@@ -300,6 +300,13 @@ function civicrm_wp_invoke() {
     return '';
   }
 
+  // CRM-12523 - WordPress has it's own timezone calculations
+  $WP_base_timezone = date_default_timezone_get();
+  $WP_user_timezone = get_option('timezone_string');
+  if ($WP_user_timezone) {
+     date_default_timezone_set($WP_user_timezone);
+  }
+  
   // Add our standard css & js
   CRM_Core_Resources::singleton()->addCoreResources();
 
@@ -332,6 +339,8 @@ function civicrm_wp_invoke() {
   }
 
   CRM_Core_Invoke::invoke($args);
+
+  date_default_timezone_set($WP_base_timezone);
 }
 
 function civicrm_wp_head() {
