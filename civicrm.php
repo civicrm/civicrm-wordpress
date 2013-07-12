@@ -1198,6 +1198,14 @@ class CiviCRM_For_WordPress {
         $args['gid'] = $gid;
         break;
 
+      case 'petition':
+
+        $args['q'] = 'civicrm/petition/sign';
+        $args['sid'] = $args['id'];
+        unset( $args['id'] );
+
+        break;
+
       default:
 
         echo '<p>' . __( 'Do not know how to handle this shortcode', 'civicrm-wordpress' ) . '</p>';
@@ -1337,7 +1345,6 @@ class CiviCRM_For_WordPress {
         $eventPages[$dao->id] = $dao->title;
       }
 
-
       $sql = "
         SELECT g.id as id, g.title as title
         FROM   civicrm_uf_group g, civicrm_uf_join j
@@ -1355,6 +1362,20 @@ class CiviCRM_For_WordPress {
         $profilePages[$dao->id] = $dao->title;
       }
 
+      $sql = "
+        SELECT petition.id as id, petition.title as title
+        FROM   civicrm_survey petition
+INNER JOIN     civicrm_option_group og ON og.name = 'activity_type'
+INNER JOIN     civicrm_option_value ov ON ( ov.name = 'Petition' AND ov.option_group_id = og.id )
+WHERE          petition.activity_type_id = ov.value
+AND            petition.is_active = 1
+               ";
+
+      $dao = CRM_Core_DAO::executeQuery( $sql );
+      $petitionPages = array();
+      while ( $dao->fetch() ) {
+        $petitionPages[$dao->id] = $dao->title;
+      }
       ?>
       <div id="civicrm_frontend_pages" style="display:none;">
         <div class="wrap">
@@ -1374,6 +1395,7 @@ class CiviCRM_For_WordPress {
                 <option value="event"><?php _e( 'Event Page', 'civicrm-wordpress' ); ?></option>
                 <option value="profile"><?php _e( 'Profile', 'civicrm-wordpress' ); ?></option>
                 <option value="user-dashboard"><?php _e( 'User Dashboard', 'civicrm-wordpress' ); ?></option>
+                <option value="petition"><?php _e( 'Petition', 'civicrm-wordpress' ); ?></option>
               </select>
 
                <span id="contribution-section" style="display:none;">
@@ -1432,6 +1454,18 @@ class CiviCRM_For_WordPress {
                 <input type="radio" name="profile_mode" value="edit" /> <?php _e( 'View', 'civicrm-wordpress' ); ?>
                  </div>
               </span>
+
+              <span id="petition-section" style="display:none;">
+                <select id="add_petition_id">
+                  <?php
+                  foreach ($petitionPages as $key => $value) { ?>
+                    <option value="<?php echo absint($key) ?>"><?php echo esc_html($value) ?></option>
+                  <?php
+                  }
+                  ?>
+                </select>
+              </span>
+
 
               <div style="padding:8px 0 0 0; font-size:11px; font-style:italic; color:#5A5A5A"><?php _e( "Can't find your form? Make sure it is active.", 'civicrm-wordpress' ); ?></div>
             </div>
