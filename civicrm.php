@@ -1156,7 +1156,7 @@ class CiviCRM_For_WordPress {
     $allowed = ( $screen->base == 'post' ) ? true : false;
 
     // allow filtering by plugins and themes
-    $allowed = apply_filters( 'civicrm_form_button_screen', $allowed, $screen );
+    $allowed = apply_filters( 'civicrm_restrict_button_appearance', $allowed, $screen );
 
     if ( $allowed ) {
       if ( ! $this->initialize() ) {
@@ -1306,7 +1306,7 @@ class CiviCRM_For_WordPress {
     // default allowed to true on all post types
     $allowed = ( $screen->base == 'post' ) ? true : false;
     // allow plugins to override
-    $allowed = apply_filters( 'civicrm_form_button_screen', $allowed, $screen );
+    $allowed = apply_filters( 'civicrm_restrict_button_appearance', $allowed, $screen );
 
     // add modal to WP selected post types
     if ( $allowed ) {
