@@ -402,6 +402,30 @@ class CiviCRM_For_WordPress {
 
   }
 
+/**
+ * Detect Ajax, snippet, or file requests
+ *
+ * @return boolean
+ */
+  public function isNotPageRequest() {
+    $argString = NULL;
+    $args = array();
+    if (isset( $_GET['q'])) {
+      $argString = trim($_GET['q']);
+      $args = explode('/', $argString);
+    }
+    $args = array_pad($args, 2, '');
+
+    if (CRM_Utils_Array::value('HTTP_X_REQUESTED_WITH', $_SERVER) == 'XMLHttpRequest'
+        || in_array($args[1], array('ajax', 'file'))
+        || !empty($_REQUEST['snippet'])
+      ) {
+      return true;
+    }
+    else {
+      return FALSE;
+    }
+  }
 
   /**
    * @description: invoke CiviCRM in a WordPress context
@@ -410,10 +434,6 @@ class CiviCRM_For_WordPress {
    * Also called by add_shortcode_includes() and _civicrm_update_user()
    */
   public function invoke() {
-  
-    if ( !in_the_loop() && !is_admin() && empty($_REQUEST['snippet']) ) {
-      return;
-    }
 
     static $alreadyInvoked = FALSE;
     if ( $alreadyInvoked ) {
@@ -478,6 +498,10 @@ class CiviCRM_For_WordPress {
     do_action( 'civicrm_invoked' );
 
   }
+
+    if ( !$this->isNotPageRequest() && !in_the_loop() && !is_admin() ) {
+      return;
+    }
 
 
   /**
@@ -839,9 +863,7 @@ class CiviCRM_For_WordPress {
     $config->userFrameworkFrontend = TRUE;
 
     require_once 'CRM/Utils/Array.php';
-
-    // lets just ensure that admin urls are not valid from the front end
-    // this check is a bit redundant, but keeping it for 4.4
+    // all profile and file urls, as well as user dashboard and tell-a-friend are valid
     $arg1 = CRM_Utils_Array::value(1, $args);
     $invalidPaths = array('admin');
     if ( in_array( $arg1, $invalidPaths ) ) {
@@ -1053,6 +1075,7 @@ class CiviCRM_For_WordPress {
       'cid' => NULL,
       'gid' => NULL,
       'cs' => NULL,
+      'force' => NULL,
       ),
       $atts
     ) );
@@ -1060,6 +1083,7 @@ class CiviCRM_For_WordPress {
     $args = array(
       'reset' => 1,
       'id'    => $id,
+      'force' => $force,
     );
 
     switch ( $component ) {
@@ -1106,6 +1130,9 @@ class CiviCRM_For_WordPress {
         elseif ($mode == 'view') {
           $args['q'] = 'civicrm/profile/view';
         }
+        elseif ($mode == 'search') {
+          $args['q'] = 'civicrm/profile';
+        }
         else {
           $args['q'] = 'civicrm/profile/create';
         }
@@ -1149,7 +1176,7 @@ class CiviCRM_For_WordPress {
     $screen = get_current_screen();
 
     // only add on default WP post types
-    if ( $screen->post_type == 'post' OR $screen->post_type == 'page' ) {
+    if ( $screen->base == 'post') {
 
       if ( ! $this->initialize() ) {
         return '';
@@ -1296,9 +1323,7 @@ class CiviCRM_For_WordPress {
 
     // only add on edit page for default WP post types
     if (
-      $screen->base == 'post' AND
-      ( $screen->id == 'post' OR $screen->id == 'page' ) AND
-      ( $screen->post_type == 'post' OR $screen->post_type == 'page' )
+      $screen->base == 'post' 
     ) {
 
       $title = __( 'Please select a CiviCRM front-end page type.', 'civicrm-wordpress' );
@@ -1381,6 +1406,7 @@ class CiviCRM_For_WordPress {
                 <input type="radio" name="profile_mode" value="create" checked="checked"/> <?php _e( 'Create', 'civicrm-wordpress' ); ?>
                 <input type="radio" name="profile_mode" value="edit" /> <?php _e( 'Edit', 'civicrm-wordpress' ); ?>
                 <input type="radio" name="profile_mode" value="edit" /> <?php _e( 'View', 'civicrm-wordpress' ); ?>
+                <input type="radio" name="profile_mode" value="search" /> <?php _e( 'Search/Public Directory', 'civicrm-wordpress' ); ?>
                  </div>
               </span>
 
