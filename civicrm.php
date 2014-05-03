@@ -410,8 +410,8 @@ class CiviCRM_For_WordPress {
    * Also called by add_shortcode_includes() and _civicrm_update_user()
    */
   public function invoke() {
-  
-    if ( !in_the_loop() && !is_admin() && empty($_REQUEST['snippet']) ) {
+
+    if ( !in_the_loop() && !is_admin() && empty($_REQUEST['snippet']) && ($_REQUEST['q'] != "civicrm/ajax/jqState") ) {
       return;
     }
 
@@ -528,7 +528,8 @@ class CiviCRM_For_WordPress {
         'access_civicrm',
         'CiviCRM',
         array( $this, 'invoke' ),
-        $civilogo
+        $civilogo,
+        1
       );
 
     } else {
@@ -1299,7 +1300,7 @@ class CiviCRM_For_WordPress {
 
     // only add on edit page for default WP post types
     if (
-      $screen->base == 'post' 
+      $screen->base == 'post'
     ) {
 
       $title = __( 'Please select a CiviCRM front-end page type.', 'civicrm-wordpress' );
