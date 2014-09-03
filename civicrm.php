@@ -227,7 +227,8 @@ class CiviCRM_For_WordPress {
       // the following three hooks CiviCRM button to post and page screens
 
       // adds the CiviCRM button to post and page screens
-      add_action( 'media_buttons_context', array( $this, 'add_form_button' ) );
+	  //use priority 100 to position button to the farright
+      add_action( 'media_buttons', array( $this, 'add_form_button' ),100);
 
       // adds the HTML triggered by the button above
       add_action( 'admin_footer', array( $this, 'add_form_button_html' ) );
@@ -559,7 +560,7 @@ class CiviCRM_For_WordPress {
         'CiviCRM',
         array( $this, 'invoke' ),
         $civilogo,
-        59.1
+        '3.9'
       );
 
     } else {
@@ -1182,9 +1183,13 @@ class CiviCRM_For_WordPress {
     // get screen object
     $screen = get_current_screen();
 
-    // only add on default WP post types
-    if ( $screen->base == 'post') {
+	// default allowed to true on all post types
+    $allowed = ( $screen->base == 'post' ) ? true : false;
 
+    // allow filtering by plugins and themes
+    $allowed = apply_filters( 'civicrm_restrict_button_appearance', $allowed, $screen );
+
+    if ( $allowed ) {
       if ( ! $this->initialize() ) {
         return '';
       }
@@ -1192,7 +1197,8 @@ class CiviCRM_For_WordPress {
       $config      = CRM_Core_Config::singleton();
       $imageBtnURL = $config->resourceBase . 'i/logo16px.png';
       $out         = '<a href="#TB_inline?width=480&inlineId=civicrm_frontend_pages" class="button thickbox" id="add_civi" style="padding-left: 4px;" title="' . __( 'Add CiviCRM Public Pages', 'civicrm-wordpress' ) . '"><img src="' . $imageBtnURL . '" height="15" width="15" alt="' . __( 'Add CiviCRM Public Pages', 'civicrm-wordpress' ) . '" />'. __( 'CiviCRM', 'civicrm-wordpress' ) .'</a>';
-      return $context . $out;
+      //return $context . $out;
+	  echo $out;
 
     }
 
@@ -1328,10 +1334,13 @@ class CiviCRM_For_WordPress {
     // get screen object
     $screen = get_current_screen();
 
-    // only add on edit page for default WP post types
-    if (
-      $screen->base == 'post' 
-    ) {
+    // default allowed to true on all post types
+    $allowed = ( $screen->base == 'post' ) ? true : false;
+    // allow plugins to override
+    $allowed = apply_filters( 'civicrm_restrict_button_appearance', $allowed, $screen );
+
+    // add modal to WP selected post types
+    if ( $allowed ) {
 
       $title = __( 'Please select a CiviCRM front-end page type.', 'civicrm-wordpress' );
       ?>
