@@ -1181,9 +1181,15 @@ class CiviCRM_For_WordPress {
 
     // get screen object
     $screen = get_current_screen();
+    
+    // default allowed to true on all post types
+    $allowed = ( $screen->base == 'post' ) ? true : false;
+    
+    // allow plugins to override
+    $allowed = apply_filters( 'civicrm_form_button_screen', $allowed, $screen );
 
-    // only add on default WP post types
-    if ( $screen->base == 'post') {
+    // add button to WP selected post types
+    if ( $allowed ) {
 
       if ( ! $this->initialize() ) {
         return '';
@@ -1328,10 +1334,14 @@ class CiviCRM_For_WordPress {
     // get screen object
     $screen = get_current_screen();
 
-    // only add on edit page for default WP post types
-    if (
-      $screen->base == 'post' 
-    ) {
+    // default allowed to true on all post types
+    $allowed = ( $screen->base == 'post' ) ? true : false;
+    
+    // allow plugins to override
+    $allowed = apply_filters( 'civicrm_form_button_screen', $allowed, $screen );
+
+    // add modal to WP selected post types
+    if ( $allowed ) {
 
       $title = __( 'Please select a CiviCRM front-end page type.', 'civicrm-wordpress' );
       ?>
