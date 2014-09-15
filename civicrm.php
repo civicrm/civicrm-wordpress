@@ -1178,15 +1178,19 @@ class CiviCRM_For_WordPress {
    * @return string HTML for output or empty if CiviCRM not initialized
    */
   public function add_form_button( $context ) {
+  // only add on default WP post types and Custom Post Types that are 'public'
+      $args = array(
+        'public'   => true,
+        'exclude_from_search' => false
+      );
+      $output = 'names';
+      $operator = 'and';
+      $post_types = get_post_types( $args, $output, $operator );
 
-    // get screen object
-    $screen = get_current_screen();
-
-    // only add on default WP post types
-    if ( $screen->base == 'post') {
-
-      if ( ! $this->initialize() ) {
-        return '';
+      $allowed = $post_types;
+        if ( $allowed ) {
+          if ( ! $this->initialize() ) {
+            return '';
       }
 
       $config      = CRM_Core_Config::singleton();
@@ -1324,14 +1328,12 @@ class CiviCRM_For_WordPress {
    * @description: callback method for 'admin_footer' hook as set in register_hooks()
    */
   public function add_form_button_html() {
+    // get screen object - we have already defined on what post types the button appears, we just need to make sure the html is only sent to post screens
 
-    // get screen object
     $screen = get_current_screen();
+    $allowed = ( $screen->base == 'post' ) ;
 
-    // only add on edit page for default WP post types
-    if (
-      $screen->base == 'post' 
-    ) {
+    if ( $allowed ) {
 
       $title = __( 'Please select a CiviCRM front-end page type.', 'civicrm-wordpress' );
       ?>
