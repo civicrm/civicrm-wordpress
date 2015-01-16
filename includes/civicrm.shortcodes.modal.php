@@ -317,6 +317,7 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
     $params = array(
       'version' => 3,
       'is_active' => 1,
+      'activity_type_id' => 'Petition',
       'return' => array('id', 'title'),
 
     );
