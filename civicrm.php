@@ -565,7 +565,7 @@ class CiviCRM_For_WordPress {
       );
 
       // add top level menu item
-      add_menu_page(
+      $menu_page = add_menu_page(
         __( 'CiviCRM', 'civicrm-wordpress' ),
         __( 'CiviCRM', 'civicrm-wordpress' ),
         'access_civicrm',
@@ -573,6 +573,9 @@ class CiviCRM_For_WordPress {
         array( $this, 'invoke' ),
         $civilogo
       );
+
+      // add CiviCRM scripts and styles to admin head
+      add_action( 'admin_head-' . $menu_page, array( $this, 'wp_head' ), 50 );
 
     } else {
 
