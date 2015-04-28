@@ -89,8 +89,17 @@ if (!defined( 'CIVICRM_PLUGIN_DIR')) {
 
 // store PATH to this plugin's settings file
 if (!defined('CIVICRM_SETTINGS_PATH')) {
-  define( 'CIVICRM_SETTINGS_PATH', CIVICRM_PLUGIN_DIR . 'civicrm.settings.php' );
+	$upload_dir    = wp_upload_dir();
+	$wp_civi_settings = $upload_dir[basedir] . DIRECTORY_SEPARATOR . 'civicrm' . 'civicrm.settings.php' ;
+  define( 'CIVICRM_SETTINGS_PATH', $upload_dir[basedir] . DIRECTORY_SEPARATOR . 'civicrm'. DIRECTORY_SEPARATOR . 'civicrm.settings.php' );
 }
+
+
+// store PATH to this plugin's settings file --old
+if (!defined('CIVICRM_SETTINGS_PATH_OLD')) {
+	define( 'CIVICRM_SETTINGS_PATH_OLD', CIVICRM_PLUGIN_DIR . 'civicrm.settings.php' );
+}
+
 
 // test if Civi is installed
 if ( file_exists( CIVICRM_SETTINGS_PATH ) ) {
