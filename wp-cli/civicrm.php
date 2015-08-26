@@ -46,6 +46,9 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
          * wp civicrm api
          * ===============
          * Command for accessing CiviCRM APIs. Syntax is identical to drush cvap.
+         * Options:
+         * --timezone      Specify a timezone (e.g. --timezone=America/New_York.  Use this with Job.execute to override PHP's timezone_string.
+         *                 Find a list of PHP timezones here: http://php.net/manual/en/timezones.php
          *
          * wp civicrm cache-clear
          * ===============
@@ -198,6 +201,9 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
             }
 
             civicrm_initialize();
+            $timezone = $this->getOption('timezone', get_option('timezone_string'));
+            date_default_timezone_set($timezone);
+
             $result = civicrm_api($entity, $action, $params);
 
             switch ($this->getOption('out', 'pretty')) {
