@@ -89,14 +89,21 @@ if (!defined( 'CIVICRM_PLUGIN_DIR')) {
 
 // store PATH to this plugin's settings file
 if (!defined('CIVICRM_SETTINGS_PATH')) {
-  define( 'CIVICRM_SETTINGS_PATH', CIVICRM_PLUGIN_DIR . 'civicrm.settings.php' );
+  $upload_dir    = wp_upload_dir();
+  $wp_civi_settings = $upload_dir[basedir] . DIRECTORY_SEPARATOR . 'civicrm' . 'civicrm.settings.php' ;
+  define( 'CIVICRM_SETTINGS_PATH', $upload_dir[basedir] . DIRECTORY_SEPARATOR . 'civicrm'. DIRECTORY_SEPARATOR . 'civicrm.settings.php' );
+}
+
+// store 4.6 and prior version PATH to this plugin's settings file
+if (!defined('CIVICRM_SETTINGS_PATH_DEPRECATED')) {
+  define( 'CIVICRM_SETTINGS_PATH_DEPRECATED', CIVICRM_PLUGIN_DIR . 'civicrm.settings.php' );
 }
 
 // test if Civi is installed
-if ( file_exists( CIVICRM_SETTINGS_PATH ) ) {
-  define( 'CIVICRM_INSTALLED', TRUE );
-} else {
-  define( 'CIVICRM_INSTALLED', FALSE );
+if ( file_exists( CIVICRM_SETTINGS_PATH) || file_exists( CIVICRM_SETTINGS_PATH_DEPRECATED  ) ) {
+    define( 'CIVICRM_INSTALLED', TRUE );
+  } else {
+    define( 'CIVICRM_INSTALLED', FALSE );
 }
 
 // prevent CiviCRM from rendering its own header
@@ -577,6 +584,7 @@ class CiviCRM_For_WordPress {
         $error = FALSE;
       } else {
         $error = include_once ( CIVICRM_SETTINGS_PATH );
+        $error =  $error . include_once ( CIVICRM_SETTINGS_PATH_DEPRECATED );
       }
 
       // autoload
