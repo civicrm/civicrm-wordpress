@@ -582,9 +582,10 @@ class CiviCRM_For_WordPress {
       // check for settings
       if ( ! CIVICRM_INSTALLED ) {
         $error = FALSE;
-      } else {
+      } elseif ( file_exists( CIVICRM_SETTINGS_PATH) ) {
         $error = include_once ( CIVICRM_SETTINGS_PATH );
-        $error =  $error . include_once ( CIVICRM_SETTINGS_PATH_DEPRECATED );
+      } elseif (file_exists( CIVICRM_SETTINGS_PATH_DEPRECATED  ) ) {
+        $error =  include_once ( CIVICRM_SETTINGS_PATH_DEPRECATED );
       }
 
       // autoload
