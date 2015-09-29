@@ -751,13 +751,20 @@ class CiviCRM_For_WordPress {
 
     } else {
 
-      // add menu item to options menu
-      $options_page = add_options_page(
+      $civilogo = plugins_url(
+        'civicrm/i/logo16px.png',
+        __FILE__
+      );
+
+      // add top level menu item
+      $menu_page = add_menu_page(
         __( 'CiviCRM Installer', 'civicrm' ),
         __( 'CiviCRM Installer', 'civicrm' ),
         'manage_options',
         'civicrm-install',
-        array( $this, 'run_installer' )
+        array( $this, 'run_installer' ),
+        $civilogo,
+        apply_filters( 'civicrm_menu_item_position', '3.904981' ) // 3.9 + random digits to reduce risk of conflict
       );
 
       /*
