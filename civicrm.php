@@ -87,20 +87,20 @@ if (!defined( 'CIVICRM_PLUGIN_DIR')) {
   define( 'CIVICRM_PLUGIN_DIR', plugin_dir_path(CIVICRM_PLUGIN_FILE) );
 }
 
-// store PATH to this plugin's settings file
-if (!defined('CIVICRM_SETTINGS_PATH')) {
+// Test where the settings file exists, if in the 4.6 and prior location use that as CIVICRM_SETTINGS_PATH, otherwise set the new location as CIVICRM_SETTINGS_PATH
   $upload_dir    = wp_upload_dir();
   $wp_civi_settings = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'civicrm' . 'civicrm.settings.php' ;
-  define( 'CIVICRM_SETTINGS_PATH', $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'civicrm'. DIRECTORY_SEPARATOR . 'civicrm.settings.php' );
-}
+  $wp_civi_settings_deprectated = CIVICRM_PLUGIN_DIR . 'civicrm.settings.php';
 
-// store 4.6 and prior version PATH to this plugin's settings file
-if (!defined('CIVICRM_SETTINGS_PATH_DEPRECATED')) {
-  define( 'CIVICRM_SETTINGS_PATH_DEPRECATED', CIVICRM_PLUGIN_DIR . 'civicrm.settings.php' );
+if (file_exists($wp_civi_settings_deprectated)) {
+  define( 'CIVICRM_SETTINGS_PATH', $wp_civi_settings_deprectated );
+}
+else  {
+  define( 'CIVICRM_SETTINGS_PATH', $wp_civi_settings );
 }
 
 // test if Civi is installed
-if ( file_exists( CIVICRM_SETTINGS_PATH) || file_exists( CIVICRM_SETTINGS_PATH_DEPRECATED  ) ) {
+if ( file_exists( CIVICRM_SETTINGS_PATH)  ) {
     define( 'CIVICRM_INSTALLED', TRUE );
   } else {
     define( 'CIVICRM_INSTALLED', FALSE );
