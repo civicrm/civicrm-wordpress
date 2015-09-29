@@ -89,7 +89,7 @@ if (!defined( 'CIVICRM_PLUGIN_DIR')) {
 
 // Test where the settings file exists, if in the 4.6 and prior location use that as CIVICRM_SETTINGS_PATH, otherwise set the new location as CIVICRM_SETTINGS_PATH
   $upload_dir    = wp_upload_dir();
-  $wp_civi_settings = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'civicrm' . 'civicrm.settings.php' ;
+  $wp_civi_settings = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR . 'civicrm.settings.php' ;
   $wp_civi_settings_deprectated = CIVICRM_PLUGIN_DIR . 'civicrm.settings.php';
 
 if (file_exists($wp_civi_settings_deprectated)) {
