@@ -55,6 +55,10 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
          * ===============
          * Command for to turn debug on.
          *
+         * wp civicrm disable-debug
+         * ===============
+         * Command for to turn debug off.
+         *
          * wp civicrm member-records
          * ===============
          * Run the CiviMember UpdateMembershipRecord cron (civicrm member-records).
@@ -132,6 +136,7 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
                 'api'                => 'api',
                 'cache-clear'        => 'cacheClear',
                 'enable-debug'       => 'enableDebug',
+                'disable-debug'       => 'disableDebug',
                 'install'            => 'install',
                 'member-records'     => 'memberRecords',
                 'process-mail-queue' => 'processMailQueue',
@@ -244,34 +249,24 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
          * Implementation of command 'enable-debug'
          */
         private function enableDebug() {
-
             civicrm_initialize();
-            $plugins_dir = WP_PLUGIN_DIR ;
-            $CRM_Core = $plugins_dir . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR . 'CRM';
-            $domain_path = $CRM_Core . '/Core/DAO/Domain.php' ;
-            $configSettingpath = $CRM_Core . '/Core/BAO/ConfigSetting.php';
-            require_once  $domain_path ;
+            Civi::settings()->add(array(
+              'debug_enabled' => 1,
+              'backtrace' => 1,
+            ));
+            WP_CLI::success('Debug setting enabled.');
+        }
 
-            $domain = new CRM_Core_DAO_Domain();
-            $domain->id = CRM_Core_Config::domainID();
-            $domain->find(TRUE);
-
-            if ($domain->config_backend) {
-
-                $config = unserialize($domain->config_backend);
-                $config['debug_enabled']     = 1;
-                $config['debug']     = 1;
-                $config['backtrace'] = 1;
-
-                require_once $configSettingpath;
-                CRM_Core_BAO_ConfigSetting::add($config);
-
-                WP_CLI::success('Debug setting enabled.');
-
-            } else {
-                WP_CLI::error('Error retrieving current config_backend.');
-            }
-
+        /**
+         * Implementation of command 'disable-debug'
+         */
+        private function disableDebug() {
+            civicrm_initialize();
+            Civi::settings()->add(array(
+              'debug_enabled' => 0,
+              'backtrace' => 0,
+            ));
+            WP_CLI::success('Debug setting disabled.');
         }
 
         /**
