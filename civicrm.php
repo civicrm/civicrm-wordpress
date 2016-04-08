@@ -1212,7 +1212,10 @@ class CiviCRM_For_WordPress {
 
     // set flag
     $alreadyInvoked = TRUE;
-
+    if (!isset( $_GET['q']) && !empty($_GET['amp;q'])) {
+      // CRM-18383 handle odd, unavoidable situation where payment processor encodes the return url.
+      $_GET['q'] = $_GET['amp;q'];
+    }
     // get args
     $argdata = $this->get_request_args();
 
