@@ -76,6 +76,12 @@ class CiviCRM_For_WordPress_Basepage {
       return;
     }
 
+    // In WP 4.6.0+, tell it URL params are part of canonical URL
+    add_filter( 'get_canonical_url', array($this, 'basepage_canonical_url' ), 999);
+
+    // Yoast SEO has separate way of establishing canonical URL
+    add_filter( 'wpseo_canonical', array($this, 'basepage_canonical_url' ), 999);
+
     // regardless of URL, load page template
     add_filter( 'template_include', array( $this, 'basepage_template' ), 999 );
 
@@ -259,6 +265,33 @@ class CiviCRM_For_WordPress_Basepage {
 
   }
 
+  /**
+   * Provide the canonical URL for a page accessed through a basepage.
+   *
+   * WordPress will default to saying the canonical URL is the URL of the base
+   * page itself, but we need to indicate that in this case, the whole thing
+   * matters.
+   *
+   * @return string
+   *   The complete URL to the page as it should be accessed.
+   */
+  public function basepage_canonical_url($canonical) {
+    // It would be better to specify which params are okay to accept as the
+    // canonical URLs, but this will work for the time being.
+    if (empty($_GET['page'])
+      || empty($_GET['q'])
+      || $_GET['page'] != 'CiviCRM') {
+      return $canonical;
+    }
+    $path = $_GET['q'];
+    unset($_GET['q']);
+    unset($_GET['page']);
+    $query = http_build_query($_GET);
+
+    // We should, however, build the URL the way that CiviCRM expects it to be
+    // (rather than through some other funny base page).
+    return CRM_Utils_System::url($path, $query);
+  }
 
   /**
    * Get CiviCRM base page template.
@@ -328,5 +361,3 @@ class CiviCRM_For_WordPress_Basepage {
 
 
 } // class CiviCRM_For_WordPress_Basepage ends
-
-
