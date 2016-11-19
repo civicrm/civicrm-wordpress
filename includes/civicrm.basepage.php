@@ -82,6 +82,9 @@ class CiviCRM_For_WordPress_Basepage {
     // Yoast SEO has separate way of establishing canonical URL
     add_filter( 'wpseo_canonical', array($this, 'basepage_canonical_url' ), 999);
 
+    // All in One SEO has separate way of establishing canonical URL
+    add_filter( 'aioseop_canonical_url', array($this, 'basepage_canonical_url' ), 999);
+
     // regardless of URL, load page template
     add_filter( 'template_include', array( $this, 'basepage_template' ), 999 );
 
