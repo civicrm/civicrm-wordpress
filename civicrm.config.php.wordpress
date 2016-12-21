@@ -396,20 +396,23 @@ class Bootstrap {
    */
   protected function getSearchDir() {
     if ($this->options['search'] === TRUE) {
-      // exec(pwd) works better with symlinked source trees, but it's
-      // probably not portable to Windows.
-      if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+      if ($_SERVER['SCRIPT_FILENAME']) {
+        return dirname($_SERVER['SCRIPT_FILENAME']);
+      }
+      // getenv('PWD') works better with symlinked source trees, but it's
+      // not portable to Windows.
+      elseif (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
         return getcwd();
       }
       else {
-        exec('pwd', $output);
-        return trim(implode("\n", $output));
+        return getenv('PWD');
       }
     }
     else {
       return $this->options['search'];
     }
   }
+
 }
 
 \Civi\Cv\Bootstrap::singleton()->boot();
