@@ -308,56 +308,64 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 				return WP_CLI::error( 'CiviCRM database name not specified.' );
 			}
 
-			if ( ! $this->getOption( 'tarfile', false ) and ! $this->getOption( 'zipfile', false ) ) {
-				return WP_CLI::error( 'Must specify either --tarfile or --zipfile' );
-			}
-
 			if ( $lang = $this->getOption( 'lang', false ) and ! $langtarfile = $this->getOption( 'langtarfile', false ) ) {
 				return WP_CLI::error( 'CiviCRM language tarfile not specified.' );
 			}
 
 			# begin install
 
-			$wp_root = ABSPATH;
-			$plugins_dir = plugin_dir_path( __FILE__ );
-
 			if ( $plugin_path = $this->getOption( 'destination', false ) ) {
-				$plugin_path = $wp_root . $plugin_path;
+				$plugin_path = ABSPATH . $plugin_path;
 			} else {
-				$plugin_path = $plugins_dir;
+				$plugin_path = WP_PLUGIN_DIR . '/civicrm';
 			}
 
-			if ( is_dir( $plugin_path ) ) {
-				return WP_CLI::error( 'Existing CiviCRM found. No action taken.' );
-			}
+			global $crmPath;
+			$crmPath = "$plugin_path/civicrm";
+			$crm_files_present = is_dir( $crmPath );
 
 			# extract the archive
 			if ( $this->getOption( 'tarfile', false ) ) {
 				# should probably never get to here as Wordpress Civi comes in a zip file, but
 				# just in case that ever changes ..
-				if ( ! $this->untar( $plugin_path ) ) {
+				if ( $crm_files_present ) {
+					return WP_CLI::error( 'Existing CiviCRM found. No action taken.' );
+				}
+
+				if ( ! $this->untar( WP_PLUGIN_DIR ) ) {
 					return WP_CLI::error( 'Error extracting tarfile' );
 				}
 			} elseif ( $this->getOption( 'zipfile', false ) ) {
+				if ( $crm_files_present ) {
+					return WP_CLI::error( 'Existing CiviCRM found. No action taken.' );
+				}
 
-				if ( ! $this->unzip( $plugin_path ) ) {
+				if ( ! $this->unzip( WP_PLUGIN_DIR ) ) {
 					return WP_CLI::error( 'Error extracting zipfile' );
 				}
+			} elseif ( $crm_files_present ) {
+				// Site is already extracted (which is how we're running this
+				// script); we just need to run the installer.
+
 			} else {
-				return WP_CLI::error( 'No zipfile specified, use --zipfile=path/to/zipfile' );
+				return WP_CLI::error( 'No zipfile specified, use --zipfile=path/to/zipfile or extract file ahead of time' );
 			}
 
 			# include civicrm installer helper file
-			global $crmPath;
-
-			$crmPath                = "$plugin_path/civicrm";
 			$civicrm_installer_helper = "$crmPath/install/civicrm.php";
 
 			if ( ! file_exists( $civicrm_installer_helper ) ) {
 				return WP_CLI::error( 'Archive could not be unpacked OR CiviCRM installer helper file is missing.' );
 			}
 
-			WP_CLI::success( 'Archive unpacked.' );
+			if ( $crm_files_present ) {
+				// We were using a directory that was already there.
+				WP_CLI::success( 'Using installer files found on the site.' );
+			} else {
+				// We must've just unpacked the archive because it wasn't there
+				// before.
+				WP_CLI::success( 'Archive unpacked.' );
+			}
 			require_once $civicrm_installer_helper;
 
 			if ( '' != $lang ) {
@@ -376,7 +384,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 			$dsn = "mysql://{$dbuser}:{$dbpass}@{$dbhost}/{$dbname}?new_link=true";
 			$dsn_nodb = "mysql://{$dbuser}:{$dbpass}@{$dbhost}";
 
-			require_once $plugins_dir . '/civicrm/packages/DB.php';
+			require_once "$crmPath/packages/DB.php";
 
 			$db = DB::connect( $dsn );
 			if ( DB::iserror( $db ) ) {
