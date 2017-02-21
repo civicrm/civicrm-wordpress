@@ -384,6 +384,10 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 			$dsn = "mysql://{$dbuser}:{$dbpass}@{$dbhost}/{$dbname}?new_link=true";
 			$dsn_nodb = "mysql://{$dbuser}:{$dbpass}@{$dbhost}";
 
+			if ( ! defined( 'DB_DSN_MODE' ) ) {
+				define( 'DB_DSN_MODE', 'auto' );
+			}
+
 			require_once "$crmPath/packages/DB.php";
 
 			$db = DB::connect( $dsn );
@@ -449,11 +453,9 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 			if ( substr( $base_url, -1 ) != '/' ) {
 				$base_url .= '/';
 			}
-			$upload_dir      = wp_upload_dir();
-			$settings_dir     = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR;
 			$params = array(
 				'crmRoot'            => $crmPath . '/',
-				'templateCompileDir' => "$settings_dir/files/civicrm/templates_c",
+				'templateCompileDir' => "{$settings_dir}files/civicrm/templates_c",
 				'frontEnd'           => 0,
 				'cms'                => 'WordPress',
 				'baseURL'            => $base_url,
@@ -475,7 +477,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
 			$str = trim( $str );
 
-			$config_file = "$settings_dir/civicrm.settings.php";
+			$config_file = "{$settings_dir}civicrm.settings.php";
 			civicrm_write_file( $config_file, $str );
 			WP_CLI::launch( "chmod 0644 $config_file" );
 			WP_CLI::success( sprintf( 'Settings file generated: %s', $config_file ) );
