@@ -332,7 +332,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 					return WP_CLI::error( 'Existing CiviCRM found. No action taken.' );
 				}
 
-				if ( ! $this->untar( WP_PLUGIN_DIR ) ) {
+				if ( ! $this->untar( dirname( $plugin_path ) ) ) {
 					return WP_CLI::error( 'Error extracting tarfile' );
 				}
 			} elseif ( $this->getOption( 'zipfile', false ) ) {
@@ -340,7 +340,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 					return WP_CLI::error( 'Existing CiviCRM found. No action taken.' );
 				}
 
-				if ( ! $this->unzip( WP_PLUGIN_DIR ) ) {
+				if ( ! $this->unzip( dirname( $plugin_path ) ) ) {
 					return WP_CLI::error( 'Error extracting zipfile' );
 				}
 			} elseif ( $crm_files_present ) {
