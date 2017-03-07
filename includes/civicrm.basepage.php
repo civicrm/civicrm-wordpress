@@ -178,6 +178,9 @@ class CiviCRM_For_WordPress_Basepage {
     // tweak admin bar
     add_action( 'wp_before_admin_bar_render', array( $this->civi, 'clear_edit_post_menu_item' ) );
 
+    // add body classes for easier styling
+    add_filter( 'body_class', array( $this, 'add_body_classes' ) );
+
     // flag that we have parsed the base page
     $this->basepage_parsed = TRUE;
 
@@ -323,6 +326,49 @@ class CiviCRM_For_WordPress_Basepage {
 
     // fall back to provided template
     return $template;
+
+  }
+
+
+  /**
+   * Add classes to body element when on basepage.
+   *
+   * This allows selectors to be written for particular CiviCRM "pages" despite
+   * them all being rendered on the one WordPress basepage.
+   *
+   * @param array $classes The existing body classes
+   * @return array $classes The modified body classes
+   */
+  public function add_body_classes( $classes ) {
+
+  	 $args = $this->civi->get_request_args();
+
+  	 // bail if we don't have any
+  	 if ( is_null( $args['argString'] ) ) {
+  	   return $classes;
+  	 }
+
+  	 // check for top level - it can be assumed this always 'civicrm'
+  	 if ( isset( $args['args'][0] ) AND ! empty( $args['args'][0] ) ) {
+  	   $classes[] = $args['args'][0];
+  	 }
+
+  	 // check for second level - the component
+  	 if ( isset( $args['args'][1] ) AND ! empty( $args['args'][1] ) ) {
+  	   $classes[] = $args['args'][0] . '-' . $args['args'][1];
+  	 }
+
+  	 // check for third level - the component's configuration
+  	 if ( isset( $args['args'][2] ) AND ! empty( $args['args'][2] ) ) {
+  	   $classes[] = $args['args'][0] . '-' . $args['args'][1] . '-' . $args['args'][2];
+  	 }
+
+  	 // check for fourth level - because well, why not?
+  	 if ( isset( $args['args'][3] ) AND ! empty( $args['args'][3] ) ) {
+  	   $classes[] = $args['args'][0] . '-' . $args['args'][1] . '-' . $args['args'][2] . '-' . $args['args'][3];
+  	 }
+
+  	 return $classes;
 
   }
 
