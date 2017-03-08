@@ -76,6 +76,15 @@ class CiviCRM_For_WordPress_Basepage {
       return;
     }
 
+    // In WP 4.6.0+, tell it URL params are part of canonical URL
+    add_filter( 'get_canonical_url', array( $this, 'basepage_canonical_url' ), 999 );
+
+    // Yoast SEO has separate way of establishing canonical URL
+    add_filter( 'wpseo_canonical', array( $this, 'basepage_canonical_url' ), 999 );
+
+    // And also for All in One SEO to handle canonical URL
+    add_filter( 'aioseop_canonical_url', array( $this, 'basepage_canonical_url' ), 999 );
+
     // regardless of URL, load page template
     add_filter( 'template_include', array( $this, 'basepage_template' ), 999 );
 
@@ -262,6 +271,45 @@ class CiviCRM_For_WordPress_Basepage {
 
   }
 
+  /**
+   * Provide the canonical URL for a page accessed through a basepage.
+   *
+   * WordPress will default to saying the canonical URL is the URL of the base
+   * page itself, but we need to indicate that in this case, the whole thing
+   * matters.
+   *
+   * Note: this function is used for three different but similar hooks:
+   *  - `get_canonical_url` (WP 4.6.0+)
+   *  - `aioseop_canonical_url` (All in One SEO)
+   *  - `wpseo_canonical` (Yoast WordPress SEO)
+   *
+   * The native WordPress one passes the page object, while the other two do
+   * not.  We don't actually need the page object, so the argument is omitted
+   * here.
+   *
+   * @param string $canonical
+   *   The canonical URL.
+   *
+   * @return string
+   *   The complete URL to the page as it should be accessed.
+   */
+  public function basepage_canonical_url( $canonical ) {
+    // It would be better to specify which params are okay to accept as the
+    // canonical URLs, but this will work for the time being.
+    if ( empty( $_GET['page'] )
+      || empty( $_GET['q'] )
+      || 'CiviCRM' !== $_GET['page'] ) {
+      return $canonical;
+    }
+    $path = $_GET['q'];
+    unset( $_GET['q'] );
+    unset( $_GET['page'] );
+    $query = http_build_query( $_GET );
+
+    // We should, however, build the URL the way that CiviCRM expects it to be
+    // (rather than through some other funny base page).
+    return CRM_Utils_System::url( $path, $query );
+  }
 
   /**
    * Get CiviCRM base page template.
@@ -374,5 +422,3 @@ class CiviCRM_For_WordPress_Basepage {
 
 
 } // class CiviCRM_For_WordPress_Basepage ends
-
-
