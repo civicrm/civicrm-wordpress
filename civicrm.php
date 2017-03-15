@@ -1420,29 +1420,26 @@ class CiviCRM_For_WordPress {
    * @return mixed|null|string
    */
   public function get_base_url($absolute, $frontend, $forceBackend) {
-    $config    = CRM_Core_Config::singleton();
-
-    if (!isset($config->useFrameworkRelativeBase)) {
-      $base = parse_url($config->userFrameworkBaseURL);
-      $config->useFrameworkRelativeBase = $base['path'];
+    $config = CRM_Core_Config::singleton();
+    if (!defined('CIVICRM_UF_ADMINURL')) {
+      define('CIVICRM_UF_ADMINURL', CIVICRM_UF_BASEURL . 'wp-admin/');
     }
-
-    $base = $absolute ? $config->userFrameworkBaseURL : $config->useFrameworkRelativeBase;
-
+    if (!defined('CIVICRM_UF_WP_BASEURL')) {
+      define('CIVICRM_UF_WP_BASEURL', CIVICRM_UF_BASEURL );
+    }
     if ((is_admin() && !$frontend) || $forceBackend) {
-      $base .= admin_url( 'admin.php' );
-      return $base;
+      $url = CIVICRM_UF_ADMINURL . 'admin.php';
+      return $url;
     }
     elseif (defined('CIVICRM_UF_WP_BASEPAGE')) {
-      $base .= CIVICRM_UF_WP_BASEPAGE;
-      return $base;
+      $url = CIVICRM_UF_WP_BASEURL  . CIVICRM_UF_WP_BASEPAGE  ;
+      return $url;
     }
     elseif (isset($config->wpBasePage)) {
-      $base .= $config->wpBasePage;
-      return $base;
+      $url = CIVICRM_UF_WP_BASEURL  . $config->wpBasePage;
+      return $url;
     }
-
-    return $base;
+    return $absolute ? $url :  preg_replace(';https?://[^/]+/;', '/', $url);
   }
 
 
