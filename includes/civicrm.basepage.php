@@ -88,6 +88,11 @@ class CiviCRM_For_WordPress_Basepage {
     // regardless of URL, load page template
     add_filter( 'template_include', array( $this, 'basepage_template' ), 999 );
 
+    if (!isset( $_GET['q']) && !empty($_GET['amp;q'])) {
+      // CRM-18383 handle odd, unavoidable situation where payment processor encodes the return url.
+      // We need to do this prior to considering the permission.
+      $_GET['q'] = $_GET['amp;q'];
+    }
     // check permission
     $argdata = $this->civi->get_request_args();
     if ( ! $this->civi->users->check_permission( $argdata['args'] ) ) {
