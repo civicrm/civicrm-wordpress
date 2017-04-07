@@ -376,9 +376,8 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
 			# create files dirs
 			$upload_dir = wp_upload_dir();
-			$userFilesDir = $upload_dir['basedir'] . DIRECTORY_SEPARATOR;
-			$settings_dir = $userFilesDir . 'civicrm' . DIRECTORY_SEPARATOR;
-			civicrm_setup( "$userFilesDir" );
+			$settings_dir = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR;
+			civicrm_setup( $upload_dir['basedir'] . DIRECTORY_SEPARATOR );
 			WP_CLI::launch( "chmod 0777 $settings_dir -R" );
 
 			# now we've got some files in place, require PEAR DB and check db setup
@@ -405,25 +404,25 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 			}
 
 			# install db
-			$sql_path = "$crmPath/sql";
+			global $sqlPath;
 
 			# setup database with civicrm structure and data
 			WP_CLI::line( 'Loading CiviCRM database structure ..' );
-			civicrm_source( $dsn, $sql_path . '/civicrm.mysql' );
+			civicrm_source( $dsn, $sqlPath . '/civicrm.mysql' );
 			WP_CLI::line( 'Loading CiviCRM database with required data ..' );
 
 			# testing the translated sql files availability
-			$data_file = $sql_path . '/civicrm_data.mysql';
-			$acl_file  = $sql_path . '/civicrm_acl.mysql';
+			$data_file = $sqlPath . '/civicrm_data.mysql';
+			$acl_file  = $sqlPath . '/civicrm_acl.mysql';
 
 			if ( '' != $lang ) {
 
-				if ( file_exists( $sql_path . '/civicrm_data.' . $lang . '.mysql' )
-					and file_exists( $sql_path . '/civicrm_acl.' . $lang . '.mysql' )
+				if ( file_exists( $sqlPath . '/civicrm_data.' . $lang . '.mysql' )
+					and file_exists( $sqlPath . '/civicrm_acl.' . $lang . '.mysql' )
 					and '' != $lang
 				 ) {
-					$data_file = $sql_path . '/civicrm_data.' . $lang . '.mysql';
-					$acl_file = $sql_path . '/civicrm_acl.' . $lang . '.mysql';
+					$data_file = $sqlPath . '/civicrm_data.' . $lang . '.mysql';
+					$acl_file = $sqlPath . '/civicrm_acl.' . $lang . '.mysql';
 				} else {
 					WP_CLI::warning( "No sql files could be retrieved for '$lang' using default language." );
 				}
@@ -435,12 +434,9 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 			WP_CLI::success( 'CiviCRM database loaded successfully.' );
 
 			# generate civicrm.settings.php file
-			$settings_tpl_file = "$crmPath/templates/CRM/common/civicrm.settings.php.tpl";
-			if ( ! file_exists( $settings_tpl_file ) ) {
-				$settings_tpl_file = "$crmPath/templates/CRM/common/civicrm.settings.php.template";
-				if ( ! file_exists( $settings_tpl_file ) ) {
-					return WP_CLI::error( 'Could not find CiviCRM settings template and therefore could not create settings file.' );
-				}
+			global $tplPath;
+			if ( ! file_exists( $tplPath . 'civicrm.settings.php.template' ) ) {
+				return WP_CLI::error( 'Could not find CiviCRM settings template and therefore could not create settings file.' );
 			}
 
 			WP_CLI::line( 'Generating civicrm settings file ..' );
@@ -471,7 +467,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 				'siteKey'            => md5(rand() . mt_rand() . rand() . uniqid('', TRUE) . $params['baseURL']),
 			 );
 
-			$str = file_get_contents( $settings_tpl_file );
+			$str = file_get_contents( $tplPath . 'civicrm.settings.php.template' );
 			foreach ( $params as $key => $value ) {
 				$str = str_replace( '%%' . $key . '%%', $value, $str );
 			}
