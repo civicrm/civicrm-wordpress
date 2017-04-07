@@ -375,9 +375,10 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 			}
 
 			# create files dirs
-			$upload_dir      = wp_upload_dir();
-			$settings_dir     = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR;
-			civicrm_setup( "$settings_dir" );
+			$upload_dir = wp_upload_dir();
+			$userFilesDir = $upload_dir['basedir'] . DIRECTORY_SEPARATOR;
+			$settings_dir = $userFilesDir . 'civicrm' . DIRECTORY_SEPARATOR;
+			civicrm_setup( "$userFilesDir" );
 			WP_CLI::launch( "chmod 0777 $settings_dir -R" );
 
 			# now we've got some files in place, require PEAR DB and check db setup
@@ -455,7 +456,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 			}
 			$params = array(
 				'crmRoot'            => $crmPath . '/',
-				'templateCompileDir' => "{$settings_dir}files/civicrm/templates_c",
+				'templateCompileDir' => "{$settings_dir}templates_c",
 				'frontEnd'           => 0,
 				'cms'                => 'WordPress',
 				'baseURL'            => $base_url,
@@ -467,7 +468,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 				'CMSdbPass'          => DB_PASSWORD,
 				'CMSdbHost'          => DB_HOST,
 				'CMSdbName'          => DB_NAME,
-				'siteKey'            => md5( uniqid( '', true ) . $base_url ),
+				'siteKey'            => md5(rand() . mt_rand() . rand() . uniqid('', TRUE) . $params['baseURL']),
 			 );
 
 			$str = file_get_contents( $settings_tpl_file );
