@@ -229,8 +229,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     $this->shortcodes_parsed = TRUE;
 
     // broadcast this as well
-    do_action( 'civicrm_shortcodes_parsed' );
-
+    do_action('civicrm_shortcodes_parsed', $this->shortcodes);
   }
 
 

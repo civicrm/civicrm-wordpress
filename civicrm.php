@@ -134,6 +134,20 @@ class CiviCRM_For_WordPress {
    */
 
   /**
+   * Shortcodes active in the current page.
+   *
+   * @var array
+   */
+  private static $civicrm_active_shortcodes = array();
+
+  /**
+   * Flag used to indicate whether or not CiviCRM's shortcodes have been parsed yet.
+   *
+   * @var bool
+   */
+  private static $civicrm_shortcodes_parsed = FALSE;
+
+  /**
    * @var CiviCRM_For_WordPress
    */
   private static $instance;
@@ -405,6 +419,25 @@ class CiviCRM_For_WordPress {
 
   }
 
+  /**
+   * Setter for shortcodes that are active in the page.
+   *
+   * Callback to WordPress 'civicrm_shortcodes_parsed' hook.
+   *
+   * @param array $shortcodes
+   */
+  public function civicrm_active_shortcodes_set($shortcodes) {
+    self::$civicrm_active_shortcodes = $shortcodes;
+    self::$civicrm_shortcodes_parsed = TRUE;
+  }
+
+  public function civicrm_active_shortcodes_get() {
+    return apply_filters('civicrm_active_shortcodes', self::$civicrm_active_shortcodes);
+  }
+
+  public function civicrm_shortcodes_parsed_get() {
+    return self::$civicrm_shortcodes_parsed;
+  }
 
   // ---------------------------------------------------------------------------
   // Files
@@ -516,6 +549,8 @@ class CiviCRM_For_WordPress {
    * @return void
    */
   public function register_hooks_common() {
+    // expose to extension the list of shortcodess in use on the current page
+    add_action('civicrm_shortcodes_parsed', array($this, 'civicrm_active_shortcodes_set'));
 
     // use translation files
     add_action( 'plugins_loaded', array( $this, 'enable_translation' ) );
@@ -1530,6 +1565,17 @@ function wp_civicrm_capability() {
  */
 function civicrm_wp_in_civicrm() {
   return civi_wp()->civicrm_in_wordpress();
+}
+
+/**
+ * Test if CiviCRM is currently being displayed in a WordPress shortcode.
+ */
+function civicrm_wp_is_shortcode() {
+  if (!civi_wp()->civicrm_shortcodes_parsed_get()) {
+    throw new Exception('Action civicrm_shortcodes_parsed has not fired yet. Try invoking this function on a different event with a higher priority.');
+  }
+
+  return (bool) count(civi_wp()->civicrm_active_shortcodes_get());
 }
 
 /**
