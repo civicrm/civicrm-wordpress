@@ -174,7 +174,6 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 		 * Implementation of command 'api'
 		 */
 		private function api() {
-
 			$defaults = array( 'version' => 3 );
 
 			array_shift( $this->args );
@@ -182,8 +181,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 			array_shift( $this->args );
 
 			# parse $params
-
-			$format = $this->getOption( 'in', 'args' )
+			$format = $this->getOption( 'in', 'args' );
 			switch ( $format ) {
 
 				# input params supplied via args ..
