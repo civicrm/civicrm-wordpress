@@ -174,6 +174,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 		 * Implementation of command 'api'
 		 */
 		private function api() {
+
 			$defaults = array( 'version' => 3 );
 
 			array_shift( $this->args );
