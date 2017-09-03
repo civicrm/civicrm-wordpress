@@ -179,16 +179,17 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
 			array_shift( $this->args );
 			list( $entity, $action ) = explode( '.', $this->args[0] );
+			array_shift( $this->args );
 
 			# parse $params
-
-			switch ( $this->getOption( 'in', 'args' ) ) {
+			$format = $this->getOption( 'in', 'args' );
+			switch ( $format ) {
 
 				# input params supplied via args ..
 				case 'args':
 					$params = $defaults;
 					foreach ( $this->args as $arg ) {
-						preg_match( '/^( [^=]+ )=( .* )$/', $arg, $matches );
+						preg_match( '/^([^=]+)=(.*)$/', $arg, $matches );
 						$params[ $matches[1] ] = $matches[2];
 					}
 					break;
