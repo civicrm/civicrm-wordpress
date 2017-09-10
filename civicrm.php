@@ -4,8 +4,8 @@ Plugin Name: CiviCRM
 Description: CiviCRM - Growing and Sustaining Relationships
 Version: 4.7
 Author: CiviCRM LLC
-Author URI: http://civicrm.org/
-Plugin URI: http://wiki.civicrm.org/confluence/display/CRMDOC/WordPress+Installation+Guide+for+CiviCRM+4.7
+Author URI: https://civicrm.org/
+Plugin URI: https://wiki.civicrm.org/confluence/display/CRMDOC/Installing+CiviCRM+for+WordPress
 License: AGPL3
 Text Domain: civicrm
 Domain Path: /languages
@@ -605,9 +605,9 @@ class CiviCRM_For_WordPress {
 
       // get ready for problems
       $installLink    = admin_url() . "options-general.php?page=civicrm-install";
-      $docLinkInstall = "http://wiki.civicrm.org/confluence/display/CRMDOC/WordPress+Installation+Guide";
-      $docLinkTrouble = "http://wiki.civicrm.org/confluence/display/CRMDOC/Installation+and+Configuration+Trouble-shooting";
-      $forumLink      = "http://forum.civicrm.org/index.php/board,6.0.html";
+      $docLinkInstall = "https://wiki.civicrm.org/confluence/display/CRMDOC/Installing+CiviCRM+for+WordPress";
+      $docLinkTrouble = "https://wiki.civicrm.org/confluence/display/CRMDOC/Installation+and+Upgrades";
+      $forumLink      = "https://civicrm.stackexchange.com/";
 
 
       // construct message
