@@ -1163,7 +1163,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
 			// Find protocol and hostspec
 
-			if ( preg_match( '|^([^(]+)\((.*? )\)/?(.*?)$|', $dsn, $match ) ) {
+			if ( preg_match( '|^([^(]+)\((.*?)\)/?(.*?)$|', $dsn, $match ) ) {
 				// $dsn => proto( proto_opts )/database
 				$proto       = $match[1];
 				$proto_opts  = $match[2] ? $match[2] : false;
