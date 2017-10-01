@@ -99,14 +99,10 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
     // add button to WP selected post types, if allowed
     if ( $this->post_type_has_button() ) {
 
-      if (!$this->civi->initialize()) {
-        return;
-      }
+      $civilogo = file_get_contents( plugin_dir_path( __FILE__ ) . '../assets/civilogo.svg.b64' );
 
-      $config = CRM_Core_Config::singleton();
-      $imageBtnURL = $config->resourceBase . 'i/logo16px.png';
       $url = admin_url( 'admin.php?page=CiviCRM&q=civicrm/shortcode&reset=1' );
-      echo '<a href= "' . $url . '" class="button crm-popup medium-popup crm-shortcode-button" data-popup-type="page" style="padding-left: 4px;" title="' . __( 'Add CiviCRM Public Pages', 'civicrm' ) . '"><img src="' . $imageBtnURL . '" height="15" width="15" alt="' . __( 'Add CiviCRM Public Pages', 'civicrm' ) . '" />'. __( 'CiviCRM', 'civicrm' ) .'</a>';
+      echo '<a href= "' . $url . '" class="button crm-popup medium-popup crm-shortcode-button" data-popup-type="page" style="padding-left: 4px;" title="' . __( 'Add CiviCRM Public Pages', 'civicrm' ) . '"><img src="' . $civilogo . '" height="15" width="15" alt="' . __( 'Add CiviCRM Public Pages', 'civicrm' ) . '" />'. __( 'CiviCRM', 'civicrm' ) .'</a>';
 
     }
 
@@ -184,5 +180,3 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
   }
 
 } // class CiviCRM_For_WordPress_Shortcodes_Modal ends
-
-

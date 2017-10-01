@@ -737,16 +737,10 @@ class CiviCRM_For_WordPress {
    */
   public function add_menu_items() {
 
+    $civilogo = file_get_contents( plugin_dir_path( __FILE__ ) . 'assets/civilogo.svg.b64' );
+
     // check for settings file
     if ( CIVICRM_INSTALLED ) {
-
-      // use plugins_url( 'path/to/file.png', __FILE__ )
-      // see http://codex.wordpress.org/Function_Reference/plugins_url
-      // NB: given that URLs always use /, I see no need for DIR_SEP
-      $civilogo = plugins_url(
-        'civicrm/i/logo16px.png',
-        __FILE__
-      );
 
       // add top level menu item
       $menu_page = add_menu_page(
@@ -763,11 +757,6 @@ class CiviCRM_For_WordPress {
       add_action( 'load-' . $menu_page, array( $this, 'admin_page_load' ) );
 
     } else {
-
-      $civilogo = plugins_url(
-        'civicrm/i/logo16px.png',
-        __FILE__
-      );
 
       // add top level menu item
       $menu_page = add_menu_page(
