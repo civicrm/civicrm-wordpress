@@ -145,6 +145,11 @@ class CiviCRM_For_WordPress_Shortcodes {
     // did we get any?
     if ( $shortcodes_present ) {
 
+      // we need CiviCRM initialised prior to parsing shortcodes
+      if (!$this->civi->initialize()) {
+        return;
+      }
+
       // how should we handle multiple shortcodes?
       if ( $shortcodes_present > 1 ) {
 
@@ -555,11 +560,11 @@ class CiviCRM_For_WordPress_Shortcodes {
    * Preprocess CiviCRM-defined shortcodes
    *
    * @param array $atts Shortcode attributes array
-   * @return void
+   * @return array $args Shortcode arguments array
    */
   public function preprocess_atts( $atts ) {
 
-    extract( shortcode_atts( array(
+    $shortcode_atts = shortcode_atts( array(
       'component' => 'contribution',
       'action' => NULL,
       'mode' => NULL,
@@ -569,8 +574,11 @@ class CiviCRM_For_WordPress_Shortcodes {
       'cs' => NULL,
       'force' => NULL,
       ),
-      $atts
-    ) );
+      $atts,
+      'civicrm'
+    );
+
+    extract( $shortcode_atts );
 
     $args = array(
       'reset' => 1,
@@ -647,7 +655,18 @@ class CiviCRM_For_WordPress_Shortcodes {
 
     }
 
-    return $args;
+    /**
+     * Filter the CiviCRM shortcode arguments.
+     *
+     * This filter allows plugins or CiviExtensions to modify the attributes
+     * that the 'civicrm' shortcode allows. Injected attributes and their values
+     * will also become available in the $_REQUEST and $_GET arrays.
+     *
+     * @param array $args Existing shortcode arguments
+     * @param array $shortcode_atts Shortcode attributes
+     * @return array $args Modified shortcode arguments
+     */
+    return apply_filters( 'civicrm_shortcode_preprocess_atts', $args, $shortcode_atts );
 
   }
 
@@ -657,7 +676,7 @@ class CiviCRM_For_WordPress_Shortcodes {
    *
    * @param array $atts Shortcode attributes array
    * @param array $args Shortcode arguments array
-   * @return void
+   * @return array|bool $data The array data used to build the shortcode markup (or false on failure)
    */
   public function get_data( $atts, $args ) {
 
@@ -668,14 +687,25 @@ class CiviCRM_For_WordPress_Shortcodes {
       return FALSE;
     }
 
-    // get the Civi entity via the API
-    $params = array(
+    /**
+     * Filter the base CiviCRM API parameters.
+     *
+     * This filter allows plugins or CiviExtensions to modify the API call when
+     * there are multiple shortcodes being rendered.
+     *
+     * @param array $params Existing API params
+     * @param array $atts Shortcode attributes array
+     * @param array $args Shortcode arguments array
+     * @return array $params Modified API params
+     */
+    $params = apply_filters( 'civicrm_shortcode_api_params', array(
       'version' => 3,
       'page' => 'CiviCRM',
       'q' => 'civicrm/ajax/rest',
       'sequential' => '1',
-    );
+    ), $atts, $args );
 
+    // get the Civi entity via the API
     switch ( $atts['component'] ) {
 
       case 'contribution':
@@ -786,7 +816,18 @@ class CiviCRM_For_WordPress_Shortcodes {
 
     }
 
-    return $data;
+    /**
+     * Filter the CiviCRM shortcode data array.
+     *
+     * This filter allows plugins or CiviExtensions to modify the data used to
+     * display the shortcode when there are multiple shortcodes being rendered.
+     *
+     * @param array $data Existing shortcode data
+     * @param array $atts Shortcode attributes array
+     * @param array $args Shortcode arguments array
+     * @return array $data Modified shortcode data
+     */
+    return apply_filters( 'civicrm_shortcode_get_data', $data, $atts, $args );
 
   }
 
