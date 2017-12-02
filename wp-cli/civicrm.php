@@ -1293,7 +1293,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 			if ( $tarfile = $this->getOption( $option, false ) ) {
 				WP_CLI::launch( "gzip -d $tarfile" );
 				$tarfile = substr( $tarfile, 0, strlen( $tarfile ) - 3 );
-				$this->exec( "tar -xf $tarfile -C \"$destination_path\"" );
+				WP_CLI::launch( "tar -xf $tarfile -C \"$destination_path\"" );
 				return true;
 			} else {
 				return false;
