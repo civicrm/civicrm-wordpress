@@ -654,7 +654,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
 			$restore_backup_dir .= '/plugins/restore/' . $date;
 
-			if ( ! mkdir( $restore_backup_dir, 777, true ) ) {
+			if ( ! mkdir( $restore_backup_dir, 0755, true ) ) {
 				return WP_CLI::error( 'Failed creating directory: ' . $restore_backup_dir );
 			}
 
@@ -999,7 +999,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 			# begin upgrade
 
 			$backup_dir .= '/plugins/' . $date;
-			if ( ! mkdir( $backup_dir, 777, true ) ) {
+			if ( ! mkdir( $backup_dir, 0755, true ) ) {
 				return WP_CLI::error( 'Failed creating directory: ' . $backup_dir );
 			}
 
