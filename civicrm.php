@@ -805,6 +805,7 @@ class CiviCRM_For_WordPress {
         require_once $loader;
         require_once implode(DIRECTORY_SEPARATOR, [$civicrmCore, 'CRM', 'Core', 'ClassLoader.php']);
         CRM_Core_ClassLoader::singleton()->register();
+        \Civi\Setup::assertProtocolCompatibility(0.1);
         \Civi\Setup::init([
           'cms' => 'WordPress',
           'srcPath' => $civicrmCore,
