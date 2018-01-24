@@ -801,15 +801,14 @@ class CiviCRM_For_WordPress {
     );
     foreach ($setupPaths as $setupPath) {
       $loader = implode(DIRECTORY_SEPARATOR, [$civicrmCore, $setupPath, 'civicrm-setup-autoload.php']);
-      if (file_exists($loader)) {
+      if (file_exists($civicrmCore . DIRECTORY_SEPARATOR . '.use-civicrm-setup') && file_exists($loader)) {
         require_once $loader;
         require_once implode(DIRECTORY_SEPARATOR, [$civicrmCore, 'CRM', 'Core', 'ClassLoader.php']);
         CRM_Core_ClassLoader::singleton()->register();
-        \Civi\Setup::assertProtocolCompatibility(0.1);
+        \Civi\Setup::assertProtocolCompatibility(1.0);
         \Civi\Setup::init([
           'cms' => 'WordPress',
           'srcPath' => $civicrmCore,
-          'setupPath' => dirname($loader),
         ]);
         $ctrl = \Civi\Setup::instance()->createController()->getCtrl();
         $ctrl->setUrls(array(
