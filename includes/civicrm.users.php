@@ -65,14 +65,14 @@ class CiviCRM_For_WordPress_Users {
 
 
   /**
-   * Register hooks to handle CiviCRM in a WordPress wpBasePage context
+   * Register hooks for handling users.
    *
    * @return void
    */
   public function register_hooks() {
 
     // add CiviCRM access capabilities to WordPress roles
-    add_action( 'init', array( $this, 'set_access_capabilities' ) );
+    $this->set_access_capabilities();
 
     // do not hook into user updates if Civi not installed yet
     if ( ! CIVICRM_INSTALLED ) return;
