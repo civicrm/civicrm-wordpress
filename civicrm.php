@@ -482,6 +482,13 @@ class CiviCRM_For_WordPress {
    */
   public function register_hooks_other() {
 
+    // prevent multiple calls
+    static $alreadyRegistered = FALSE;
+    if ( $alreadyRegistered ) {
+      return;
+    }
+    $alreadyRegistered = TRUE;
+
     // Store context
     $this->civicrm_in_wordpress_set();
 
@@ -575,8 +582,8 @@ class CiviCRM_For_WordPress {
 
     // let's add rewrite rule when viewing the basepage
     add_rewrite_rule(
-      '^' . $config->wpBasePage . '/([^/]*)/([^/]*)/([^/]*)/?',
-      'index.php?page_id=' . $basepage->ID . '&page=CiviCRM&q=civicrm/$matches[1]/$matches[2]&reset=1&id=$matches[3]',
+      '^' . $config->wpBasePage . '/([^/]*)/([^/]*)/?',
+      'index.php?page_id=' . $basepage->ID . '&page=CiviCRM&q=civicrm/$matches[1]/$matches[2]',
       'top'
     );
 
@@ -613,13 +620,22 @@ class CiviCRM_For_WordPress {
       $query_vars = array();
     }
 
-    // add our query vars
+    // add our URL query vars
     $query_vars[] = 'page';
     $query_vars[] = 'q';
     $query_vars[] = 'reset';
     $query_vars[] = 'id';
     $query_vars[] = 'html';
     $query_vars[] = 'snippet';
+
+    // add our shortcode query vars
+    $query_vars[] = 'action';
+    $query_vars[] = 'mode';
+    $query_vars[] = 'cid';
+    $query_vars[] = 'gid';
+    $query_vars[] = 'sid';
+    $query_vars[] = 'cs';
+    $query_vars[] = 'force';
 
     return $query_vars;
   }
@@ -1291,6 +1307,11 @@ class CiviCRM_For_WordPress {
     // WP always quotes the request, CiviCRM needs to reverse what it just did
     $this->remove_wp_magic_quotes();
 
+    // required for AJAX calls
+    if ($this->civicrm_in_wordpress()) {
+      $_REQUEST['noheader'] = $_GET['noheader'] = TRUE;
+    }
+
     // Code inside invoke() requires the current user to be set up
     $current_user = wp_get_current_user();
 
@@ -1305,13 +1326,11 @@ class CiviCRM_For_WordPress {
     // set flag
     $alreadyInvoked = TRUE;
 
-    // get args
-    $argdata = $this->get_request_args();
-
     // set dashboard as default if args are empty
-    if ( empty( $argdata['args'] ) ) {
-      $_GET['q']      = 'civicrm/dashboard';
-      $_GET['reset']  = 1;
+    $argdata = $this->get_request_args();
+    if ( empty( $argdata['argString'] ) ) {
+      $_GET['q'] = 'civicrm/dashboard';
+      $_GET['reset'] = 1;
       $argdata['args'] = array('civicrm', 'dashboard');
     }
 
@@ -1363,12 +1382,28 @@ class CiviCRM_For_WordPress {
 		$html = get_query_var( 'html' );
 		$snippet = get_query_var( 'snippet' );
 
+		$action = get_query_var( 'action' );
+		$mode = get_query_var( 'mode' );
+		$cid = get_query_var( 'cid' );
+		$gid = get_query_var( 'gid' );
+		$sid = get_query_var( 'sid' );
+		$cs = get_query_var( 'cs' );
+		$force = get_query_var( 'force' );
+
 		$_REQUEST['q'] = $_GET['q'] = $q;
 		$_REQUEST['page'] = $_GET['page'] = 'CiviCRM';
-		$_REQUEST['reset'] = $_GET['reset'] = $reset;
-		$_REQUEST['id'] = $_GET['id'] = $id;
-		$_REQUEST['html'] = $_GET['html'] = $html;
-		$_REQUEST['snippet'] = $_GET['snippet'] = $snippet;
+		if (!empty($reset)) { $_REQUEST['reset'] = $_GET['reset'] = $reset; }
+		if (!empty($id)) { $_REQUEST['id'] = $_GET['id'] = $id; }
+		if (!empty($html)) { $_REQUEST['html'] = $_GET['html'] = $html; }
+		if (!empty($snippet)) { $_REQUEST['snippet'] = $_GET['snippet'] = $snippet; }
+
+		if (!empty($action)) { $_REQUEST['action'] = $_GET['action'] = $action; }
+		if (!empty($mode)) { $_REQUEST['mode'] = $_GET['mode'] = $mode; }
+		if (!empty($cid)) { $_REQUEST['cid'] = $_GET['cid'] = $cid; }
+		if (!empty($gid)) { $_REQUEST['gid'] = $_GET['gid'] = $gid; }
+		if (!empty($sid)) { $_REQUEST['sid'] = $_GET['sid'] = $sid; }
+		if (!empty($cs)) { $_REQUEST['cs'] = $_GET['cs'] = $cs; }
+		if (!empty($force)) { $_REQUEST['force'] = $_GET['force'] = $force; }
 
     }
 
