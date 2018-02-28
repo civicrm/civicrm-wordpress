@@ -545,8 +545,21 @@ class CiviCRM_For_WordPress {
     // register user hooks
     $this->users->register_hooks();
 
-    // custom rewrite rules
-    $this->rewrite_rules();
+	// have we flushed rewrite rules?
+    if ( get_option( 'civicrm_rules_flushed' ) !== 'true' ) {
+
+      // apply custom rewrite rules, then flush rules afterwards
+      $this->rewrite_rules( true );
+
+      // set a one-time-only option to flag that this has been done
+      add_option( 'civicrm_rules_flushed', 'true' );
+
+    } else {
+
+      // apply custom rewrite rules normally
+      $this->rewrite_rules();
+
+    }
 
     // add our query vars
     add_filter( 'query_vars', array( $this, 'query_vars' ) );
