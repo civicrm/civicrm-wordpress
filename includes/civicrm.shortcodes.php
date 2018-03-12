@@ -273,7 +273,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     // invoke() requires environment variables to be set
     foreach ( $args as $key => $value ) {
       if ( $value !== NULL ) {
-      	set_query_var($key, $value);
+        set_query_var($key, $value);
         //$_REQUEST[$key] = $_GET[$key] = $value;
       }
     }
