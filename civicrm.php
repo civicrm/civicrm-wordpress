@@ -545,7 +545,7 @@ class CiviCRM_For_WordPress {
     // register user hooks
     $this->users->register_hooks();
 
-	// have we flushed rewrite rules?
+    // have we flushed rewrite rules?
     if ( get_option( 'civicrm_rules_flushed' ) !== 'true' ) {
 
       // apply custom rewrite rules, then flush rules afterwards
@@ -1389,34 +1389,34 @@ class CiviCRM_For_WordPress {
     $q = get_query_var( 'q' );
     if (!empty($q)) {
 
-		$page = get_query_var( 'page' );
-		$reset = get_query_var( 'reset' );
-		$id = get_query_var( 'id' );
-		$html = get_query_var( 'html' );
-		$snippet = get_query_var( 'snippet' );
+      $page = get_query_var( 'page' );
+      $reset = get_query_var( 'reset' );
+      $id = get_query_var( 'id' );
+      $html = get_query_var( 'html' );
+      $snippet = get_query_var( 'snippet' );
 
-		$action = get_query_var( 'action' );
-		$mode = get_query_var( 'mode' );
-		$cid = get_query_var( 'cid' );
-		$gid = get_query_var( 'gid' );
-		$sid = get_query_var( 'sid' );
-		$cs = get_query_var( 'cs' );
-		$force = get_query_var( 'force' );
+      $action = get_query_var( 'action' );
+      $mode = get_query_var( 'mode' );
+      $cid = get_query_var( 'cid' );
+      $gid = get_query_var( 'gid' );
+      $sid = get_query_var( 'sid' );
+      $cs = get_query_var( 'cs' );
+      $force = get_query_var( 'force' );
 
-		$_REQUEST['q'] = $_GET['q'] = $q;
-		$_REQUEST['page'] = $_GET['page'] = 'CiviCRM';
-		if (!empty($reset)) { $_REQUEST['reset'] = $_GET['reset'] = $reset; }
-		if (!empty($id)) { $_REQUEST['id'] = $_GET['id'] = $id; }
-		if (!empty($html)) { $_REQUEST['html'] = $_GET['html'] = $html; }
-		if (!empty($snippet)) { $_REQUEST['snippet'] = $_GET['snippet'] = $snippet; }
+      $_REQUEST['q'] = $_GET['q'] = $q;
+      $_REQUEST['page'] = $_GET['page'] = 'CiviCRM';
+      if (!empty($reset)) { $_REQUEST['reset'] = $_GET['reset'] = $reset; }
+      if (!empty($id)) { $_REQUEST['id'] = $_GET['id'] = $id; }
+      if (!empty($html)) { $_REQUEST['html'] = $_GET['html'] = $html; }
+      if (!empty($snippet)) { $_REQUEST['snippet'] = $_GET['snippet'] = $snippet; }
 
-		if (!empty($action)) { $_REQUEST['action'] = $_GET['action'] = $action; }
-		if (!empty($mode)) { $_REQUEST['mode'] = $_GET['mode'] = $mode; }
-		if (!empty($cid)) { $_REQUEST['cid'] = $_GET['cid'] = $cid; }
-		if (!empty($gid)) { $_REQUEST['gid'] = $_GET['gid'] = $gid; }
-		if (!empty($sid)) { $_REQUEST['sid'] = $_GET['sid'] = $sid; }
-		if (!empty($cs)) { $_REQUEST['cs'] = $_GET['cs'] = $cs; }
-		if (!empty($force)) { $_REQUEST['force'] = $_GET['force'] = $force; }
+      if (!empty($action)) { $_REQUEST['action'] = $_GET['action'] = $action; }
+      if (!empty($mode)) { $_REQUEST['mode'] = $_GET['mode'] = $mode; }
+      if (!empty($cid)) { $_REQUEST['cid'] = $_GET['cid'] = $cid; }
+      if (!empty($gid)) { $_REQUEST['gid'] = $_GET['gid'] = $gid; }
+      if (!empty($sid)) { $_REQUEST['sid'] = $_GET['sid'] = $sid; }
+      if (!empty($cs)) { $_REQUEST['cs'] = $_GET['cs'] = $cs; }
+      if (!empty($force)) { $_REQUEST['force'] = $_GET['force'] = $force; }
 
     }
 
