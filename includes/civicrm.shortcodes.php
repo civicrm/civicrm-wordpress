@@ -246,7 +246,11 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @return string HTML for output
    */
   public function render_single( $atts ) {
-
+    // Do not parse shortcodes in REST context, which breaks saving in Gutenberg editor
+    if(defined('REST_REQUEST') && REST_REQUEST){
+        return;
+    }
+   
     // check if we've already parsed this shortcode
     global $post;
     if ( is_object($post) ) {
