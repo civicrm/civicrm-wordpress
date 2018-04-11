@@ -302,12 +302,6 @@ class CiviCRM_For_WordPress {
       session_start();
     }
 
-    // save original arrays
-    $this->civi_get     = $_GET;
-    $this->civi_post    = $_POST;
-    $this->civi_cookie  = $_COOKIE;
-    $this->civi_request = $_REQUEST;
-
     // get classes and instantiate
     $this->include_files();
 
@@ -1380,10 +1374,10 @@ class CiviCRM_For_WordPress {
     $this->wp_request = $_REQUEST;
 
     // reassign globals
-    $_GET     = stripslashes_deep($this->civi_get);
-    $_POST    = stripslashes_deep($this->civi_post);
-    $_COOKIE  = stripslashes_deep($this->civi_cookie);
-    $_REQUEST = stripslashes_deep($this->civi_request);
+    $_GET     = stripslashes_deep( $_GET );
+    $_POST    = stripslashes_deep( $_POST );
+    $_COOKIE  = stripslashes_deep( $_COOKIE );
+    $_REQUEST = stripslashes_deep( $_REQUEST );
 
     // test for query var
     $q = get_query_var( 'q' );
