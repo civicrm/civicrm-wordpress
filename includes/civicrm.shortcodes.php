@@ -246,6 +246,16 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @return string HTML for output
    */
   public function render_single( $atts ) {
+    // Do not parse shortcodes in REST context for PUT, POST and DELETE methods
+    if(defined('REST_REQUEST') && REST_REQUEST && (isset($_PUT) || isset($_POST) || isset($_DELETE)) ){
+        // Return the original shortcode
+        $shortcode = '[civicrm';
+        foreach($atts as $att=>$val){
+            $shortcode.=' '.$att.'="'.$val.'"';
+        }
+        $shortcode.=']';
+        return $shortcode;
+    }
 
     // check if we've already parsed this shortcode
     global $post;
