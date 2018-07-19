@@ -308,7 +308,9 @@ class CiviCRM_For_WordPress {
     if ( $this->civicrm_in_wordpress() ) {
       // this is required for AJAX calls in WordPress admin
       $_GET['noheader'] = TRUE;
-    } else {
+    }
+
+    if ( !CIVICRM_INSTALLED && !$this->civicrm_in_wordpress() ) {
       $_GET['civicrm_install_type'] = 'wordpress';
     }
 
