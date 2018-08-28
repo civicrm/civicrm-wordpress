@@ -1096,7 +1096,7 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
                 $parsed['dbsyntax'] = $str;
             }
 
-            if (!count($dsn)) {
+            if (empty($dsn)) {
                 return $parsed;
             }
 
