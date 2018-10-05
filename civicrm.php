@@ -301,7 +301,8 @@ class CiviCRM_For_WordPress {
     $this->civicrm_in_wordpress_set();
 
     // there is no session handling in WP hence we start it for CiviCRM pages
-    if (!session_id()) {
+    // except when running via WP-CLI which does not require sessions
+    if ( empty( session_id() ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
       session_start();
     }
 
