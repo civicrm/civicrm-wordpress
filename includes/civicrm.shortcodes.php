@@ -659,9 +659,14 @@ class CiviCRM_For_WordPress_Shortcodes {
         break;
 
       default:
-
-        echo '<p>' . __( 'Do not know how to handle this shortcode', 'civicrm' ) . '</p>';
-        return;
+        $args = apply_filters( 'civicrm_shortcode_preprocess_atts', $args, $shortcode_atts );
+        if (!$args) {
+          echo '<p>' . __( 'Do not know how to handle this shortcode', 'civicrm' ) . '</p>';
+          return;
+        }
+        else {
+          break;
+        }
 
     }
 
