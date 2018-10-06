@@ -280,6 +280,11 @@ class CiviCRM_For_WordPress_Shortcodes {
     // preprocess shortcode attributes
     $args = $this->preprocess_atts( $atts );
 
+    // sanity check for improperly constructed shortcode
+    if ( $args === FALSE ) {
+      return '<p>' . __( 'Do not know how to handle this shortcode.', 'civicrm' ) . '</p>';
+    }
+
     // invoke() requires environment variables to be set
     foreach ( $args as $key => $value ) {
       if ( $value !== NULL ) {
@@ -324,6 +329,11 @@ class CiviCRM_For_WordPress_Shortcodes {
 
     // pre-process shortcode and retrieve args
     $args = $this->preprocess_atts( $atts );
+
+    // sanity check for improperly constructed shortcode
+    if ( $args === FALSE ) {
+      return '<p>' . __( 'Do not know how to handle this shortcode.', 'civicrm' ) . '</p>';
+    }
 
     // get data for this shortcode
     $data = $this->get_data( $atts, $args );
@@ -596,6 +606,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       'force' => $force,
     );
 
+    // construct args for known components
     switch ( $component ) {
 
       case 'contribution':
@@ -622,8 +633,7 @@ class CiviCRM_For_WordPress_Shortcodes {
             break;
 
           default:
-            echo '<p>' . __( 'Do not know how to handle this shortcode', 'civicrm' ) . '</p>';
-            return;
+            return FALSE;
         }
         break;
 
@@ -658,11 +668,6 @@ class CiviCRM_For_WordPress_Shortcodes {
         unset($args['id']);
         break;
 
-      default:
-
-        echo '<p>' . __( 'Do not know how to handle this shortcode', 'civicrm' ) . '</p>';
-        return;
-
     }
 
     /**
@@ -676,7 +681,14 @@ class CiviCRM_For_WordPress_Shortcodes {
      * @param array $shortcode_atts Shortcode attributes
      * @return array $args Modified shortcode arguments
      */
-    return apply_filters( 'civicrm_shortcode_preprocess_atts', $args, $shortcode_atts );
+    $args = apply_filters( 'civicrm_shortcode_preprocess_atts', $args, $shortcode_atts );
+
+    // sanity check for path
+    if ( ! isset( $args['q'] ) ) {
+      return FALSE;
+    }
+
+    return $args;
 
   }
 
