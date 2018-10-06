@@ -805,7 +805,11 @@ class CiviCRM_For_WordPress_Shortcodes {
         $civi_entity = civicrm_api( 'uf_group', 'getsingle', $params );
 
         // set title
-        $data['title'] = $civi_entity['title'];
+        if ( isset($civi_entity['frontend_title']) ) {
+          $data['title'] = $civi_entity['frontend_title'];
+        } else {
+          $data['title'] = $civi_entity['title'];
+        }
 
         // set text to empty
         $data['text'] = '';
