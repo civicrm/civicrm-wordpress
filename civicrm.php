@@ -65,35 +65,35 @@ http://make.wordpress.org/core/handbook/coding-standards/javascript/
 */
 
 
-// this file must not accessed directly
+// This file must not accessed directly
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 
-// set version here: when it changes, will force JS to reload
+// Set version here: when it changes, will force JS to reload
 define( 'CIVICRM_PLUGIN_VERSION', '4.7' );
 
-// store reference to this file
+// Store reference to this file
 if (!defined('CIVICRM_PLUGIN_FILE')) {
   define( 'CIVICRM_PLUGIN_FILE', __FILE__ );
 }
 
-// store URL to this plugin's directory
+// Store URL to this plugin's directory
 if (!defined( 'CIVICRM_PLUGIN_URL')) {
   define( 'CIVICRM_PLUGIN_URL', plugin_dir_url(CIVICRM_PLUGIN_FILE) );
 }
 
-// store PATH to this plugin's directory
+// Store PATH to this plugin's directory
 if (!defined( 'CIVICRM_PLUGIN_DIR')) {
   define( 'CIVICRM_PLUGIN_DIR', plugin_dir_path(CIVICRM_PLUGIN_FILE) );
 }
 
-/**
+/*
  * The constant CIVICRM_SETTINGS_PATH is also defined in civicrm.config.php and
  * may already have been defined there - e.g. by cron or external scripts.
  */
 if ( !defined( 'CIVICRM_SETTINGS_PATH' ) ) {
 
-  /**
+  /*
    * Test where the settings file exists.
    *
    * If the settings file is found in the 4.6 and prior location, use that as
@@ -112,55 +112,84 @@ if ( !defined( 'CIVICRM_SETTINGS_PATH' ) ) {
 
 }
 
-// test if Civi is installed
+// Test if CiviCRM is installed
 if ( file_exists( CIVICRM_SETTINGS_PATH )  ) {
     define( 'CIVICRM_INSTALLED', TRUE );
   } else {
     define( 'CIVICRM_INSTALLED', FALSE );
 }
 
-// prevent CiviCRM from rendering its own header
+// Prevent CiviCRM from rendering its own header
 define( 'CIVICRM_UF_HEAD', TRUE );
 
 
 /**
- * Define CiviCRM_For_WordPress Class
+ * Define CiviCRM_For_WordPress Class.
+ *
+ * @since 4.4
  */
 class CiviCRM_For_WordPress {
 
-
   /**
-   * Declare our properties
-   */
-
-  /**
-   * @var CiviCRM_For_WordPress
+   * Plugin instance.
+   *
+   * @since 4.4
+   * @access private
+   * @var object $instance The plugin instance.
    */
   private static $instance;
 
-  // plugin context (broad)
+  /**
+   * Plugin context (broad).
+   *
+   * @since 4.4
+   * @access public
+   * @var bool $in_wordpress The broad plugin context.
+   */
   static $in_wordpress;
 
-  // plugin context (specific)
+  /**
+   * Plugin context (specific).
+   *
+   * @since 4.4
+   * @access public
+   * @var str $context The specific plugin context.
+   */
   static $context;
 
   /**
-   * @var CiviCRM_For_WordPress_Shortcodes
+   * Shortcodes management object.
+   *
+   * @since 4.4
+   * @access public
+   * @var object CiviCRM_For_WordPress_Shortcodes The shortcodes management object.
    */
   public $shortcodes;
 
   /**
-   * @var CiviCRM_For_WordPress_Shortcodes_Modal
+   * Modal dialog management object.
+   *
+   * @since 4.4
+   * @access public
+   * @var object CiviCRM_For_WordPress_Shortcodes_Modal The modal dialog management object.
    */
   public $modal;
 
   /**
-   * @var CiviCRM_For_WordPress_Basepage
+   * Basepage management object.
+   *
+   * @since 4.4
+   * @access public
+   * @var object CiviCRM_For_WordPress_Basepage The basepage management object.
    */
   public $basepage;
 
   /**
-   * @var CiviCRM_For_WordPress_Users
+   * User management object.
+   *
+   * @since 4.4
+   * @access public
+   * @var object CiviCRM_For_WordPress_Users The user management object.
    */
   public $users;
 
@@ -174,39 +203,44 @@ class CiviCRM_For_WordPress {
    * Getter method which returns the CiviCRM instance and optionally creates one
    * if it does not already exist. Standard CiviCRM singleton pattern.
    *
-   * @return object CiviCRM plugin instance
+   * @since 4.4
+   *
+   * @return object CiviCRM_For_WordPress The CiviCRM plugin instance.
    */
   public static function singleton() {
 
-    // if it doesn't already exist...
+    // Create instance if it doesn't already exist
     if ( ! isset( self::$instance ) ) {
-
-      // create it
       self::$instance = new CiviCRM_For_WordPress;
       self::$instance->setup_instance();
-
     }
 
-    // return existing instance
+    // Return instance
     return self::$instance;
 
   }
 
 
   /**
-   * Dummy instance constructor
+   * Dummy instance constructor.
+   *
+   * @since 4.4
    */
   function __construct() {}
 
   /**
-   * Dummy magic method to prevent CiviCRM_For_WordPress from being cloned
+   * Dummy magic method to prevent CiviCRM_For_WordPress from being cloned.
+   *
+   * @since 4.4
    */
   public function __clone() {
     _doing_it_wrong( __FUNCTION__, __( 'Only one instance of CiviCRM_For_WordPress please', 'civicrm' ), '4.4' );
   }
 
   /**
-   * Dummy magic method to prevent CiviCRM_For_WordPress from being unserialized
+   * Dummy magic method to prevent CiviCRM_For_WordPress from being unserialized.
+   *
+   * @since 4.4
    */
   public function __wakeup() {
     _doing_it_wrong( __FUNCTION__, __( 'Please do not serialize CiviCRM_For_WordPress', 'civicrm' ), '4.4' );
@@ -214,54 +248,58 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Method that is called only when CiviCRM plugin is activated
-   * In order for other plugins to be able to interact with Civi's activation,
-   * we wait until after the activation redirect to perform activation actions
+   * Plugin activation.
    *
-   * @return void
+   * This method is called only when CiviCRM plugin is activated. In order for
+   * other plugins to be able to interact with Civi's activation, we wait until
+   * after the activation redirect to perform activation actions.
+   *
+   * @since 4.4
    */
   public function activate() {
 
-    // set a one-time-only option
+    // Set a one-time-only option
     add_option( 'civicrm_activation_in_progress', 'true' );
 
   }
 
 
   /**
-   * Method that runs CiviCRM's plugin activation methods
+   * Run CiviCRM's plugin activation procedure.
    *
-   * @return void
+   * @since 4.4
    */
   public function activation() {
 
-    // if activating...
+    // If activating
     if ( is_admin() && get_option( 'civicrm_activation_in_progress' ) == 'true' ) {
 
-      // assign minimum capabilities for all WP roles and create 'anonymous_user' role
+      // Assign minimum capabilities for all WP roles and create 'anonymous_user' role
       $this->users->set_wp_user_capabilities();
 
-      // set a one-time-only option to flag that we need to create a basepage -
-      // it will not update the option once it has been set to another value nor
-      // create a new option with the same name
+      /*
+       * Set a one-time-only option to flag that we need to create a basepage -
+       * it will not update the option once it has been set to another value nor
+       * create a new option with the same name.
+       */
       add_option( 'civicrm_activation_create_basepage', 'true' );
 
-      // change option so this method never runs again
+      // Change option so this method never runs again
       update_option( 'civicrm_activation_in_progress', 'false' );
 
     }
 
-    // if activating and we still haven't created the basepage...
+    // If activating and we still haven't created the basepage
     if (
       is_admin() &&
       get_option( 'civicrm_activation_create_basepage' ) == 'true' &&
       CIVICRM_INSTALLED
     ) {
 
-      // create basepage
+      // Create basepage
       add_action( 'wp_loaded', array( $this, 'create_wp_basepage' ) );
 
-      // change option so this method never runs again
+      // Change option so this method never runs again
       update_option( 'civicrm_activation_create_basepage', 'done' );
 
     }
@@ -270,15 +308,17 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Method that is called only when CiviCRM plugin is deactivated
-   * In order for other plugins to be able to interact with Civi's activation,
-   * we need to remove the option that is set in activate() above
+   * Plugin deactivation.
    *
-   * @return void
+   * This method is called only when CiviCRM plugin is deactivated. In order for
+   * other plugins to be able to interact with Civi's activation, we need to
+   * remove any options that are set in activate() above.
+   *
+   * @since 4.4
    */
   public function deactivate() {
 
-    // delete options
+    // Delete options
     delete_option( 'civicrm_activation_in_progress' );
     delete_option( 'civicrm_activation_create_basepage' );
 
@@ -286,13 +326,13 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Set up the CiviCRM plugin instance
+   * Set up the CiviCRM plugin instance.
    *
-   * @return void
+   * @since 4.4
    */
   public function setup_instance() {
 
-    // kick out if another instance is being inited
+    // Kick out if another instance is being inited
     if ( isset( self::$in_wordpress ) ) {
       wp_die( __( 'Only one instance of CiviCRM_For_WordPress please', 'civicrm' ) );
     }
@@ -300,14 +340,16 @@ class CiviCRM_For_WordPress {
     // Store context
     $this->civicrm_in_wordpress_set();
 
-    // there is no session handling in WP hence we start it for CiviCRM pages
-    // except when running via WP-CLI which does not require sessions
+    /*
+     * There is no session handling in WP - hence we start it for CiviCRM pages
+     * except when running via WP-CLI which does not require sessions.
+     */
     if ( empty( session_id() ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
       session_start();
     }
 
     if ( $this->civicrm_in_wordpress() ) {
-      // this is required for AJAX calls in WordPress admin
+      // This is required for AJAX calls in WordPress admin
       $_GET['noheader'] = TRUE;
     }
 
@@ -315,22 +357,24 @@ class CiviCRM_For_WordPress {
       $_GET['civicrm_install_type'] = 'wordpress';
     }
 
-    // get classes and instantiate
+    // Get classes and instantiate
     $this->include_files();
 
-    // do plugin activation
+    // Do plugin activation
     $this->activation();
 
-    // register all hooks
+    // Register all hooks
     $this->register_hooks();
 
-    // notify plugins
+    // Notify plugins
     do_action( 'civicrm_instance_loaded' );
 
   }
 
 
   /**
+   * Set broad CiviCRM context.
+   *
    * Setter for determining if CiviCRM is currently being displayed in WordPress.
    * This becomes true whe CiviCRM is called in the following contexts:
    *
@@ -338,13 +382,13 @@ class CiviCRM_For_WordPress {
    * (b) when CiviCRM content is being displayed on the front-end via wpBasePage
    * (c) when an AJAX request is made to CiviCRM
    *
-   * It is NOT true when CiviCRM is called via a shortcode
+   * It is NOT true when CiviCRM is called via a shortcode.
    *
-   * @return void
+   * @since 4.4
    */
   public function civicrm_in_wordpress_set() {
 
-    // store
+    // Store
     self::$in_wordpress = ( isset( $_GET['page'] ) && $_GET['page'] == 'CiviCRM' ) ? TRUE : FALSE;
 
   }
@@ -355,17 +399,28 @@ class CiviCRM_For_WordPress {
    *
    * @see $this->civicrm_in_wordpress_set()
    *
-   * @return bool $in_wordpress True if Civi is displayed in WordPress, false otherwise
+   * @since 4.4
+   *
+   * @return bool $in_wordpress True if CiviCRM is displayed in WordPress, false otherwise.
    */
   public function civicrm_in_wordpress() {
 
-    // already stored
+    /**
+     * Allow broad context to be filtered.
+     *
+     * @since 4.4
+     *
+     * @param bool $in_wordpress True if CiviCRM is displayed in WordPress, false otherwise.
+     * @return bool $in_wordpress True if CiviCRM is displayed in WordPress, false otherwise.
+     */
     return apply_filters( 'civicrm_in_wordpress', self::$in_wordpress );
 
   }
 
 
   /**
+   * Set specific CiviCRM context.
+   *
    * Setter for determining how CiviCRM is currently being displayed in WordPress.
    * This can be one of the following contexts:
    *
@@ -374,36 +429,46 @@ class CiviCRM_For_WordPress {
    * (c) when a "non-page" request is made to CiviCRM
    * (d) when CiviCRM is called via a shortcode
    *
-   * The following codes correspond to the different contexts
+   * The following codes correspond to the different contexts:
    *
    * (a) 'admin'
    * (b) 'basepage'
    * (c) 'nonpage'
    * (d) 'shortcode'
    *
-   * @param string $context
-   *   One of the four context codes above
-   * @return void
+   * @since 4.4
+   *
+   * @param string $context One of the four context codes above.
    */
   public function civicrm_context_set( $context ) {
 
-    // store
+    // Store
     self::$context = $context;
 
   }
 
 
   /**
+   * Get specific CiviCRM context.
+   *
    * Getter for determining how CiviCRM is currently being displayed in WordPress.
    *
    * @see $this->civicrm_context_set()
    *
-   * @return string
-   *   The context in which Civi is displayed in WordPress
+   * @since 4.4
+   *
+   * @return string The context in which CiviCRM is displayed in WordPress.
    */
   public function civicrm_context_get() {
 
-    // already stored
+    /**
+     * Allow specific context to be filtered.
+     *
+     * @since 4.4
+     *
+     * @param bool $context The existing context in which CiviCRM is displayed in WordPress.
+     * @return bool $context The modified context in which CiviCRM is displayed in WordPress.
+     */
     return apply_filters( 'civicrm_context', self::$context );
 
   }
@@ -415,25 +480,25 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Include files
+   * Include files.
    *
-   * @return void
+   * @since 4.4
    */
   public function include_files() {
 
-    // include users class
+    // Include users class
     include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.users.php';
     $this->users = new CiviCRM_For_WordPress_Users;
 
-    // include shortcodes class
+    // Include shortcodes class
     include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.shortcodes.php';
     $this->shortcodes = new CiviCRM_For_WordPress_Shortcodes;
 
-    // include shortcodes modal dialog class
+    // Include shortcodes modal dialog class
     include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.shortcodes.modal.php';
     $this->modal = new CiviCRM_For_WordPress_Shortcodes_Modal;
 
-    // include basepage class
+    // Include basepage class
     include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.basepage.php';
     $this->basepage = new CiviCRM_For_WordPress_Basepage;
 
@@ -446,34 +511,34 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Register hooks
+   * Register hooks.
    *
-   * @return void
+   * @since 4.4
    */
   public function register_hooks() {
 
-    // always add the common hooks
+    // Always add the common hooks
     $this->register_hooks_common();
 
-    // when in WordPress admin...
+    // When in WordPress admin...
     if ( is_admin() ) {
 
-      // set context
+      // Set context
       $this->civicrm_context_set( 'admin' );
 
-      // handle WP admin context
+      // Handle WP admin context
       $this->register_hooks_admin();
       return;
 
     }
 
-    // go no further if Civi not installed yet
+    // Go no further if CiviCRM not installed yet
     if ( ! CIVICRM_INSTALLED ) return;
 
-    // when embedded via wpBasePage or AJAX call...
+    // When embedded via wpBasePage or AJAX call...
     if ( $this->civicrm_in_wordpress() ) {
 
-      /**
+      /*
        * Directly output CiviCRM html only in a few cases and skip WP templating:
        *
        * (a) when a snippet is set
@@ -483,79 +548,79 @@ class CiviCRM_For_WordPress {
        */
       if ( ! $this->is_page_request() ) {
 
-        // set context
+        // Set context
         $this->civicrm_context_set( 'nonpage' );
 
-        // add core resources for front end
+        // Add core resources for front end
         add_action( 'wp', array( $this, 'front_end_page_load' ) );
 
-        // echo all output when WP has been set up but nothing has been rendered
+        // Wcho all output when WP has been set up but nothing has been rendered
         add_action( 'wp', array( $this, 'invoke' ) );
         return;
 
       }
 
-      // set context
+      // Set context
       $this->civicrm_context_set( 'basepage' );
 
-      // if we get here, we must be in a wpBasePage context
+      // If we get here, we must be in a wpBasePage context
       $this->basepage->register_hooks();
       return;
 
     }
 
-    // set context
+    // Set context
     $this->civicrm_context_set( 'shortcode' );
 
-    // that leaves us with handling shortcodes, should they exist
+    // That leaves us with handling shortcodes, should they exist
     $this->shortcodes->register_hooks();
 
   }
 
 
   /**
-   * Register hooks that must always be present
+   * Register hooks that must always be present.
    *
-   * @return void
+   * @since 4.4
    */
   public function register_hooks_common() {
 
-    // use translation files
+    // Use translation files
     add_action( 'plugins_loaded', array( $this, 'enable_translation' ) );
 
-    // register user hooks
+    // Register user hooks
     $this->users->register_hooks();
 
   }
 
 
   /**
-   * Register hooks to handle CiviCRM in a WordPress admin context
+   * Register hooks to handle CiviCRM in a WordPress admin context.
    *
-   * @return void
+   * @since 4.4
    */
   public function register_hooks_admin() {
 
-    // modify the admin menu
+    // Modify the admin menu
     add_action( 'admin_menu', array( $this, 'add_menu_items' ) );
 
-    // set page title
+    // Set page title
     add_filter( 'admin_title', array( $this, 'set_admin_title' ) );
 
-    // print CiviCRM's header
+    // Print CiviCRM's header
     add_action('admin_head', array( $this, 'wp_head' ), 50);
 
-    // if settings file does not exist, show notice with link to installer
+    // If settings file does not exist, show notice with link to installer
     if ( ! CIVICRM_INSTALLED ) {
       if ( isset( $_GET['page'] ) && $_GET['page'] == 'civicrm-install' ) {
-        // register hooks for installer page?
+        // Register hooks for installer page?
       } else {
-        // show notice
+        // Show notice
         add_action( 'admin_notices', array( $this, 'show_setup_warning' ) );
       }
     }
 
-    // enable shortcode modal
+    // Enable shortcode modal
     $this->modal->register_hooks();
 
   }
@@ -567,9 +632,11 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Initialize CiviCRM
+   * Initialize CiviCRM.
    *
-   * @return bool $success
+   * @since 4.4
+   *
+   * @return bool $success True if CiviCRM is initialized, false otherwise.
    */
   public function initialize() {
 
@@ -595,25 +662,25 @@ class CiviCRM_For_WordPress {
         exit();
       }
 
-      // check for settings
+      // Check for settings
       if ( ! CIVICRM_INSTALLED ) {
         $error = FALSE;
       } elseif ( file_exists( CIVICRM_SETTINGS_PATH) ) {
         $error = include_once ( CIVICRM_SETTINGS_PATH );
       }
 
-      // autoload
+      // Autoload
       require_once 'CRM/Core/ClassLoader.php';
       CRM_Core_ClassLoader::singleton()->register();
 
-      // get ready for problems
+      // Get ready for problems
       $installLink    = admin_url() . "options-general.php?page=civicrm-install";
       $docLinkInstall = "https://wiki.civicrm.org/confluence/display/CRMDOC/Installing+CiviCRM+for+WordPress";
       $docLinkTrouble = "https://wiki.civicrm.org/confluence/display/CRMDOC/Installation+and+Upgrades";
       $forumLink      = "https://civicrm.stackexchange.com/";
 
 
-      // construct message
+      // Construct message
       $errorMsgAdd = sprintf(
         __( 'Please review the <a href="%s">WordPress Installation Guide</a> and the <a href="%s">Trouble-shooting page</a> for assistance. If you still need help installing, you can often find solutions to your issue by searching for the error message in the <a href="%s">installation support section of the community forum</a>.', 'civicrm' ),
         $docLinkInstall,
@@ -621,7 +688,7 @@ class CiviCRM_For_WordPress {
         $forumLink
       );
 
-      // does install message get used?
+      // Does install message get used?
       $installMessage = sprintf(
         __( 'Click <a href="%s">here</a> for fresh install.', 'civicrm' ),
         $installLink
@@ -632,20 +699,20 @@ class CiviCRM_For_WordPress {
         return FALSE;
       }
 
-      // access global defined in civicrm.settings.php
+      // Access global defined in civicrm.settings.php
       global $civicrm_root;
 
-      // this does pretty much all of the civicrm initialization
+      // This does pretty much all of the civicrm initialization
       if ( ! file_exists( $civicrm_root . 'CRM/Core/Config.php' ) ) {
         $error = FALSE;
       } else {
         $error = include_once ( 'CRM/Core/Config.php' );
       }
 
-      // have we got it?
+      // Have we got it?
       if ( $error == FALSE ) {
 
-        // set static flag
+        // Set static flag
         $failure = TRUE;
 
         // FIX ME - why?
@@ -663,27 +730,26 @@ class CiviCRM_For_WordPress {
           "</p><p class='error'>" . $errorMsgAdd . "</p></strong>"
         );
 
-        // won't reach here!
+        // Won't reach here!
         return FALSE;
 
       }
 
-      // set static flag
+      // Set static flag
       $initialized = TRUE;
 
-      // initialize the system by creating a config object
+      // Initialize the system by creating a config object
       $config = CRM_Core_Config::singleton();
-      //print_r( $config ); die();
 
-      // sync the logged in user with WP
+      // Sync the logged in user with WP
       global $current_user;
       if ( $current_user ) {
 
-        // sync procedure sets session values for logged in users
+        // Sync procedure sets session values for logged in users
         require_once 'CRM/Core/BAO/UFMatch.php';
         CRM_Core_BAO_UFMatch::synchronize(
-          $current_user, // user object
-          FALSE, // do not update
+          $current_user, // User object
+          FALSE, // Do not update
           'WordPress', // CMS
           $this->users->get_civicrm_contact_type('Individual')
         );
@@ -692,10 +758,14 @@ class CiviCRM_For_WordPress {
 
     }
 
-    // notify plugins
+    /**
+     * Broadcast that CiviCRM is now initialized.
+     *
+     * @since 4.4
+     */
     do_action( 'civicrm_initialized' );
 
-    // success!
+    // Success!
     return TRUE;
 
   }
@@ -707,25 +777,20 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Load translation files
+   * Load translation files.
+   *
    * A good reference on how to implement translation in WordPress:
    * http://ottopress.com/2012/internationalization-youre-probably-doing-it-wrong/
    *
-   * @return void
+   * @since 4.4
    */
   public function enable_translation() {
 
-    // not used, as there are no translations as yet
+    // Load translations
     load_plugin_textdomain(
-
-      // unique name
-      'civicrm',
-
-      // deprecated argument
-      FALSE,
-
-      // relative path to directory containing translation files
-      dirname( plugin_basename( __FILE__ ) ) . '/languages/'
+      'civicrm', // Unique name
+      FALSE, // Deprecated argument
+      dirname( plugin_basename( __FILE__ ) ) . '/languages/' // Relative path to translation files
 
     );
 
@@ -733,19 +798,20 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Adds menu items to WordPress admin menu
-   * Callback method for 'admin_menu' hook as set in register_hooks()
+   * Adds menu items to WordPress admin menu.
    *
-   * @return void
+   * Callback method for 'admin_menu' hook as set in register_hooks().
+   *
+   * @since 4.4
    */
   public function add_menu_items() {
 
     $civilogo = file_get_contents( plugin_dir_path( __FILE__ ) . 'assets/civilogo.svg.b64' );
 
-    // check for settings file
+    // Check for settings file
     if ( CIVICRM_INSTALLED ) {
 
-      // add top level menu item
+      // Add top level menu item
       $menu_page = add_menu_page(
         __( 'CiviCRM', 'civicrm' ),
         __( 'CiviCRM', 'civicrm' ),
@@ -756,12 +822,12 @@ class CiviCRM_For_WordPress {
         apply_filters( 'civicrm_menu_item_position', '3.904981' ) // 3.9 + random digits to reduce risk of conflict
       );
 
-      // add core resources prior to page load
+      // Add core resources prior to page load
       add_action( 'load-' . $menu_page, array( $this, 'admin_page_load' ) );
 
     } else {
 
-      // add top level menu item
+      // Add top level menu item
       $menu_page = add_menu_page(
         __( 'CiviCRM Installer', 'civicrm' ),
         __( 'CiviCRM Installer', 'civicrm' ),
@@ -773,7 +839,7 @@ class CiviCRM_For_WordPress {
       );
 
       /*
-      // add scripts and styles like this
+      // Add scripts and styles like this
       add_action( 'admin_print_scripts-' . $options_page, array( $this, 'admin_installer_js' ) );
       add_action( 'admin_print_styles-' . $options_page, array( $this, 'admin_installer_css' ) );
       add_action( 'admin_head-' . $options_page, array( $this, 'admin_installer_head' ), 50 );
@@ -790,9 +856,9 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Callback method for add_options_page() that runs the CiviCRM installer
+   * Callback method for add_options_page() that runs the CiviCRM installer.
    *
-   * @return void
+   * @since 4.4
    */
   public function run_installer() {
     $civicrmCore = CIVICRM_PLUGIN_DIR . 'civicrm';
@@ -826,7 +892,7 @@ class CiviCRM_For_WordPress {
       }
     }
 
-    // uses CIVICRM_PLUGIN_DIR instead of WP_PLUGIN_DIR
+    // Uses CIVICRM_PLUGIN_DIR instead of WP_PLUGIN_DIR
     $installFile =
       CIVICRM_PLUGIN_DIR .
       'civicrm' . DIRECTORY_SEPARATOR .
@@ -841,9 +907,9 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Callback method for missing settings file in register_hooks()
+   * Callback method for missing settings file in register_hooks().
    *
-   * @return void
+   * @since 4.4
    */
   public function show_setup_warning() {
 
@@ -862,9 +928,9 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Create WordPress basepage and save setting
+   * Create WordPress basepage and save setting.
    *
-   * @return void
+   * @since 4.6
    */
   public function create_wp_basepage() {
 
@@ -874,34 +940,34 @@ class CiviCRM_For_WordPress {
 
     $config = CRM_Core_Config::singleton();
 
-    // bail if we already have a basepage setting
+    // Bail if we already have a basepage setting
     if ( !empty( $config->wpBasePage ) ) {
       return;
     }
 
-    // default page slug, but allow overrides
+    // Default page slug, but allow overrides
     $slug = apply_filters( 'civicrm_basepage_slug', 'civicrm' );
 
-    // get existing page with that slug
+    // Get existing page with that slug
     $page = get_page_by_path( $slug );
 
-    // does it exist?
+    // Does it exist?
     if ( $page ) {
 
-      // we already have a basepage
+      // We already have a basepage
       $result = $page->ID;
 
     } else {
 
-      // create the basepage
+      // Create the basepage
       $result = $this->create_basepage( $slug );
 
     }
 
-    // were we successful?
+    // Were we successful?
     if ( $result !== 0 AND !is_wp_error($result) ) {
 
-      // get the post object
+      // Get the post object
       $post = get_post( $result );
 
       $params = array(
@@ -909,7 +975,7 @@ class CiviCRM_For_WordPress {
         'wpBasePage' => $post->post_name,
       );
 
-      // save the setting
+      // Save the setting
       civicrm_api3('setting', 'create', $params);
 
     }
@@ -920,51 +986,53 @@ class CiviCRM_For_WordPress {
   /**
    * Create a WordPress page to act as the CiviCRM base page.
    *
-   * @param string $slug The unique slug for the page - same as wpBasePage setting
-   * @return int|WP_Error The page ID on success. The value 0 or WP_Error on failure
+   * @since 4.6
+   *
+   * @param string $slug The unique slug for the page - same as wpBasePage setting.
+   * @return int|WP_Error The page ID on success. The value 0 or WP_Error on failure.
    */
   private function create_basepage( $slug ) {
 
-    // if multisite, switch to main site
+    // If multisite, switch to main site
     if ( is_multisite() && !is_main_site() ) {
 
-      // store this site
+      // Store this site
       $original_site = get_current_blog_id();
 
-      // switch
+      // Switch
       global $current_site;
       switch_to_blog( $current_site->blog_id );
 
     }
 
-    // define basepage
+    // Define basepage
     $page = array(
       'post_status' => 'publish',
       'post_type' => 'page',
       'post_parent' => 0,
       'comment_status' => 'closed',
       'ping_status' => 'closed',
-      'to_ping' => '', // quick fix for Windows
-      'pinged' => '', // quick fix for Windows
-      'post_content_filtered' => '', // quick fix for Windows
-      'post_excerpt' => '', // quick fix for Windows
+      'to_ping' => '', // Quick fix for Windows
+      'pinged' => '', // Quick fix for Windows
+      'post_content_filtered' => '', // Quick fix for Windows
+      'post_excerpt' => '', // Quick fix for Windows
       'menu_order' => 0,
       'post_name' => $slug,
     );
 
-    // default page title, but allow overrides
+    // Default page title, but allow overrides
     $page['post_title'] = apply_filters( 'civicrm_basepage_title', __( 'CiviCRM', 'civicrm' ) );
 
-    // default content
+    // Default content
     $content = __( 'Do not delete this page. Page content is generated by CiviCRM.', 'civicrm' );
 
-    // set, but allow overrides
+    // Set, but allow overrides
     $page['post_content'] = apply_filters( 'civicrm_basepage_content', $content );
 
-    // insert the post into the database
+    // Insert the post into the database
     $page_id = wp_insert_post( $page );
 
-    // switch back if we've switched
+    // Switch back if we've switched
     if ( isset( $original_site ) ) {
       restore_current_blog();
     }
@@ -981,16 +1049,16 @@ class CiviCRM_For_WordPress {
   /**
    * Perform necessary stuff prior to CiviCRM's admin page being loaded
    * This needs to be a method because it can then be hooked into WP at the
-   * right time
+   * right time.
    *
-   * @return void
+   * @since 4.6
    */
   public function admin_page_load() {
 
-    // add resources for back end
+    // Add resources for back end
     $this->add_core_resources( FALSE );
 
-    // check setting for path to wp-load.php
+    // Check setting for path to wp-load.php
     $this->add_wpload_setting();
 
   }
@@ -1021,7 +1089,7 @@ class CiviCRM_For_WordPress {
    * To get the path to wp-load.php, use:
    * $path = CRM_Core_BAO_Setting::getItem('CiviCRM Preferences', 'wpLoadPhp');
    *
-   * @return void
+   * @since 4.6.3
    */
   public function add_wpload_setting() {
 
@@ -1029,20 +1097,20 @@ class CiviCRM_For_WordPress {
       return;
     }
 
-    // get path to wp-load.php
+    // Get path to wp-load.php
     $path = ABSPATH . 'wp-load.php';
 
-    // get the setting, if it exists
+    // Get the setting, if it exists
     $setting = CRM_Core_BAO_Setting::getItem('CiviCRM Preferences', 'wpLoadPhp');
 
-    // if we don't have one, create it
+    // If we don't have one, create it
     if ( is_null( $setting ) ) {
       CRM_Core_BAO_Setting::setItem($path, 'CiviCRM Preferences', 'wpLoadPhp');
     }
 
-    // is it different to the one we've stored?
+    // Is it different to the one we've stored?
     if ( $setting !== $path ) {
-      // yes - set new path (this could be because we've changed server or location)
+      // Yes - set new path (this could be because we've changed server or location)
       CRM_Core_BAO_Setting::setItem($path, 'CiviCRM Preferences', 'wpLoadPhp');
     }
 
@@ -1052,9 +1120,9 @@ class CiviCRM_For_WordPress {
   /**
    * Perform necessary stuff prior to CiviCRM being loaded on the front end
    * This needs to be a method because it can then be hooked into WP at the
-   * right time
+   * right time.
    *
-   * @return void
+   * @since 4.6
    */
   public function front_end_page_load() {
 
@@ -1063,24 +1131,26 @@ class CiviCRM_For_WordPress {
       return;
     }
 
-    // add resources for front end
+    // Add resources for front end
     $this->add_core_resources( TRUE );
 
-    // merge CiviCRM's HTML header with the WordPress theme's header
+    // Merge CiviCRM's HTML header with the WordPress theme's header
     add_action( 'wp_head', array( $this, 'wp_head' ) );
 
-    // set flag so this only happens once
+    // Set flag so this only happens once
     $frontend_loaded = TRUE;
 
   }
 
 
   /**
-   * Load only the CiviCRM CSS. This is needed because $this->front_end_page_load()
-   * is only called when there is a single Civi entity present on a page or archive
-   * and, whilst we don't want all the Javascript to load, we do want stylesheets
+   * Load only the CiviCRM CSS.
    *
-   * @return void
+   * This is needed because $this->front_end_page_load() is only called when
+   * there is a single CiviCRM entity present on a page or archive and, whilst
+   * we don't want all the Javascript to load, we do want stylesheets.
+   *
+   * @since 4.6
    */
   public function front_end_css_load() {
 
@@ -1095,22 +1165,22 @@ class CiviCRM_For_WordPress {
 
     $config = CRM_Core_Config::singleton();
 
-    // default custom CSS to standalone
+    // Default custom CSS to standalone
     $dependent = NULL;
 
     // Load core CSS
     if (!CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'disable_core_css')) {
 
-      // enqueue stylesheet
+      // Enqueue stylesheet
       wp_enqueue_style(
         'civicrm_css',
         $config->resourceBase . 'css/civicrm.css',
-        NULL, // dependencies
-        CIVICRM_PLUGIN_VERSION, // version
-        'all' // media
+        NULL, // Dependencies
+        CIVICRM_PLUGIN_VERSION, // Version
+        'all' // Media
       );
 
-      // custom CSS is dependent
+      // Custom CSS is dependent
       $dependent = array( 'civicrm_css' );
 
     }
@@ -1120,23 +1190,24 @@ class CiviCRM_For_WordPress {
       wp_enqueue_style(
         'civicrm_custom_css',
         $config->customCSSURL,
-        $dependent, // dependencies
-        CIVICRM_PLUGIN_VERSION, // version
-        'all' // media
+        $dependent, // Dependencies
+        CIVICRM_PLUGIN_VERSION, // Version
+        'all' // Media
       );
     }
 
-    // set flag so this only happens once
+    // Set flag so this only happens once
     $frontend_css_loaded = TRUE;
 
   }
 
 
   /**
-   * Add CiviCRM core resources
+   * Add CiviCRM core resources.
    *
-   * @param bool $front_end True if on WP front end, false otherwise
-   * @return void
+   * @since 4.6
+   *
+   * @param bool $front_end True if on WP front end, false otherwise.
    */
   public function add_core_resources( $front_end = TRUE ) {
 
@@ -1147,21 +1218,22 @@ class CiviCRM_For_WordPress {
     $config = CRM_Core_Config::singleton();
     $config->userFrameworkFrontend = $front_end;
 
-    // add CiviCRM core resources
+    // Add CiviCRM core resources
     CRM_Core_Resources::singleton()->addCoreResources();
 
   }
 
 
   /**
-   * Merge CiviCRM's HTML header with the WordPress theme's header
-   * Callback from WordPress 'admin_head' and 'wp_head' hooks
+   * Merge CiviCRM's HTML header with the WordPress theme's header.
    *
-   * @return void
+   * Callback from WordPress 'admin_head' and 'wp_head' hooks.
+   *
+   * @since 4.4
    */
   public function wp_head() {
 
-    // CRM-11823 - If Civi bootstrapped, then merge its HTML header with the CMS's header
+    // CRM-11823 - If CiviCRM bootstrapped, then merge its HTML header with the CMS's header
     global $civicrm_root;
     if ( empty( $civicrm_root ) ) {
       return;
@@ -1182,12 +1254,13 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Invoke CiviCRM in a WordPress context
+   * Invoke CiviCRM in a WordPress context.
+   *
    * Callback function from add_menu_page()
    * Callback from WordPress 'init' and 'the_content' hooks
    * Also called by shortcode_render() and _civicrm_update_user()
    *
-   * @return void
+   * @since 4.4
    */
   public function invoke() {
 
@@ -1196,7 +1269,7 @@ class CiviCRM_For_WordPress {
       return;
     }
 
-    // bail if this is called via a content-preprocessing plugin
+    // Bail if this is called via a content-preprocessing plugin
     if ( $this->is_page_request() && !in_the_loop() && !is_admin() ) {
       return;
     }
@@ -1205,10 +1278,12 @@ class CiviCRM_For_WordPress {
       return;
     }
 
-    // CRM-12523
-    // WordPress has it's own timezone calculations
-    // Civi relies on the php default timezone which WP
-    // overrides with UTC in wp-settings.php
+    /*
+     * CRM-12523
+     * WordPress has it's own timezone calculations
+     * CiviCRM relies on the php default timezone which WP
+     * overrides with UTC in wp-settings.php
+     */
     $wpBaseTimezone = date_default_timezone_get();
     $wpUserTimezone = get_option('timezone_string');
     if ($wpUserTimezone) {
@@ -1216,15 +1291,17 @@ class CiviCRM_For_WordPress {
       CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
     }
 
-    // CRM-95XX
-    // At this point we are calling a CiviCRM function
-    // WP always quotes the request, CiviCRM needs to reverse what it just did
+    /*
+     * CRM-95XX
+     * At this point we are calling a CiviCRM function
+     * WP always quotes the request, CiviCRM needs to reverse what it just did.
+     */
     $this->remove_wp_magic_quotes();
 
     // Code inside invoke() requires the current user to be set up
     $current_user = wp_get_current_user();
 
-    /**
+    /*
      * Bypass synchronize if running upgrade to avoid any serious non-recoverable
      * error which might hinder the upgrade process.
      */
@@ -1232,52 +1309,53 @@ class CiviCRM_For_WordPress {
       $this->users->sync_user( $current_user );
     }
 
-    // set flag
+    // Set flag
     $alreadyInvoked = TRUE;
 
-    // get args
+    // Get args
     $argdata = $this->get_request_args();
 
-    // set dashboard as default if args are empty
+    // Set dashboard as default if args are empty
    if ( !isset( $_GET['q'] ) ) {
       $_GET['q']      = 'civicrm/dashboard';
       $_GET['reset']  = 1;
       $argdata['args'] = array('civicrm', 'dashboard');
     }
 
-    // do the business
+    // Do the business
     CRM_Core_Invoke::invoke($argdata['args']);
 
-    // restore WP's timezone
+    // Restore WP's timezone
     if ($wpBaseTimezone) {
       date_default_timezone_set($wpBaseTimezone);
     }
 
-    // restore WP's arrays
+    // Restore WP's arrays
     $this->restore_wp_magic_quotes();
 
-    // notify plugins
+    // Notify plugins
     do_action( 'civicrm_invoked' );
 
   }
 
 
   /**
-   * Non-destructively override WordPress magic quotes
-   * Only called by invoke() to undo WordPress default behaviour
-   * CMW: Should probably be a private method
+   * Non-destructively override WordPress magic quotes.
    *
-   * @return void
+   * Only called by invoke() to undo WordPress default behaviour.
+   * CMW: Should probably be a private method.
+   *
+   * @since 4.4
    */
   public function remove_wp_magic_quotes() {
 
-    // save original arrays
+    // Save original arrays
     $this->wp_get     = $_GET;
     $this->wp_post    = $_POST;
     $this->wp_cookie  = $_COOKIE;
     $this->wp_request = $_REQUEST;
 
-    // reassign globals
+    // Reassign globals
     $_GET     = stripslashes_deep($_GET);
     $_POST    = stripslashes_deep($_POST);
     $_COOKIE  = stripslashes_deep($_COOKIE);
@@ -1287,15 +1365,16 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Restore WordPress magic quotes
-   * Only called by invoke() to redo WordPress default behaviour
-   * CMW: Should probably be a private method
+   * Restore WordPress magic quotes.
    *
-   * @return void
+   * Only called by invoke() to redo WordPress default behaviour.
+   * CMW: Should probably be a private method.
+   *
+   * @since 4.4
    */
   public function restore_wp_magic_quotes() {
 
-    // restore original arrays
+    // Restore original arrays
     $_GET     = $this->wp_get;
     $_POST    = $this->wp_post;
     $_COOKIE  = $this->wp_cookie;
@@ -1305,23 +1384,27 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Detect Ajax, snippet, or file requests
+   * Detect Ajax, snippet, or file requests.
    *
-   * @return boolean True if request is for a CiviCRM page, false otherwise
+   * @since 4.4
+   *
+   * @return boolean True if request is for a CiviCRM page, false otherwise.
    */
   public function is_page_request() {
 
-    // kick out if not CiviCRM
+    // Kick out if not CiviCRM
     if (!$this->initialize()) {
       return;
     }
 
-    // get args
+    // Get args
     $argdata = $this->get_request_args();
 
-    // FIXME: It's not sustainable to hardcode a whitelist of all of non-HTML
-    // pages. Maybe the menu-XML should include some metadata to make this
-    // unnecessary?
+    /*
+     * FIXME: It's not sustainable to hardcode a whitelist of all of non-HTML
+     * pages. Maybe the menu-XML should include some metadata to make this
+     * unnecessary?
+     */
     if (CRM_Utils_Array::value('HTTP_X_REQUESTED_WITH', $_SERVER) == 'XMLHttpRequest'
         || ($argdata['args'][0] == 'civicrm' && in_array($argdata['args'][1], array('ajax', 'file')) )
         || !empty($_REQUEST['snippet'])
@@ -1337,9 +1420,11 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Get arguments and request string from $_GET
+   * Get arguments and request string from $_GET.
    *
-   * @return array $argdata Array containing request arguments and request string
+   * @since 4.6
+   *
+   * @return array $argdata Array containing request arguments and request string.
    */
   public function get_request_args() {
 
@@ -1359,10 +1444,12 @@ class CiviCRM_For_WordPress {
   }
 
   /**
-   * Add CiviCRM's title to the header's <title>
+   * Add CiviCRM's title to the header's <title> tag.
    *
-   * @param string $title
-   * @return string
+   * @since 4.6
+   *
+   * @param string $title The title to set.
+   * @return string The computed title.
    */
   public function set_admin_title($title) {
     global $civicrm_wp_title;
@@ -1379,32 +1466,38 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Override a WordPress page title with the CiviCRM entity title
-   * Callback method for 'single_page_title' hook, always called from WP front-end
+   * Override a WordPress page title with the CiviCRM entity title.
    *
-   * @param string $post_title The title of the WordPress page or post
-   * @param object $post The WordPress post object the title applies to
-   * @return string $civicrm_wp_title The title of the CiviCRM entity
+   * Callback method for 'single_page_title' hook, always called from WP front-end.
+   *
+   * @since 4.6
+   *
+   * @param string $post_title The title of the WordPress page or post.
+   * @param object $post The WordPress post object the title applies to.
+   * @return string $civicrm_wp_title The title of the CiviCRM entity.
    */
   public function single_page_title( $post_title, $post ) {
 
-    // sanity check and override
+    // Sanity check and override
     global $civicrm_wp_title;
     if (!empty($civicrm_wp_title)) {
       return $civicrm_wp_title;
     }
 
-    // fallback
+    // Fallback
     return $post_title;
 
   }
 
 
   /**
-   * Remove edit link from page content
-   * Callback from 'edit_post_link' hook
+   * Remove edit link from page content.
    *
-   * @return string Always empty
+   * Callback from 'edit_post_link' hook.
+   *
+   * @since 4.6
+   *
+   * @return string Always empty.
    */
   public function clear_edit_post_link() {
     return '';
@@ -1412,39 +1505,45 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Remove edit link in WP Admin Bar
-   * Callback from 'wp_before_admin_bar_render' hook
+   * Remove edit link in WP Admin Bar.
    *
-   * @return void
+   * Callback from 'wp_before_admin_bar_render' hook.
+   *
+   * @since 4.6
    */
   public function clear_edit_post_menu_item() {
 
-    // access object
+    // Access object
     global $wp_admin_bar;
 
-    // bail if in admin
+    // Bail if in admin
     if ( is_admin() ) return;
 
-    // remove the menu item from front end
+    // Remove the menu item from front end
     $wp_admin_bar->remove_menu( 'edit' );
 
   }
 
 
   /**
+   * Get base URL.
+   *
    * Clone of CRM_Utils_System_WordPress::getBaseUrl() whose access is set to
    * private. Until it is public, we cannot access the URL of the basepage since
-   * CRM_Utils_System_WordPress::url()
-   * 
+   * CRM_Utils_System_WordPress::url().
+   *
    * 27-09-2016
    * CRM-16421 CRM-17633 WIP Changes to support WP in it's own directory
    * https://wiki.civicrm.org/confluence/display/CRM/WordPress+installed+in+its+own+directory+issues
    * For now leave hard coded wp-admin references.
-   * TODO: remove wp-admin references and replace with admin_url() in the future.  Look at best way to get path to admin_url
+   * TODO: remove wp-admin references and replace with admin_url() in the future.
+   * TODO: Look at best way to get path to admin_url.
    *
-   * @param bool $absolute Passing TRUE prepends the scheme and domain, FALSE doesn't
-   * @param bool $frontend Passing FALSE returns the admin URL
-   * @param $forceBackend Passing TRUE overrides $frontend and returns the admin URL
+   * @since 4.4
+   *
+   * @param bool $absolute Passing TRUE prepends the scheme and domain, FALSE doesn't.
+   * @param bool $frontend Passing FALSE returns the admin URL.
+   * @param $forceBackend Passing TRUE overrides $frontend and returns the admin URL.
    * @return mixed|null|string
    */
   public function get_base_url($absolute, $frontend, $forceBackend) {
@@ -1458,7 +1557,7 @@ class CiviCRM_For_WordPress {
   }
 
 
-} // class CiviCRM_For_WordPress ends
+} // Class CiviCRM_For_WordPress ends
 
 
 /*
@@ -1472,19 +1571,21 @@ Procedures start here
  * The main function responsible for returning the CiviCRM_For_WordPress instance
  * to functions everywhere.
  *
- * Use this function like you would a global variable, except without needing
- * to declare the global.
+ * Use this function like you would a global variable, except without needing to
+ * declare the global.
  *
  * Example: $civi = civi_wp();
  *
- * @return CiviCRM_For_WordPress instance
+ * @since 4.4
+ *
+ * @return CiviCRM_For_WordPress The plugin instance.
  */
 function civi_wp() {
   return CiviCRM_For_WordPress::singleton();
 }
 
 
-/**
+/*
  * Hook CiviCRM_For_WordPress early onto the 'plugins_loaded' action.
  *
  * This gives all other plugins the chance to load before CiviCRM, to get their
@@ -1493,28 +1594,28 @@ function civi_wp() {
 if ( defined( 'CIVICRM_LATE_LOAD' ) ) {
   add_action( 'plugins_loaded', 'civi_wp', (int) CIVICRM_LATE_LOAD );
 
-// initialize
+// Initialize
 } else {
   civi_wp();
 }
 
 
-/**
+/*
  * Tell WordPress to call plugin activation method - no longer calls legacy
- * global scope function
+ * global scope function.
  */
 register_activation_hook( CIVICRM_PLUGIN_FILE, array( civi_wp(), 'activate' ) );
 
 
-/**
+/*
  * Tell WordPress to call plugin deactivation method - needed in order to reset
  * the option that is set on activation.
  */
 register_deactivation_hook( CIVICRM_PLUGIN_FILE, array( civi_wp(), 'deactivate' ) );
 
 
-// uninstall uses the 'uninstall.php' method
-// see: http://codex.wordpress.org/Function_Reference/register_uninstall_hook
+// Uninstall uses the 'uninstall.php' method
+// See: http://codex.wordpress.org/Function_Reference/register_uninstall_hook
 
 
 
@@ -1527,18 +1628,26 @@ previous versions of the CiviCRM WordPress plugin.
 
 
 /**
- * add CiviCRM access capabilities to WordPress roles
+ * Add CiviCRM access capabilities to WordPress roles.
+ *
  * Called by postProcess() in civicrm/CRM/ACL/Form/WordPress/Permissions.php
  * Also a callback for the 'init' hook in civi_wp()->register_hooks()
+ *
+ * @since 4.3
  */
 function wp_civicrm_capability() {
   civi_wp()->users->set_access_capabilities();
 }
 
 /**
- * Test if CiviCRM is currently being displayed in WordPress
+ * Test if CiviCRM is currently being displayed in WordPress.
+ *
  * Called by setTitle() in civicrm/CRM/Utils/System/WordPress.php
  * Also called at the top of this plugin file to determine AJAX status
+ *
+ * @since 4.3
+ *
+ * @return bool True if CiviCRM is displayed in WordPress, false otherwise.
  */
 function civicrm_wp_in_civicrm() {
   return civi_wp()->civicrm_in_wordpress();
@@ -1546,7 +1655,11 @@ function civicrm_wp_in_civicrm() {
 
 /**
  * This was the original name of the initialization function and is
- * retained for backward compatibility
+ * retained for backward compatibility.
+ *
+ * @since 4.3
+ *
+ * @return bool True if CiviCRM is initialized, false otherwise.
  */
 function civicrm_wp_initialize() {
   return civi_wp()->initialize();
@@ -1555,37 +1668,57 @@ function civicrm_wp_initialize() {
 /**
  * Initialize CiviCRM. Call this function from other modules too if
  * they use the CiviCRM API.
+ *
+ * @since 4.3
+ *
+ * @return bool True if CiviCRM is initialized, false otherwise.
  */
 function civicrm_initialize() {
   return civi_wp()->initialize();
 }
 
 /**
- * Callback from 'edit_post_link' hook to remove edit link in civicrm_set_post_blank()
+ * Callback from 'edit_post_link' hook to remove edit link in civicrm_set_post_blank().
+ *
+ * @since 4.3
+ *
+ * @return string Always empty.
  */
 function civicrm_set_blank() {
   return civi_wp()->clear_edit_post_link();
 }
 
 /**
- * Authentication function used by civicrm_wp_frontend()
+ * Authentication function used by civicrm_wp_frontend().
+ *
+ * @since 4.3
+ *
+ * @param array $args The page arguments array.
+ * @return bool True if authenticated, false otherwise.
  */
 function civicrm_check_permission( $args ) {
   return civi_wp()->users->check_permission( $args );
 }
 
 /**
- * Called when authentication fails in civicrm_wp_frontend()
+ * Called when authentication fails in civicrm_wp_frontend().
+ *
+ * @since 4.3
+ *
+ * @return string Warning message.
  */
 function civicrm_set_frontendmessage() {
   return civi_wp()->users->get_permission_denied();
 }
 
 /**
- * Invoke CiviCRM in a WordPress context
- * Callback function from add_menu_page()
- * Callback from WordPress 'init' and 'the_content' hooks
- * Also used by civicrm_wp_shortcode_includes() and _civicrm_update_user()
+ * Invoke CiviCRM in a WordPress context.
+ *
+ * Callback function from add_menu_page().
+ * Callback from WordPress 'init' and 'the_content' hooks.
+ * Also used by civicrm_wp_shortcode_includes() and _civicrm_update_user().
+ *
+ * @since 4.3
  */
 function civicrm_wp_invoke() {
   civi_wp()->invoke();
@@ -1593,39 +1726,55 @@ function civicrm_wp_invoke() {
 
 /**
  * Method that runs only when civicrm plugin is activated.
+ *
+ * @since 4.3
  */
 function civicrm_activate() {
   civi_wp()->activate();
 }
 
 /**
- * Function to create anonymous_user' role, if 'anonymous_user' role is not in the wordpress installation
- * and assign minimum capabilities for all wordpress roles
- * This function is called on plugin activation and also from upgrade_4_3_alpha1()
+ * Set WordPress user capabilities.
+ *
+ * Function to create anonymous_user' role, if 'anonymous_user' role is not in
+ * the wordpress installation and assign minimum capabilities for all wordpress roles.
+ * This function is called on plugin activation and also from upgrade_4_3_alpha1().
+ *
+ * @since 4.3
  */
 function civicrm_wp_set_capabilities() {
   civi_wp()->users->set_wp_user_capabilities();
 }
 
 /**
- * Callback function for add_options_page() that runs the CiviCRM installer
+ * Callback function for add_options_page() that runs the CiviCRM installer.
+ *
+ * @since 4.3
  */
 function civicrm_run_installer() {
   civi_wp()->run_installer();
 }
 
 /**
- * Function to get the contact type
- * @param string $default contact type
- * @return $ctype contact type
+ * Function to get the contact type.
+ *
+ * @since 4.3
+ *
+ * @param string $default The contact type.
+ * @return string $ctype The contact type.
  */
 function civicrm_get_ctype( $default = NULL ) {
   return civi_wp()->users->get_civicrm_contact_type( $default );
 }
 
 /**
- * Getter function for global $wp_set_breadCrumb
+ * Getter function for global $wp_set_breadCrumb.
+ *
  * Called by appendBreadCrumb() in civicrm/CRM/Utils/System/WordPress.php
+ *
+ * @since 4.3
+ *
+ * @return string $wp_set_breadCrumb The breadcrumb markup.
  */
 function wp_get_breadcrumb() {
   global $wp_set_breadCrumb;
@@ -1633,9 +1782,15 @@ function wp_get_breadcrumb() {
 }
 
 /**
- * Setter function for global $wp_set_breadCrumb
+ * Setter function for global $wp_set_breadCrumb.
+ *
  * Called by appendBreadCrumb() in civicrm/CRM/Utils/System/WordPress.php
  * Called by resetBreadCrumb() in civicrm/CRM/Utils/System/WordPress.php
+ *
+ * @since 4.3
+ *
+ * @param string $breadCrumb The desired breadcrumb markup.
+ * @return string $wp_set_breadCrumb The breadcrumb markup.
  */
 function wp_set_breadcrumb( $breadCrumb ) {
   global $wp_set_breadCrumb;
@@ -1645,11 +1800,14 @@ function wp_set_breadcrumb( $breadCrumb ) {
 
 
 /**
- * Incorporate WP-CLI Integration
- * Based on drush civicrm functionality, work done by Andy Walker
+ * Incorporate WP-CLI Integration.
+ *
+ * Based on drush civicrm functionality, work done by Andy Walker.
  * https://github.com/andy-walker/wp-cli-civicrm
+ *
+ * @since 4.5
  */
 if ( defined('WP_CLI') && WP_CLI ) {
-  // changed from __DIR__ because of possible symlink issues
+  // Changed from __DIR__ because of possible symlink issues
   include_once CIVICRM_PLUGIN_DIR . 'wp-cli/civicrm.php';
 }
