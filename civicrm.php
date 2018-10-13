@@ -209,10 +209,15 @@ class CiviCRM_For_WordPress {
    */
   public static function singleton() {
 
-    // Create instance if it doesn't already exist
+    // If instance doesn't already exist
     if ( ! isset( self::$instance ) ) {
+
+      // Create instance
       self::$instance = new CiviCRM_For_WordPress;
-      self::$instance->setup_instance();
+
+      // Delay setup until 'plugins_loaded' to allow other plugins to load as well
+      add_action( 'plugins_loaded', array( self::$instance, 'setup_instance' ) );
+
     }
 
     // Return instance
@@ -337,9 +342,6 @@ class CiviCRM_For_WordPress {
       wp_die( __( 'Only one instance of CiviCRM_For_WordPress please', 'civicrm' ) );
     }
 
-    // Store context
-    $this->civicrm_in_wordpress_set();
-
     /*
      * There is no session handling in WP - hence we start it for CiviCRM pages
      * except when running via WP-CLI which does not require sessions.
@@ -348,23 +350,17 @@ class CiviCRM_For_WordPress {
       session_start();
     }
 
-    if ( $this->civicrm_in_wordpress() ) {
-      // This is required for AJAX calls in WordPress admin
-      $_GET['noheader'] = TRUE;
-    }
-
-    if ( !CIVICRM_INSTALLED && !$this->civicrm_in_wordpress() ) {
-      $_GET['civicrm_install_type'] = 'wordpress';
-    }
-
     // Get classes and instantiate
     $this->include_files();
 
     // Do plugin activation
     $this->activation();
 
-    // Register all hooks
-    $this->register_hooks();
+    // Use translation files
+    $this->enable_translation();
+
+    // Register all hooks on init
+    add_action( 'init', array( $this, 'register_hooks' ) );
 
     // Notify plugins
     do_action( 'civicrm_instance_loaded' );
@@ -511,7 +507,7 @@ class CiviCRM_For_WordPress {
 
 
   /**
-   * Register hooks.
+   * Register hooks on init.
    *
    * @since 4.4
    */
@@ -535,6 +531,29 @@ class CiviCRM_For_WordPress {
     // Go no further if CiviCRM not installed yet
     if ( ! CIVICRM_INSTALLED ) return;
 
+    // Delay everything else until query has been parsed
+    add_action( 'parse_query', array( $this, 'register_hooks_front_end' ) );
+
+  }
+
+
+  /**
+   * Register hooks for the front end.
+   *
+   * @since 5.6
+   */
+  public function register_hooks_front_end() {
+
+    // Prevent multiple calls
+    static $alreadyRegistered = FALSE;
+    if ( $alreadyRegistered ) {
+      return;
+    }
+    $alreadyRegistered = TRUE;
+
+    // Store context
+    $this->civicrm_in_wordpress_set();
+
     // When embedded via wpBasePage or AJAX call...
     if ( $this->civicrm_in_wordpress() ) {
 
@@ -554,7 +573,7 @@ class CiviCRM_For_WordPress {
         // Add core resources for front end
         add_action( 'wp', array( $this, 'front_end_page_load' ) );
 
-        // Wcho all output when WP has been set up but nothing has been rendered
+        // Echo all output when WP has been set up but nothing has been rendered
         add_action( 'wp', array( $this, 'invoke' ) );
         return;
 
@@ -585,9 +604,6 @@ class CiviCRM_For_WordPress {
    */
   public function register_hooks_common() {
 
-    // Use translation files
-    add_action( 'plugins_loaded', array( $this, 'enable_translation' ) );
-
     // Register user hooks
     $this->users->register_hooks();
 
@@ -613,7 +629,8 @@ class CiviCRM_For_WordPress {
     // If settings file does not exist, show notice with link to installer
     if ( ! CIVICRM_INSTALLED ) {
       if ( isset( $_GET['page'] ) && $_GET['page'] == 'civicrm-install' ) {
-        // Register hooks for installer page?
+        // Set install type
+        $_GET['civicrm_install_type'] = 'wordpress';
       } else {
         // Show notice
         add_action( 'admin_notices', array( $this, 'show_setup_warning' ) );
@@ -1054,6 +1071,9 @@ class CiviCRM_For_WordPress {
    * @since 4.6
    */
   public function admin_page_load() {
+
+    // This is required for AJAX calls in WordPress admin
+    $_GET['noheader'] = TRUE;
 
     // Add resources for back end
     $this->add_core_resources( FALSE );
@@ -1586,18 +1606,10 @@ function civi_wp() {
 
 
 /*
- * Hook CiviCRM_For_WordPress early onto the 'plugins_loaded' action.
- *
- * This gives all other plugins the chance to load before CiviCRM, to get their
- * actions, filters, and overrides setup without CiviCRM being in the way.
+ * Instantiate CiviCRM_For_WordPress immediately.
+ * See CiviCRM_For_WordPress::setup_instance()
  */
-if ( defined( 'CIVICRM_LATE_LOAD' ) ) {
-  add_action( 'plugins_loaded', 'civi_wp', (int) CIVICRM_LATE_LOAD );
-
-// Initialize
-} else {
-  civi_wp();
-}
+civi_wp();
 
 
 /*
