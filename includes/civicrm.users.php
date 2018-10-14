@@ -315,8 +315,20 @@ class CiviCRM_For_WordPress_Users {
       $wp_roles = new WP_Roles();
     }
 
-    // Give access to civicrm page menu link to particular roles
+    /**
+     * Filter the default roles with access to CiviCRM.
+     *
+     * The 'access_civicrm' capability is the most basic CiviCRM capability and
+     * is required to see the CiviCRM menu link in the WordPress Admin menu.
+     *
+     * @since 4.6
+     *
+     * @param array The default roles with access to CiviCRM.
+     * @return array The modified roles with access to CiviCRM.
+     */
     $roles = apply_filters( 'civicrm_access_roles', array( 'super admin', 'administrator' ) );
+
+     // Give access to CiviCRM to particular roles.
     foreach ( $roles as $role ) {
       $roleObj = $wp_roles->get_role( $role );
       if (

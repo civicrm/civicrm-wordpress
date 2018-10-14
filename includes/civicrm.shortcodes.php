@@ -460,7 +460,17 @@ class CiviCRM_For_WordPress_Shortcodes {
     $more_link = sprintf(
       '<a href="%s">%s</a>',
       $link,
+
+      /**
+       * Filter the CiviCRM shortcode more link text.
+       *
+       * @since 4.6
+       *
+       * @param str The existing shortcode more link text.
+       * @return str The modified shortcode more link text.
+       */
       apply_filters( 'civicrm_shortcode_more_link', __( 'Find out more...', 'civicrm' ) )
+
     );
 
     // Assume CiviCRM footer is not enabled
@@ -475,6 +485,15 @@ class CiviCRM_For_WordPress_Shortcodes {
       $logo = '<div class="empowered-by-logo"><span>' . __( 'CiviCRM', 'civicrm' ) . '</span></div>';
       $civi_link = '<a href="http://civicrm.org/" title="' . $civi . '" target="_blank" class="empowered-by-link">' . $logo . '</a>';
       $empowered = sprintf( __( 'Empowered by %s', 'civicrm' ), $civi_link );
+
+      /**
+       * Filter the CiviCRM shortcode footer text.
+       *
+       * @since 4.6
+       *
+       * @param str $empowered The existing shortcode footer.
+       * @return str $empowered The modified shortcode footer.
+       */
       $footer = apply_filters( 'civicrm_shortcode_footer', $empowered );
 
       $empowered_enabled = TRUE;
@@ -490,7 +509,16 @@ class CiviCRM_For_WordPress_Shortcodes {
     // Save the output and flush the buffer
     $markup = ob_get_clean();
 
-    // Allow plugins to override
+    /**
+     * Filter the computed CiviCRM shortcode markup.
+     *
+     * @since 4.6
+     *
+     * @param str $markup The computed shortcode markup.
+     * @param int $post_id The numeric ID of the WordPress post.
+     * @param string $shortcode The shortcode being parsed.
+     * @return str $markup The modified shortcode markup.
+     */
     return apply_filters( 'civicrm_shortcode_render_multiple', $markup, $post_id, $shortcode );
 
   }

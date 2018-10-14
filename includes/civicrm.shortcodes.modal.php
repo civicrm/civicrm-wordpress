@@ -148,7 +148,15 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
     // Default allowed to true on all capable post types
     $allowed = ( in_array( $screen->post_type, $capable_post_types ) ) ? true : false;
 
-    // Allow plugins to override
+    /**
+     * Filter the appearance of the CiviCRM button.
+     *
+     * @since 4.6
+     *
+     * @param bool $allowed True if the button is allowed, false otherwise.
+     * @param object $screen The current WordPress screen object.
+     * @return bool $allowed True if the button is allowed, false otherwise.
+     */
     $allowed = apply_filters( 'civicrm_restrict_button_appearance', $allowed, $screen );
 
     return $allowed;
