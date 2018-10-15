@@ -64,6 +64,22 @@ class CiviCRM_For_WordPress_Users {
     // Store reference to CiviCRM plugin object
     $this->civi = civi_wp();
 
+    // Always listen for activation action
+    add_action( 'civicrm_activation', array( $this, 'activate' ) );
+
+  }
+
+
+  /**
+   * Plugin activation tasks.
+   *
+   * @since 5.6
+   */
+  public function activate() {
+
+    // Assign minimum capabilities for all WP roles and create 'anonymous_user' role
+    $this->set_wp_user_capabilities();
+
   }
 
 
