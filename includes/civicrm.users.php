@@ -64,6 +64,22 @@ class CiviCRM_For_WordPress_Users {
     // Store reference to CiviCRM plugin object
     $this->civi = civi_wp();
 
+    // Always listen for activation action
+    add_action( 'civicrm_activation', array( $this, 'activate' ) );
+
+  }
+
+
+  /**
+   * Plugin activation tasks.
+   *
+   * @since 5.6
+   */
+  public function activate() {
+
+    // Assign minimum capabilities for all WP roles and create 'anonymous_user' role
+    $this->set_wp_user_capabilities();
+
   }
 
 
@@ -75,7 +91,7 @@ class CiviCRM_For_WordPress_Users {
   public function register_hooks() {
 
     // Add CiviCRM access capabilities to WordPress roles
-    add_action( 'init', array( $this, 'set_access_capabilities' ) );
+    $this->set_access_capabilities();
 
     // Do not hook into user updates if CiviCRM not installed yet
     if ( ! CIVICRM_INSTALLED ) return;
@@ -315,8 +331,20 @@ class CiviCRM_For_WordPress_Users {
       $wp_roles = new WP_Roles();
     }
 
-    // Give access to civicrm page menu link to particular roles
+    /**
+     * Filter the default roles with access to CiviCRM.
+     *
+     * The 'access_civicrm' capability is the most basic CiviCRM capability and
+     * is required to see the CiviCRM menu link in the WordPress Admin menu.
+     *
+     * @since 4.6
+     *
+     * @param array The default roles with access to CiviCRM.
+     * @return array The modified roles with access to CiviCRM.
+     */
     $roles = apply_filters( 'civicrm_access_roles', array( 'super admin', 'administrator' ) );
+
+     // Give access to CiviCRM to particular roles.
     foreach ( $roles as $role ) {
       $roleObj = $wp_roles->get_role( $role );
       if (

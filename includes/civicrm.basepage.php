@@ -64,6 +64,15 @@ class CiviCRM_For_WordPress_Basepage {
     // Store reference to CiviCRM plugin object
     $this->civi = civi_wp();
 
+    // Always listen for activation action
+    add_action( 'civicrm_activation', array( $this, 'activate' ) );
+
+    // Always listen for deactivation action
+    add_action( 'civicrm_deactivation', array( $this, 'deactivate' ) );
+
+    // Always check if the basepage needs to be created
+    add_action( 'civicrm_instance_loaded', array( $this, 'maybe_create_basepage' ) );
+
   }
 
 
@@ -100,6 +109,214 @@ class CiviCRM_For_WordPress_Basepage {
 
     // Cache CiviCRM base page markup
     add_action( 'wp', array( $this, 'basepage_handler' ), 10, 1 );
+
+  }
+
+
+  /**
+   * Trigger the process whereby the WordPress basepage is created.
+   *
+   * Sets a one-time-only option to flag that we need to create a basepage -
+   * it will not update the option once it has been set to another value nor
+   * create a new option with the same name.
+   *
+   * As a result of doing this, we know that a basepage needs to be created, but
+   * the moment to do so is once CiviCRM has been successfully installed.
+   *
+   * @see do_basepage_creation()
+   *
+   * @since 5.6
+   */
+  public function activate() {
+
+    // Save option
+    add_option( 'civicrm_activation_create_basepage', 'true' );
+
+  }
+
+
+  /**
+   * Plugin deactivation.
+   *
+   * @since 5.6
+   */
+  public function deactivate() {
+
+    // Delete option
+    delete_option( 'civicrm_activation_create_basepage' );
+
+  }
+
+
+  /**
+   * Register the hook to create the WordPress basepage, if necessary.
+   *
+   * Changes the one-time-only option so that the basepage can only be created
+   * once. Thereafter, we're on our own until there's a 'delete_post' callback
+   * to prevent the basepage from being deleted.
+   *
+   * @since 5.6
+   */
+  public function maybe_create_basepage() {
+
+    // Bail if CiviCRM not installed
+    if ( ! CIVICRM_INSTALLED ) {
+      return;
+    }
+
+    // Bail if not installing
+    if ( get_option( 'civicrm_activation_create_basepage' ) !== 'true' ) {
+      return;
+    }
+
+    // Bail if not WordPress admin
+    if ( ! is_admin() ) {
+      return;
+    }
+
+    // Create basepage
+    add_action( 'wp_loaded', array( $this, 'create_wp_basepage' ) );
+
+    // Change option so the callback above never runs again
+    update_option( 'civicrm_activation_create_basepage', 'done' );
+
+  }
+
+
+  /**
+   * Create WordPress basepage and save setting.
+   *
+   * @since 4.6
+   * @since 5.6 Relocated from CiviCRM_For_WordPress to here.
+   */
+  public function create_wp_basepage() {
+
+    if (!$this->civi->initialize()) {
+      return;
+    }
+
+    $config = CRM_Core_Config::singleton();
+
+    // Bail if we already have a basepage setting
+    if ( !empty( $config->wpBasePage ) ) {
+      return;
+    }
+
+    /**
+     * Filter the default page slug.
+     *
+     * @since 4.6
+     *
+     * @param str The default basepage slug.
+     * @return str The modified basepage slug.
+     */
+    $slug = apply_filters( 'civicrm_basepage_slug', 'civicrm' );
+
+    // Get existing page with that slug
+    $page = get_page_by_path( $slug );
+
+    // Does it exist?
+    if ( $page ) {
+
+      // We already have a basepage
+      $result = $page->ID;
+
+    } else {
+
+      // Create the basepage
+      $result = $this->create_basepage( $slug );
+
+    }
+
+    // Were we successful?
+    if ( $result !== 0 AND !is_wp_error($result) ) {
+
+      // Get the post object
+      $post = get_post( $result );
+
+      $params = array(
+        'version' => 3,
+        'wpBasePage' => $post->post_name,
+      );
+
+      // Save the setting
+      civicrm_api3('setting', 'create', $params);
+
+    }
+
+  }
+
+
+  /**
+   * Create a WordPress page to act as the CiviCRM base page.
+   *
+   * @since 4.6
+   * @since 5.6 Relocated from CiviCRM_For_WordPress to here.
+   *
+   * @param string $slug The unique slug for the page - same as wpBasePage setting.
+   * @return int|WP_Error The page ID on success. The value 0 or WP_Error on failure.
+   */
+  private function create_basepage( $slug ) {
+
+    // If multisite, switch to main site
+    if ( is_multisite() && !is_main_site() ) {
+
+      // Store this site
+      $original_site = get_current_blog_id();
+
+      // Switch
+      global $current_site;
+      switch_to_blog( $current_site->blog_id );
+
+    }
+
+    // Define basepage
+    $page = array(
+      'post_status' => 'publish',
+      'post_type' => 'page',
+      'post_parent' => 0,
+      'comment_status' => 'closed',
+      'ping_status' => 'closed',
+      'to_ping' => '', // Quick fix for Windows
+      'pinged' => '', // Quick fix for Windows
+      'post_content_filtered' => '', // Quick fix for Windows
+      'post_excerpt' => '', // Quick fix for Windows
+      'menu_order' => 0,
+      'post_name' => $slug,
+    );
+
+    /**
+     * Filter the default page title.
+     *
+     * @since 4.6
+     *
+     * @param str The default base page title.
+     * @return str The modified base page title.
+     */
+    $page['post_title'] = apply_filters( 'civicrm_basepage_title', __( 'CiviCRM', 'civicrm' ) );
+
+    // Default content
+    $content = __( 'Do not delete this page. Page content is generated by CiviCRM.', 'civicrm' );
+
+    /**
+     * Filter the default page content.
+     *
+     * @since 4.6
+     *
+     * @param str $content The default base page content.
+     * @return str $content The modified base page content.
+     */
+    $page['post_content'] = apply_filters( 'civicrm_basepage_content', $content );
+
+    // Insert the post into the database
+    $page_id = wp_insert_post( $page );
+
+    // Switch back if we've switched
+    if ( isset( $original_site ) ) {
+      restore_current_blog();
+    }
+
+    return $page_id;
 
   }
 
