@@ -335,11 +335,14 @@ class CiviCRM_For_WordPress {
       wp_die( __( 'Only one instance of CiviCRM_For_WordPress please', 'civicrm' ) );
     }
 
+    // Get existing session ID
+    $session_id = session_id();
+
     /*
      * There is no session handling in WP - hence we start it for CiviCRM pages
      * except when running via WP-CLI which does not require sessions.
      */
-    if ( empty( session_id() ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+    if ( empty( $session_id ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
       session_start();
     }
 
