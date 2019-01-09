@@ -675,11 +675,6 @@ class CiviCRM_For_WordPress {
    */
   public function rewrite_rules( $flush_rewrite_rules = false ) {
 
-    // Kick out if admin
-    if (is_admin()) {
-      return;
-    }
-
     // Kick out if not CiviCRM
     if (!$this->initialize()) {
       return;
