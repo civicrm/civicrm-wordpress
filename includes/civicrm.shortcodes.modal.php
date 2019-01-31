@@ -106,7 +106,7 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
       $civilogo = file_get_contents( plugin_dir_path( __FILE__ ) . '../assets/civilogo.svg.b64' );
 
       $url = admin_url( 'admin.php?page=CiviCRM&q=civicrm/shortcode&reset=1' );
-      echo '<a href= "' . $url . '" class="button crm-popup medium-popup crm-shortcode-button" data-popup-type="page" style="padding-left: 4px;" title="' . __( 'Add CiviCRM Public Pages', 'civicrm' ) . '"><img src="' . $civilogo . '" height="15" width="15" alt="' . __( 'Add CiviCRM Public Pages', 'civicrm' ) . '" />'. __( 'CiviCRM', 'civicrm' ) .'</a>';
+      echo '<a href= "' . $url . '" class="button crm-shortcode-button" style="padding-left: 4px;" title="' . __( 'Add CiviCRM Public Pages', 'civicrm' ) . '"><img src="' . $civilogo . '" height="15" width="15" alt="' . __( 'Add CiviCRM Public Pages', 'civicrm' ) . '" />'. __( 'CiviCRM', 'civicrm' ) .'</a>';
 
     }
 
@@ -122,7 +122,9 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
    */
   public function add_core_resources() {
     if ($this->civi->initialize()) {
-      CRM_Core_Resources::singleton()->addCoreResources();
+      Civi::resources()
+        ->addCoreResources()
+        ->addScriptFile('civicrm', 'js/crm.insert-shortcode.js', 0, 'html-header');
     }
   }
 
