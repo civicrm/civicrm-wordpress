@@ -607,32 +607,55 @@ class CiviCRM_For_WordPress {
    */
   public function register_hooks_common() {
 
-    // Register user hooks
+    // Register user hooks.
     $this->users->register_hooks();
 
-    // If CiviCRM is installed, we can use clean URLs.
-    if ( CIVICRM_INSTALLED ) {
+    // Register hooks for clean URLs.
+    $this->register_hooks_clean_urls();
 
-      // Have we flushed rewrite rules?
-      if ( get_option( 'civicrm_rules_flushed' ) !== 'true' ) {
+  }
 
-        // Apply custom rewrite rules, then flush rules afterwards
-        $this->rewrite_rules( true );
 
-        // Set a one-time-only option to flag that this has been done
-        add_option( 'civicrm_rules_flushed', 'true' );
+  /**
+   * Register hooks to handle Clean URLs.
+   *
+   * @since 5.12
+   */
+  public function register_hooks_clean_urls() {
 
-      } else {
+    // Bail if CiviCRM is not installed.
+    if (!CIVICRM_INSTALLED) {
+      return;
+    }
 
-        // Apply custom rewrite rules normally
-        $this->rewrite_rules();
+    // Bail if we can't initialize CiviCRM.
+    if (!$this->initialize()) {
+      return;
+    }
 
-      }
+    // Bail if CiviCRM is not using clean URLs.
+    if (!defined('CIVICRM_CLEANURL') || CIVICRM_CLEANURL !== 1) {
+      return;
+    }
 
-      // Add our query vars
-      add_filter( 'query_vars', array( $this, 'query_vars' ) );
+    // Have we flushed rewrite rules?
+    if ( get_option( 'civicrm_rules_flushed' ) !== 'true' ) {
+
+      // Apply custom rewrite rules, then flush rules afterwards.
+      $this->rewrite_rules( true );
+
+      // Set a one-time-only option to flag that this has been done.
+      add_option( 'civicrm_rules_flushed', 'true' );
+
+    } else {
+
+      // Apply custom rewrite rules normally.
+      $this->rewrite_rules();
 
     }
+
+    // Add our query vars.
+    add_filter( 'query_vars', array( $this, 'query_vars' ) );
 
   }
 
