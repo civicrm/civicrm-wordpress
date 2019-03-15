@@ -720,8 +720,8 @@ class CiviCRM_For_WordPress {
 
     // Let's add rewrite rule when viewing the basepage
     add_rewrite_rule(
-      '^' . $config->wpBasePage . '/([^/]*)/([^/]*)/?',
-      'index.php?page_id=' . $basepage->ID . '&page=CiviCRM&q=civicrm/$matches[1]/$matches[2]',
+      '^' . $config->wpBasePage . '/([^?]*)?',
+      'index.php?page_id=' . $basepage->ID . '&page=CiviCRM&q=civicrm%2F$matches[1]',
       'top'
     );
 
