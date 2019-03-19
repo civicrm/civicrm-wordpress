@@ -384,8 +384,11 @@ class CiviCRM_For_WordPress {
    */
   public function civicrm_in_wordpress_set() {
 
+    // Get identifying query var
+    $page = get_query_var( 'page' );
+
     // Store
-    self::$in_wordpress = ( isset( $_GET['page'] ) && $_GET['page'] == 'CiviCRM' ) ? TRUE : FALSE;
+    self::$in_wordpress = ( $page == 'CiviCRM' ) ? TRUE : FALSE;
 
   }
 
@@ -604,8 +607,55 @@ class CiviCRM_For_WordPress {
    */
   public function register_hooks_common() {
 
-    // Register user hooks
+    // Register user hooks.
     $this->users->register_hooks();
+
+    // Register hooks for clean URLs.
+    $this->register_hooks_clean_urls();
+
+  }
+
+
+  /**
+   * Register hooks to handle Clean URLs.
+   *
+   * @since 5.12
+   */
+  public function register_hooks_clean_urls() {
+
+    // Bail if CiviCRM is not installed.
+    if (!CIVICRM_INSTALLED) {
+      return;
+    }
+
+    // Bail if we can't initialize CiviCRM.
+    if (!$this->initialize()) {
+      return;
+    }
+
+    // Bail if CiviCRM is not using clean URLs.
+    if (!defined('CIVICRM_CLEANURL') || CIVICRM_CLEANURL !== 1) {
+      return;
+    }
+
+    // Have we flushed rewrite rules?
+    if ( get_option( 'civicrm_rules_flushed' ) !== 'true' ) {
+
+      // Apply custom rewrite rules, then flush rules afterwards.
+      $this->rewrite_rules( true );
+
+      // Set a one-time-only option to flag that this has been done.
+      add_option( 'civicrm_rules_flushed', 'true' );
+
+    } else {
+
+      // Apply custom rewrite rules normally.
+      $this->rewrite_rules();
+
+    }
+
+    // Add our query vars.
+    add_filter( 'query_vars', array( $this, 'query_vars' ) );
 
   }
 
@@ -639,6 +689,100 @@ class CiviCRM_For_WordPress {
 
     // Enable shortcode modal
     $this->modal->register_hooks();
+
+  }
+
+
+  /**
+   * Add our rewrite rules.
+   *
+   * @since 5.7
+   *
+   * @param bool $flush_rewrite_rules True if rules should be flushed, false otherwise.
+   */
+  public function rewrite_rules( $flush_rewrite_rules = false ) {
+
+    // Kick out if not CiviCRM
+    if (!$this->initialize()) {
+      return;
+    }
+
+    // Get config
+    $config = CRM_Core_Config::singleton();
+
+    // Get basepage object
+    $basepage = get_page_by_path( $config->wpBasePage );
+
+    // Sanity check
+    if (!is_object($basepage)) {
+        return;
+    }
+
+    // Let's add rewrite rule when viewing the basepage
+    add_rewrite_rule(
+      '^' . $config->wpBasePage . '/([^?]*)?',
+      'index.php?page_id=' . $basepage->ID . '&page=CiviCRM&q=civicrm%2F$matches[1]',
+      'top'
+    );
+
+    // Maybe force flush
+    if ($flush_rewrite_rules) {
+      flush_rewrite_rules();
+    }
+
+    /**
+     * Broadcast the rewrite rules event.
+     *
+     * @since 5.7
+     *
+     * @param bool $flush_rewrite_rules True if rules flushed, false otherwise.
+     */
+    do_action( 'civicrm_after_rewrite_rules', $flush_rewrite_rules );
+
+  }
+
+
+  /**
+   * Add our query vars.
+   *
+   * @since 5.7
+   *
+   * @param array $query_vars The existing query vars.
+   * @return array $query_vars The modified query vars.
+   */
+  public function query_vars( $query_vars ) {
+
+    // Sanity check
+    if (!is_array($query_vars)) {
+      $query_vars = array();
+    }
+
+    // Build our query vars
+    $civicrm_query_vars = array(
+      'page', 'q', 'reset', 'id', 'html', 'snippet', // URL query vars
+      'action', 'mode', 'cid', 'gid', 'sid', 'cs', 'force', // Shortcode query vars
+    );
+
+    /**
+     * Filter the default CiviCRM query vars.
+     *
+     * Use in combination with `civicrm_query_vars_assigned` action to ensure
+     * that any other query vars are included in the assignment to the
+     * super-global arrays.
+     *
+     * @since 5.7
+     *
+     * @param array $civicrm_query_vars The default set of query vars.
+     * @return array $civicrm_query_vars The modified set of query vars.
+     */
+    $civicrm_query_vars = apply_filters( 'civicrm_query_vars', $civicrm_query_vars );
+
+    // Now add them to WordPress
+    foreach( $civicrm_query_vars as $civicrm_query_var ) {
+      $query_vars[] = $civicrm_query_var;
+    }
+
+    return $query_vars;
 
   }
 
@@ -970,7 +1114,7 @@ class CiviCRM_For_WordPress {
   public function admin_page_load() {
 
     // This is required for AJAX calls in WordPress admin
-    $_GET['noheader'] = TRUE;
+    $_REQUEST['noheader'] = $_GET['noheader'] = TRUE;
 
     // Add resources for back end
     $this->add_core_resources( FALSE );
@@ -1215,6 +1359,11 @@ class CiviCRM_For_WordPress {
      */
     $this->remove_wp_magic_quotes();
 
+    // Required for AJAX calls
+    if ($this->civicrm_in_wordpress()) {
+      $_REQUEST['noheader'] = $_GET['noheader'] = TRUE;
+    }
+
     // Code inside invoke() requires the current user to be set up
     $current_user = wp_get_current_user();
 
@@ -1233,9 +1382,9 @@ class CiviCRM_For_WordPress {
     $argdata = $this->get_request_args();
 
     // Set dashboard as default if args are empty
-   if ( !isset( $_GET['q'] ) ) {
-      $_GET['q']      = 'civicrm/dashboard';
-      $_GET['reset']  = 1;
+    if ( empty( $argdata['argString'] ) ) {
+      $_GET['q'] = 'civicrm/dashboard';
+      $_GET['reset'] = 1;
       $argdata['args'] = array('civicrm', 'dashboard');
     }
 
@@ -1264,11 +1413,11 @@ class CiviCRM_For_WordPress {
    * Non-destructively override WordPress magic quotes.
    *
    * Only called by invoke() to undo WordPress default behaviour.
-   * CMW: Should probably be a private method.
    *
    * @since 4.4
+   * @since 5.7 Rewritten to work with query vars.
    */
-  public function remove_wp_magic_quotes() {
+  private function remove_wp_magic_quotes() {
 
     // Save original arrays
     $this->wp_get     = $_GET;
@@ -1277,10 +1426,56 @@ class CiviCRM_For_WordPress {
     $this->wp_request = $_REQUEST;
 
     // Reassign globals
-    $_GET     = stripslashes_deep($_GET);
-    $_POST    = stripslashes_deep($_POST);
-    $_COOKIE  = stripslashes_deep($_COOKIE);
-    $_REQUEST = stripslashes_deep($_REQUEST);
+    $_GET     = stripslashes_deep( $_GET );
+    $_POST    = stripslashes_deep( $_POST );
+    $_COOKIE  = stripslashes_deep( $_COOKIE );
+    $_REQUEST = stripslashes_deep( $_REQUEST );
+
+    // Test for query var
+    $q = get_query_var( 'q' );
+    if (!empty($q)) {
+
+      $page = get_query_var( 'page' );
+      $reset = get_query_var( 'reset' );
+      $id = get_query_var( 'id' );
+      $html = get_query_var( 'html' );
+      $snippet = get_query_var( 'snippet' );
+
+      $action = get_query_var( 'action' );
+      $mode = get_query_var( 'mode' );
+      $cid = get_query_var( 'cid' );
+      $gid = get_query_var( 'gid' );
+      $sid = get_query_var( 'sid' );
+      $cs = get_query_var( 'cs' );
+      $force = get_query_var( 'force' );
+
+      $_REQUEST['q'] = $_GET['q'] = $q;
+      $_REQUEST['page'] = $_GET['page'] = 'CiviCRM';
+      if (!empty($reset)) { $_REQUEST['reset'] = $_GET['reset'] = $reset; }
+      if (!empty($id)) { $_REQUEST['id'] = $_GET['id'] = $id; }
+      if (!empty($html)) { $_REQUEST['html'] = $_GET['html'] = $html; }
+      if (!empty($snippet)) { $_REQUEST['snippet'] = $_GET['snippet'] = $snippet; }
+
+      if (!empty($action)) { $_REQUEST['action'] = $_GET['action'] = $action; }
+      if (!empty($mode)) { $_REQUEST['mode'] = $_GET['mode'] = $mode; }
+      if (!empty($cid)) { $_REQUEST['cid'] = $_GET['cid'] = $cid; }
+      if (!empty($gid)) { $_REQUEST['gid'] = $_GET['gid'] = $gid; }
+      if (!empty($sid)) { $_REQUEST['sid'] = $_GET['sid'] = $sid; }
+      if (!empty($cs)) { $_REQUEST['cs'] = $_GET['cs'] = $cs; }
+      if (!empty($force)) { $_REQUEST['force'] = $_GET['force'] = $force; }
+
+      /**
+       * Broadcast that CiviCRM query vars have been assigned.
+       *
+       * Use in combination with `civicrm_query_vars` filter to ensure that any
+       * other query vars are included in the assignment to the super-global
+       * arrays.
+       *
+       * @since 5.7
+       */
+      do_action( 'civicrm_query_vars_assigned' );
+
+    }
 
   }
 
@@ -1289,11 +1484,10 @@ class CiviCRM_For_WordPress {
    * Restore WordPress magic quotes.
    *
    * Only called by invoke() to redo WordPress default behaviour.
-   * CMW: Should probably be a private method.
    *
    * @since 4.4
    */
-  public function restore_wp_magic_quotes() {
+  private function restore_wp_magic_quotes() {
 
     // Restore original arrays
     $_GET     = $this->wp_get;
@@ -1313,13 +1507,22 @@ class CiviCRM_For_WordPress {
    */
   public function is_page_request() {
 
+    // Assume not a CiviCRM page
+    $return = FALSE;
+
     // Kick out if not CiviCRM
     if (!$this->initialize()) {
-      return;
+      return $return;
     }
 
     // Get args
     $argdata = $this->get_request_args();
+
+    // Grab query var
+    $html = get_query_var( 'html' );
+    if (empty($html)) {
+      $html = isset($_GET['html']) ? $_GET['html'] : '';
+    }
 
     /*
      * FIXME: It's not sustainable to hardcode a whitelist of all of non-HTML
@@ -1329,19 +1532,22 @@ class CiviCRM_For_WordPress {
     if (CRM_Utils_Array::value('HTTP_X_REQUESTED_WITH', $_SERVER) == 'XMLHttpRequest'
         || ($argdata['args'][0] == 'civicrm' && in_array($argdata['args'][1], array('ajax', 'file')) )
         || !empty($_REQUEST['snippet'])
-        || strpos($argdata['argString'], 'civicrm/event/ical') === 0 && empty($_GET['html'])
+        || strpos($argdata['argString'], 'civicrm/event/ical') === 0 && empty($html)
         || strpos($argdata['argString'], 'civicrm/contact/imagefile') === 0
     ) {
-      return FALSE;
+      $return = FALSE;
     }
     else {
-      return TRUE;
+      $return = TRUE;
     }
+
+    return $return;
+
   }
 
 
   /**
-   * Get arguments and request string from $_GET.
+   * Get arguments and request string from query vars.
    *
    * @since 4.6
    *
@@ -1351,8 +1557,15 @@ class CiviCRM_For_WordPress {
 
     $argString = NULL;
     $args = array();
-    if (isset( $_GET['q'])) {
-      $argString = trim($_GET['q']);
+
+    // Get path from query vars
+    $q = get_query_var( 'q' );
+    if (empty($q)) {
+      $q = isset($_GET['q']) ? $_GET['q'] : '';
+    }
+
+    if (!empty($q)) {
+      $argString = trim($q);
       $args = explode('/', $argString);
     }
     $args = array_pad($args, 2, '');
@@ -1363,6 +1576,7 @@ class CiviCRM_For_WordPress {
     );
 
   }
+
 
   /**
    * Add CiviCRM's title to the header's <title> tag.

@@ -321,6 +321,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     // invoke() requires environment variables to be set
     foreach ( $args as $key => $value ) {
       if ( $value !== NULL ) {
+        set_query_var($key, $value);
         $_REQUEST[$key] = $_GET[$key] = $value;
       }
     }
@@ -406,18 +407,37 @@ class CiviCRM_For_WordPress_Shortcodes {
       // $absolute, $frontend, $forceBackend
       $base_url = $this->civi->get_base_url(TRUE, FALSE, FALSE);
 
-      // Construct query parts
+      // Init query parts
       $queryParts = array();
-      $queryParts[] = 'page=CiviCRM';
-      if (isset($args['q'])) {
-        $queryParts[] = 'q=' . $args['q'];
-      }
-      if (isset($query)) {
-        $queryParts[] = $query;
-      }
 
-      // Construct link
-      $link = trailingslashit( $base_url ) . '?' . implode('&', $queryParts);
+      // When not using clean URLs
+      if (!$config->cleanURL) {
+
+        // Construct query parts
+        $queryParts[] = 'page=CiviCRM';
+        if (isset($args['q'])) {
+          $queryParts[] = 'q=' . $args['q'];
+        }
+        if (isset($query)) {
+          $queryParts[] = $query;
+        }
+
+        // Construct link
+        $link = trailingslashit( $base_url ) . '?' . implode('&', $queryParts);
+
+      }
+      else {
+
+        // Clean URLs
+        if (isset($args['q'])) {
+          $base_url = trailingslashit( $base_url ) . str_replace('civicrm/', '', $args['q']) . '/';
+        }
+        if (isset($query)) {
+          $queryParts[] = $query;
+        }
+        $link = $base_url . '?' . implode('&', $queryParts);
+
+      }
 
       // Add a class for styling purposes
       $class = ' civicrm-shortcode-multiple';
@@ -706,7 +726,6 @@ class CiviCRM_For_WordPress_Shortcodes {
 
           case 'info':
             $args['q'] = 'civicrm/event/info';
-            $_REQUEST['page'] = $_GET['page'] = 'CiviCRM';
             break;
 
           default:

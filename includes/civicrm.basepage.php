@@ -529,19 +529,34 @@ class CiviCRM_For_WordPress_Basepage {
    */
   public function basepage_canonical_url( $canonical ) {
 
-    /*
-     * It would be better to specify which params are okay to accept as the
-     * canonical URLs, but this will work for the time being.
-     */
-    if ( empty( $_GET['page'] )
-      || empty( $_GET['q'] )
-      || 'CiviCRM' !== $_GET['page'] ) {
-      return $canonical;
+    // Access Civi config object
+    $config = CRM_Core_Config::singleton();
+
+    // Retain old logic when not using clean URLs
+    if (!$config->cleanURL) {
+
+      /*
+       * It would be better to specify which params are okay to accept as the
+       * canonical URLs, but this will work for the time being.
+       */
+      if ( empty( $_GET['page'] )
+        || empty( $_GET['q'] )
+        || 'CiviCRM' !== $_GET['page'] ) {
+        return $canonical;
+      }
+      $path = $_GET['q'];
+      unset( $_GET['q'] );
+      unset( $_GET['page'] );
+      $query = http_build_query( $_GET );
+
     }
-    $path = $_GET['q'];
-    unset( $_GET['q'] );
-    unset( $_GET['page'] );
-    $query = http_build_query( $_GET );
+    else {
+
+      $argdata = $this->civi->get_request_args();
+      $path = $argdata['argString'];
+      $query = http_build_query( $_GET );
+
+    }
 
     // We should, however, build the URL the way that CiviCRM expects it to be
     // (rather than through some other funny base page).
