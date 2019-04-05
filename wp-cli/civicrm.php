@@ -472,7 +472,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
         'CMSdbPass'          => DB_PASSWORD,
         'CMSdbHost'          => DB_HOST,
         'CMSdbName'          => DB_NAME,
-        'siteKey'            => md5(rand() . mt_rand() . rand() . uniqid('', TRUE) . $params['baseURL']),
+        'siteKey'            => md5(rand() . mt_rand() . rand() . uniqid('', true) . $params['baseURL']),
        );
 
       $str = file_get_contents( $tplPath . 'civicrm.settings.php.template' );

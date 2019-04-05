@@ -258,7 +258,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     }
 
     // Flag that we have parsed shortcodes
-    $this->shortcodes_parsed = TRUE;
+    $this->shortcodes_parsed = true;
 
     /**
      * Broadcast that shortcodes have been parsed.
@@ -314,13 +314,13 @@ class CiviCRM_For_WordPress_Shortcodes {
     $args = $this->preprocess_atts( $atts );
 
     // Sanity check for improperly constructed shortcode
-    if ( $args === FALSE ) {
+    if ( $args === false ) {
       return '<p>' . __( 'Do not know how to handle this shortcode.', 'civicrm' ) . '</p>';
     }
 
     // invoke() requires environment variables to be set
     foreach ( $args as $key => $value ) {
-      if ( $value !== NULL ) {
+      if ( $value !== null ) {
         set_query_var($key, $value);
         $_REQUEST[$key] = $_GET[$key] = $value;
       }
@@ -358,7 +358,7 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @param bool $multiple Boolean flag, TRUE if post has multiple shortcodes, FALSE otherwise.
    * @return string $markup Generic markup for multiple instances.
    */
-  private function render_multiple( $post_id = FALSE, $shortcode = FALSE, $multiple = 0 ) {
+  private function render_multiple( $post_id = false, $shortcode = false, $multiple = 0 ) {
 
     // Get attributes
     $atts = $this->get_atts( $shortcode );
@@ -367,7 +367,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     $args = $this->preprocess_atts( $atts );
 
     // Sanity check for improperly constructed shortcode
-    if ( $args === FALSE ) {
+    if ( $args === false ) {
       return '<p>' . __( 'Do not know how to handle this shortcode.', 'civicrm' ) . '</p>';
     }
 
@@ -375,14 +375,14 @@ class CiviCRM_For_WordPress_Shortcodes {
     $data = $this->get_data( $atts, $args );
 
     // Sanity check
-    if ( $data === FALSE ) return '';
+    if ( $data === false ) return '';
 
     // Did we get a title?
     $title = __( 'Content via CiviCRM', 'civicrm' );
     if ( ! empty( $data['title'] ) ) $title = $data['title'];
 
     // Init title flag
-    $show_title = TRUE;
+    $show_title = true;
 
     // Default link
     $link = get_permalink( $post_id );
@@ -405,7 +405,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       $query = implode( '&', $links );
 
       // $absolute, $frontend, $forceBackend
-      $base_url = $this->civi->get_base_url(TRUE, FALSE, FALSE);
+      $base_url = $this->civi->get_base_url(true, false, false);
 
       // Init query parts
       $queryParts = array();
@@ -459,7 +459,7 @@ class CiviCRM_For_WordPress_Shortcodes {
         add_filter( 'the_content', array( $this, 'get_content' ) );
 
         // Don't show title
-        $show_title = FALSE;
+        $show_title = false;
 
         // Add a class for styling purposes
         $class = ' civicrm-shortcode-single';
@@ -471,7 +471,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     // Set some template variables
 
     // Description
-    $description = FALSE;
+    $description = false;
     if ( isset( $data['text'] ) AND ! empty( $data['text'] ) ) {
       $description = $data['text'];
     }
@@ -494,7 +494,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     );
 
     // Assume CiviCRM footer is not enabled
-    $empowered_enabled = FALSE;
+    $empowered_enabled = false;
     $footer = '';
 
     // Test config object for setting
@@ -516,7 +516,7 @@ class CiviCRM_For_WordPress_Shortcodes {
        */
       $footer = apply_filters( 'civicrm_shortcode_footer', $empowered );
 
-      $empowered_enabled = TRUE;
+      $empowered_enabled = true;
 
     }
 
@@ -683,13 +683,13 @@ class CiviCRM_For_WordPress_Shortcodes {
 
     $shortcode_atts = shortcode_atts( array(
       'component' => 'contribution',
-      'action' => NULL,
-      'mode' => NULL,
-      'id' => NULL,
-      'cid' => NULL,
-      'gid' => NULL,
-      'cs' => NULL,
-      'force' => NULL,
+      'action' => null,
+      'mode' => null,
+      'id' => null,
+      'cid' => null,
+      'gid' => null,
+      'cs' => null,
+      'force' => null,
       ),
       $atts,
       'civicrm'
@@ -729,7 +729,7 @@ class CiviCRM_For_WordPress_Shortcodes {
             break;
 
           default:
-            return FALSE;
+            return false;
         }
         break;
 
@@ -783,7 +783,7 @@ class CiviCRM_For_WordPress_Shortcodes {
 
     // Sanity check for path
     if ( ! isset( $args['q'] ) ) {
-      return FALSE;
+      return false;
     }
 
     return $args;
@@ -806,7 +806,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     $data = array();
 
     if (!$this->civi->initialize()) {
-      return FALSE;
+      return false;
     }
 
     /**

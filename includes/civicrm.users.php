@@ -119,13 +119,13 @@ class CiviCRM_For_WordPress_Users {
   public function check_permission( $args ) {
 
     if ( $args[0] != 'civicrm' ) {
-      return FALSE;
+      return false;
     }
 
     $config = CRM_Core_Config::singleton();
 
     // Set frontend true
-    $config->userFrameworkFrontend = TRUE;
+    $config->userFrameworkFrontend = true;
 
     require_once 'CRM/Utils/Array.php';
 
@@ -133,10 +133,10 @@ class CiviCRM_For_WordPress_Users {
     $arg1 = CRM_Utils_Array::value(1, $args);
     $invalidPaths = array('admin');
     if ( in_array( $arg1, $invalidPaths ) ) {
-      return FALSE;
+      return false;
     }
 
-    return TRUE;
+    return true;
 
   }
 
@@ -185,10 +185,10 @@ class CiviCRM_For_WordPress_Users {
    *
    * @param object $user The WordPress user object.
    */
-  public function sync_user( $user = FALSE ) {
+  public function sync_user( $user = false ) {
 
     // Sanity check
-    if ( $user === FALSE OR !is_a($user, 'WP_User') ) {
+    if ( $user === false OR !is_a($user, 'WP_User') ) {
       return;
     }
 
@@ -204,7 +204,7 @@ class CiviCRM_For_WordPress_Users {
      */
     CRM_Core_BAO_UFMatch::synchronize(
       $user, // User object
-      TRUE, // Update = true
+      true, // Update = true
       'WordPress', // CMS
       'Individual' // contact type
     );
@@ -367,7 +367,7 @@ class CiviCRM_For_WordPress_Users {
    * @param string $default The requested contact type.
    * @return string $ctype The computed contact type.
    */
-  public function get_civicrm_contact_type( $default = NULL ) {
+  public function get_civicrm_contact_type( $default = null ) {
 
     // Here we are creating a new contact
     // Get the contact type from the POST variables if any

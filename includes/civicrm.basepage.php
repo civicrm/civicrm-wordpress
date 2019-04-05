@@ -415,7 +415,7 @@ class CiviCRM_For_WordPress_Basepage {
     add_filter( 'body_class', array( $this, 'add_body_classes' ) );
 
     // Flag that we have parsed the base page
-    $this->basepage_parsed = TRUE;
+    $this->basepage_parsed = true;
 
     /**
      * Broadcast that the base page is parsed.

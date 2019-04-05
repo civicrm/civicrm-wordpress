@@ -114,13 +114,13 @@ if ( !defined( 'CIVICRM_SETTINGS_PATH' ) ) {
 
 // Test if CiviCRM is installed
 if ( file_exists( CIVICRM_SETTINGS_PATH )  ) {
-    define( 'CIVICRM_INSTALLED', TRUE );
+    define( 'CIVICRM_INSTALLED', true );
   } else {
-    define( 'CIVICRM_INSTALLED', FALSE );
+    define( 'CIVICRM_INSTALLED', false );
 }
 
 // Prevent CiviCRM from rendering its own header
-define( 'CIVICRM_UF_HEAD', TRUE );
+define( 'CIVICRM_UF_HEAD', true );
 
 
 /**
@@ -388,7 +388,7 @@ class CiviCRM_For_WordPress {
     $page = get_query_var( 'page' );
 
     // Store
-    self::$in_wordpress = ( $page == 'CiviCRM' ) ? TRUE : FALSE;
+    self::$in_wordpress = ( $page == 'CiviCRM' ) ? true : false;
 
   }
 
@@ -548,11 +548,11 @@ class CiviCRM_For_WordPress {
   public function register_hooks_front_end() {
 
     // Prevent multiple calls
-    static $alreadyRegistered = FALSE;
+    static $alreadyRegistered = false;
     if ( $alreadyRegistered ) {
       return;
     }
-    $alreadyRegistered = TRUE;
+    $alreadyRegistered = true;
 
     // Store context
     $this->civicrm_in_wordpress_set();
@@ -801,11 +801,11 @@ class CiviCRM_For_WordPress {
    */
   public function initialize() {
 
-    static $initialized = FALSE;
-    static $failure = FALSE;
+    static $initialized = false;
+    static $failure = false;
 
     if ( $failure ) {
-      return FALSE;
+      return false;
     }
 
     if ( ! $initialized ) {
@@ -825,7 +825,7 @@ class CiviCRM_For_WordPress {
 
       // Check for settings
       if ( ! CIVICRM_INSTALLED ) {
-        $error = FALSE;
+        $error = false;
       } elseif ( file_exists( CIVICRM_SETTINGS_PATH) ) {
         $error = include_once ( CIVICRM_SETTINGS_PATH );
       }
@@ -855,9 +855,9 @@ class CiviCRM_For_WordPress {
         $installLink
       );
 
-      if ($error == FALSE) {
+      if ($error == false) {
         header( 'Location: ' . admin_url() . 'options-general.php?page=civicrm-install' );
-        return FALSE;
+        return false;
       }
 
       // Access global defined in civicrm.settings.php
@@ -865,16 +865,16 @@ class CiviCRM_For_WordPress {
 
       // This does pretty much all of the civicrm initialization
       if ( ! file_exists( $civicrm_root . 'CRM/Core/Config.php' ) ) {
-        $error = FALSE;
+        $error = false;
       } else {
         $error = include_once ( 'CRM/Core/Config.php' );
       }
 
       // Have we got it?
-      if ( $error == FALSE ) {
+      if ( $error == false ) {
 
         // Set static flag
-        $failure = TRUE;
+        $failure = true;
 
         // FIX ME - why?
         wp_die(
@@ -892,12 +892,12 @@ class CiviCRM_For_WordPress {
         );
 
         // Won't reach here!
-        return FALSE;
+        return false;
 
       }
 
       // Set static flag
-      $initialized = TRUE;
+      $initialized = true;
 
       // Initialize the system by creating a config object
       $config = CRM_Core_Config::singleton();
@@ -910,7 +910,7 @@ class CiviCRM_For_WordPress {
         require_once 'CRM/Core/BAO/UFMatch.php';
         CRM_Core_BAO_UFMatch::synchronize(
           $current_user, // User object
-          FALSE, // Do not update
+          false, // Do not update
           'WordPress', // CMS
           $this->users->get_civicrm_contact_type('Individual')
         );
@@ -927,7 +927,7 @@ class CiviCRM_For_WordPress {
     do_action( 'civicrm_initialized' );
 
     // Success!
-    return TRUE;
+    return true;
 
   }
 
@@ -950,7 +950,7 @@ class CiviCRM_For_WordPress {
     // Load translations
     load_plugin_textdomain(
       'civicrm', // Unique name
-      FALSE, // Deprecated argument
+      false, // Deprecated argument
       dirname( plugin_basename( __FILE__ ) ) . '/languages/' // Relative path to translation files
     );
 
@@ -1114,10 +1114,10 @@ class CiviCRM_For_WordPress {
   public function admin_page_load() {
 
     // This is required for AJAX calls in WordPress admin
-    $_REQUEST['noheader'] = $_GET['noheader'] = TRUE;
+    $_REQUEST['noheader'] = $_GET['noheader'] = true;
 
     // Add resources for back end
-    $this->add_core_resources( FALSE );
+    $this->add_core_resources( false );
 
     // Check setting for path to wp-load.php
     $this->add_wpload_setting();
@@ -1187,19 +1187,19 @@ class CiviCRM_For_WordPress {
    */
   public function front_end_page_load() {
 
-    static $frontend_loaded = FALSE;
+    static $frontend_loaded = false;
     if ( $frontend_loaded ) {
       return;
     }
 
     // Add resources for front end
-    $this->add_core_resources( TRUE );
+    $this->add_core_resources( true );
 
     // Merge CiviCRM's HTML header with the WordPress theme's header
     add_action( 'wp_head', array( $this, 'wp_head' ) );
 
     // Set flag so this only happens once
-    $frontend_loaded = TRUE;
+    $frontend_loaded = true;
 
   }
 
@@ -1215,7 +1215,7 @@ class CiviCRM_For_WordPress {
    */
   public function front_end_css_load() {
 
-    static $frontend_css_loaded = FALSE;
+    static $frontend_css_loaded = false;
     if ( $frontend_css_loaded ) {
       return;
     }
@@ -1227,7 +1227,7 @@ class CiviCRM_For_WordPress {
     $config = CRM_Core_Config::singleton();
 
     // Default custom CSS to standalone
-    $dependent = NULL;
+    $dependent = null;
 
     // Load core CSS
     if (!CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'disable_core_css')) {
@@ -1236,7 +1236,7 @@ class CiviCRM_For_WordPress {
       wp_enqueue_style(
         'civicrm_css',
         $config->resourceBase . 'css/civicrm.css',
-        NULL, // Dependencies
+        null, // Dependencies
         CIVICRM_PLUGIN_VERSION, // Version
         'all' // Media
       );
@@ -1258,7 +1258,7 @@ class CiviCRM_For_WordPress {
     }
 
     // Set flag so this only happens once
-    $frontend_css_loaded = TRUE;
+    $frontend_css_loaded = true;
 
   }
 
@@ -1270,7 +1270,7 @@ class CiviCRM_For_WordPress {
    *
    * @param bool $front_end True if on WP front end, false otherwise.
    */
-  public function add_core_resources( $front_end = TRUE ) {
+  public function add_core_resources( $front_end = true ) {
 
     if (!$this->initialize()) {
       return;
@@ -1300,7 +1300,7 @@ class CiviCRM_For_WordPress {
       return;
     }
 
-    $region = CRM_Core_Region::instance('html-header', FALSE);
+    $region = CRM_Core_Region::instance('html-header', false);
     if ( $region ) {
       echo '<!-- CiviCRM html header -->';
       echo $region->render( '' );
@@ -1325,7 +1325,7 @@ class CiviCRM_For_WordPress {
    */
   public function invoke() {
 
-    static $alreadyInvoked = FALSE;
+    static $alreadyInvoked = false;
     if ( $alreadyInvoked ) {
       return;
     }
@@ -1361,7 +1361,7 @@ class CiviCRM_For_WordPress {
 
     // Required for AJAX calls
     if ($this->civicrm_in_wordpress()) {
-      $_REQUEST['noheader'] = $_GET['noheader'] = TRUE;
+      $_REQUEST['noheader'] = $_GET['noheader'] = true;
     }
 
     // Code inside invoke() requires the current user to be set up
@@ -1376,7 +1376,7 @@ class CiviCRM_For_WordPress {
     }
 
     // Set flag
-    $alreadyInvoked = TRUE;
+    $alreadyInvoked = true;
 
     // Get args
     $argdata = $this->get_request_args();
@@ -1508,7 +1508,7 @@ class CiviCRM_For_WordPress {
   public function is_page_request() {
 
     // Assume not a CiviCRM page
-    $return = FALSE;
+    $return = false;
 
     // Kick out if not CiviCRM
     if (!$this->initialize()) {
@@ -1535,10 +1535,10 @@ class CiviCRM_For_WordPress {
         || strpos($argdata['argString'], 'civicrm/event/ical') === 0 && empty($html)
         || strpos($argdata['argString'], 'civicrm/contact/imagefile') === 0
     ) {
-      $return = FALSE;
+      $return = false;
     }
     else {
-      $return = TRUE;
+      $return = true;
     }
 
     return $return;
@@ -1555,7 +1555,7 @@ class CiviCRM_For_WordPress {
    */
   public function get_request_args() {
 
-    $argString = NULL;
+    $argString = null;
     $args = array();
 
     // Get path from query vars
@@ -1593,7 +1593,7 @@ class CiviCRM_For_WordPress {
     }
     // Replace 1st occurance of "CiviCRM" in the title
     $pos = strpos($title, 'CiviCRM');
-    if ($pos !== FALSE) {
+    if ($pos !== false) {
       return substr_replace($title, $civicrm_wp_title, $pos, 7);
     }
     return $civicrm_wp_title;
@@ -1890,7 +1890,7 @@ function civicrm_run_installer() {
  * @param string $default The contact type.
  * @return string $ctype The contact type.
  */
-function civicrm_get_ctype( $default = NULL ) {
+function civicrm_get_ctype( $default = null ) {
   return civi_wp()->users->get_civicrm_contact_type( $default );
 }
 
