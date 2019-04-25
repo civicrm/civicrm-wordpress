@@ -1564,6 +1564,14 @@ class CiviCRM_For_WordPress {
       $q = isset($_GET['q']) ? $_GET['q'] : '';
     }
 
+    // Fix 'civicrm/civicrm' elements derived from CRM:url()
+    // @see https://lab.civicrm.org/dev/rc/issues/5#note_16205
+    if (substr($q, 0, 16) === 'civicrm/civicrm/') {
+      $q = str_replace('civicrm/civicrm/', 'civicrm/', $q);
+      $_REQUEST['q'] = $_GET['q'] = $q;
+      set_query_var( 'q', $q );
+    }
+
     if (!empty($q)) {
       $argString = trim($q);
       $args = explode('/', $argString);
