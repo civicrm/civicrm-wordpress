@@ -384,11 +384,8 @@ class CiviCRM_For_WordPress {
    */
   public function civicrm_in_wordpress_set() {
 
-    // Get identifying query var
-    $page = get_query_var( 'page' );
-
     // Store
-    self::$in_wordpress = ( $page == 'CiviCRM' ) ? TRUE : FALSE;
+    self::$in_wordpress = (isset($_GET['page']) && $_GET['page'] == 'CiviCRM') ? TRUE : FALSE;
 
   }
 
