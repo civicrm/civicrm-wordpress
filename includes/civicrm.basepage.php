@@ -398,6 +398,7 @@ class CiviCRM_For_WordPress_Basepage {
 
     // Override page title with high priority
     add_filter( 'wp_title', array( $this, 'wp_page_title' ), 100, 3 );
+    add_filter( 'document_title_parts', array( $this, 'wp_page_title_parts' ), 100, 1 );
 
     // Add compatibility with WordPress SEO plugin's Open Graph title
     add_filter( 'wpseo_opengraph_title', array( $this, 'wpseo_page_title' ), 100, 1 );
@@ -466,6 +467,31 @@ class CiviCRM_For_WordPress_Basepage {
 
     // Return modified title
     return $title;
+
+  }
+
+
+  /**
+   * Get CiviCRM basepage title for <title> element.
+   *
+   * Callback method for 'document_title_parts' hook. This filter was introduced
+   * in WordPress 3.8 but it depends on whether the theme has implemented that
+   * method for generating the title or not.
+   *
+   * @since 5.14
+   *
+   * @param array $parts The existing title parts.
+   * @return array $parts The modified title parts.
+   */
+  public function wp_page_title_parts( $parts ) {
+
+    // Override with CiviCRM's title
+    if ( isset( $parts['title'] ) ) {
+      $parts['title'] = $this->basepage_title;
+    }
+
+    // Return modified title parts
+    return $parts;
 
   }
 
