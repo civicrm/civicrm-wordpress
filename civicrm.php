@@ -676,6 +676,9 @@ class CiviCRM_For_WordPress {
     // Print CiviCRM's header
     add_action('admin_head', array( $this, 'wp_head' ), 50);
 
+    // Listen for changes to the basepage setting
+    add_action( 'civicrm_postSave_civicrm_setting', array( $this, 'settings_change' ), 10 );
+
     // If settings file does not exist, show notice with link to installer
     if ( ! CIVICRM_INSTALLED ) {
       if ( isset( $_GET['page'] ) && $_GET['page'] == 'civicrm-install' ) {
@@ -689,6 +692,29 @@ class CiviCRM_For_WordPress {
 
     // Enable shortcode modal
     $this->modal->register_hooks();
+
+  }
+
+
+  /**
+   * Force rewrite rules to be recreated.
+   *
+   * When CiviCRM settings are saved, the method is called post-save. It checks
+   * if it's the WordPress Base Page setting that has been saved and causes all
+   * rewrite rules to be flushed on the next page load.
+   *
+   * @since 5.14
+   *
+   * @param obj $dao The CiviCRM database access object.
+   */
+  public function settings_change( $dao ) {
+
+    // Delete the option if conditions are met
+    if ( $dao instanceOf CRM_Core_DAO_Setting ) {
+      if ( isset( $dao->name ) && $dao->name == 'wpBasePage' ) {
+        delete_option( 'civicrm_rules_flushed' );
+      }
+    }
 
   }
 
