@@ -46,10 +46,10 @@ class Rest extends Base {
 	public function permissions_check( $request ) {
 
 		if ( ! $this->is_valid_api_key( $request ) )
-			return $this->civi_rest_error( __( 'Param api_key is not valid.' ) );
+			return $this->civi_rest_error( __( 'Param api_key is not valid.', 'civicrm' ) );
 
 		if ( ! $this->is_valid_site_key() )
-			return $this->civi_rest_error( __( 'Param key is not valid.' ) );
+			return $this->civi_rest_error( __( 'Param key is not valid.', 'civicrm' ) );
 
 		return true;
 
@@ -326,7 +326,7 @@ class Rest extends Base {
 		return [
 			'$schema' => 'http://json-schema.org/draft-04/schema#',
 			'title' => 'civicrm/v3/rest',
-			'description' => 'CiviCRM API3 WP rest endpoint wrapper',
+			'description' => __( 'CiviCRM API3 WP rest endpoint wrapper', 'civicrm' ),
 			'type' => 'object',
 			'required' => [ 'entity', 'action', 'params' ],
 			'properties' => [

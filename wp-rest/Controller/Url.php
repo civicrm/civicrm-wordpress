@@ -153,7 +153,7 @@ class Url extends Base {
 		return [
 			'$schema' => 'http://json-schema.org/draft-04/schema#',
 			'title' => 'civicrm_api3/v3/url',
-			'description' => 'CiviCRM API3 wrapper',
+			'description' => __( 'CiviCRM API3 wrapper', 'civicrm' ),
 			'type' => 'object',
 			'required' => [ 'qid', 'u' ],
 			'properties' => [

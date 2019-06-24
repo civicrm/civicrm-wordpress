@@ -92,7 +92,7 @@ class Open extends Base {
 		return [
 			'$schema' => 'http://json-schema.org/draft-04/schema#',
 			'title' => 'civicrm/v3/open',
-			'description' => 'CiviCRM Open endpoint',
+			'description' => __( 'CiviCRM Open endpoint', 'civicrm' ),
 			'type' => 'object',
 			'required' => [ 'q' ],
 			'properties' => [
