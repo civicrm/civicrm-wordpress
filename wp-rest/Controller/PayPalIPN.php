@@ -82,7 +82,7 @@ class PayPalIPN extends Base {
 		try {
 
 			if ( ! method_exists( $paypal_IPN, 'main' ) || ! $this->instance_of_crm_base_ipn( $paypal_IPN ) )
-				return $this->civi_rest_error( get_class( $paypal_IPN ) . ' must implement a "main" method.' );
+				return $this->civi_rest_error( sprintf( __( '%s must implement a "main" method.', 'civicrm' ), get_class( $paypal_IPN ) ) );
 
 			$result = $paypal_IPN->main();
 

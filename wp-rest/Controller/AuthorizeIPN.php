@@ -71,7 +71,7 @@ class AuthorizeIPN extends Base {
 		try {
 
 			if ( ! method_exists( $authorize_IPN, 'main' ) || ! $this->instance_of_crm_base_ipn( $authorize_IPN ) )
-				return $this->civi_rest_error( get_class( $authorize_IPN ) . ' must implement a "main" method.' );
+				return $this->civi_rest_error( sprintf( __( '%s must implement a "main" method.', 'civicrm' ), get_class( $authorize_IPN ) ) );
 
 			$result = $authorize_IPN->main();
 
