@@ -152,8 +152,8 @@ class Rest extends Base {
 
 		$args = $request->get_params();
 
-		// destructure entity and action
-		[ 'entity' => $entity, 'action' => $action ] = $args;
+		$entity = $args['entity'];
+		$action = $args['action'];
 
 		// unset unnecessary args
 		unset( $args['entity'], $args['action'], $args['key'], $args['api_key'] );
