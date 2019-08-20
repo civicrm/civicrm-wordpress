@@ -87,6 +87,21 @@ if (!defined( 'CIVICRM_PLUGIN_DIR')) {
   define( 'CIVICRM_PLUGIN_DIR', plugin_dir_path(CIVICRM_PLUGIN_FILE) );
 }
 
+if ( !defined( 'CIVICRM_WP_PHP_MINIMUM' ) ) {
+  /**
+   * Minimum required PHP
+   *
+   * Note: This duplicates CRM_Upgrade_Form::MINIMUM_PHP_VERSION. The
+   * duplication helps avoid dependency issues. (Reading `Form::MINIMUM_PHP_VERSION`
+   * requires loading `civicrm.settings.php`, but that triggers a parse-error
+   * on PHP 5.x.)
+   *
+   * @see CRM_Upgrade_Form::MINIMUM_PHP_VERSION
+   * @see CiviWP\PhpVersionTest::testConstantMatch()
+   */
+  define( 'CIVICRM_WP_PHP_MINIMUM', '7.0.0' );
+}
+
 /*
  * The constant CIVICRM_SETTINGS_PATH is also defined in civicrm.config.php and
  * may already have been defined there - e.g. by cron or external scripts.
@@ -837,12 +852,11 @@ class CiviCRM_For_WordPress {
     if ( ! $initialized ) {
 
       // Check for php version and ensure its greater than minPhpVersion
-      $minPhpVersion = '5.3.4';
-      if ( version_compare( PHP_VERSION, $minPhpVersion ) < 0 ) {
+      if ( version_compare( PHP_VERSION, CIVICRM_WP_PHP_MINIMUM ) < 0 ) {
         echo '<p>' .
            sprintf(
-            __( 'CiviCRM requires PHP Version %s or greater. You are running PHP Version %s', 'civicrm' ),
-            $minPhpVersion,
+            __( 'CiviCRM requires PHP version %s or greater. You are running PHP version %s', 'civicrm' ),
+            CIVICRM_WP_PHP_MINIMUM,
             PHP_VERSION
            ) .
            '<p>';
