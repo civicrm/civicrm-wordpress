@@ -832,6 +832,19 @@ class CiviCRM_For_WordPress {
   // CiviCRM Initialisation
   // ---------------------------------------------------------------------------
 
+  protected function assertPhpSupport() {
+    // Need to check this before bootstrapping - once we start bootstrapping, the error messages will become ugly.
+    if ( version_compare( PHP_VERSION, CIVICRM_WP_PHP_MINIMUM ) < 0 ) {
+      echo '<p>' .
+         sprintf(
+          __( 'CiviCRM requires PHP version %s or greater. You are running PHP version %s', 'civicrm' ),
+          CIVICRM_WP_PHP_MINIMUM,
+          PHP_VERSION
+         ) .
+         '<p>';
+      exit();
+    }
+  }
 
   /**
    * Initialize CiviCRM.
@@ -851,17 +864,7 @@ class CiviCRM_For_WordPress {
 
     if ( ! $initialized ) {
 
-      // Check for php version and ensure its greater than minPhpVersion
-      if ( version_compare( PHP_VERSION, CIVICRM_WP_PHP_MINIMUM ) < 0 ) {
-        echo '<p>' .
-           sprintf(
-            __( 'CiviCRM requires PHP version %s or greater. You are running PHP version %s', 'civicrm' ),
-            CIVICRM_WP_PHP_MINIMUM,
-            PHP_VERSION
-           ) .
-           '<p>';
-        exit();
-      }
+      $this->assertPhpSupport();
 
       // Check for settings
       if ( ! CIVICRM_INSTALLED ) {
@@ -1073,6 +1076,7 @@ class CiviCRM_For_WordPress {
    * @since 4.4
    */
   public function run_installer() {
+    $this->assertPhpSupport();
     $civicrmCore = CIVICRM_PLUGIN_DIR . 'civicrm';
 
     $setupPaths = array(
