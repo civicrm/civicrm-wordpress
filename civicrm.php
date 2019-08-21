@@ -842,7 +842,7 @@ class CiviCRM_For_WordPress {
     if ( version_compare( PHP_VERSION, CIVICRM_WP_PHP_MINIMUM ) < 0 ) {
       echo '<p>' .
          sprintf(
-          __( 'CiviCRM requires PHP version %s or greater. You are running PHP version %s', 'civicrm' ),
+          __( 'CiviCRM requires PHP version %1$s or greater. You are running PHP version %2$s', 'civicrm' ),
           CIVICRM_WP_PHP_MINIMUM,
           PHP_VERSION
          ) .
