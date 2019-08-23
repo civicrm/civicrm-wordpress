@@ -177,7 +177,7 @@ class Plugin {
 	 */
 	public function maybe_reset_wp_timezone( $result, $server, $request ) {
 
-		if ( $request->get_route() != '/civicrm/v3/rest' ) return;
+		if ( $request->get_route() != '/civicrm/v3/rest' ) return $result;
 
 		$timezones = apply_filters( 'civi_wp_rest/plugin/timezones', null );
 
