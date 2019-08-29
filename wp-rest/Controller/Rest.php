@@ -78,7 +78,7 @@ class Rest extends Base {
 
 		} catch ( \CiviCRM_API3_Exception $e ) {
 
-			return $this->civi_rest_error( $e->getMessage() );
+			$items = $this->civi_rest_error( $e );
 
 		}
 

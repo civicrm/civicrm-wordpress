@@ -1,0 +1,9 @@
+# EditorConfig is awesome: https://editorconfig.org
+
+# Not top-most EditorConfig file
+root = false
+
+# Tab indentation
+[*.php]
+indent_style = tab
+indent_size = 4
