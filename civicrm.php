@@ -832,12 +832,17 @@ class CiviCRM_For_WordPress {
   // CiviCRM Initialisation
   // ---------------------------------------------------------------------------
 
+  /**
+   * Check that the PHP version is supported. If not, raise a fatal error with a pointed message.
+   *
+   * One should check this before bootstrapping Civi - after we start the class-loader, the
+   * PHP-compatibility errors will become more ugly.
+   */
   protected function assertPhpSupport() {
-    // Need to check this before bootstrapping - once we start bootstrapping, the error messages will become ugly.
     if ( version_compare( PHP_VERSION, CIVICRM_WP_PHP_MINIMUM ) < 0 ) {
       echo '<p>' .
          sprintf(
-          __( 'CiviCRM requires PHP version %s or greater. You are running PHP version %s', 'civicrm' ),
+          __( 'CiviCRM requires PHP version %1$s or greater. You are running PHP version %2$s', 'civicrm' ),
           CIVICRM_WP_PHP_MINIMUM,
           PHP_VERSION
          ) .
