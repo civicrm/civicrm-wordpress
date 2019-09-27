@@ -310,7 +310,10 @@ class CiviCRM_For_WordPress {
 
     // Change option so this action never fires again
     update_option( 'civicrm_activation_in_progress', 'false' );
-
+    if (!isset($_GET['activate-multi'])) {
+      wp_redirect(admin_url("options-general.php?page=civicrm-install"));
+      exit;
+    }
   }
 
 
