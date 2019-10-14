@@ -559,8 +559,20 @@ class CiviCRM_For_WordPress {
    * Register hooks for the front end.
    *
    * @since 5.6
+   *
+   * @param WP_Query $query The WP_Query instance (passed by reference).
    */
-  public function register_hooks_front_end() {
+  public function register_hooks_front_end( $query ) {
+
+    // Bail if $query is not the main loop.
+    if ( ! $query->is_main_query() ) {
+      return;
+    }
+
+    // Bail if filters are suppressed on this query.
+    if ( true == $query->get( 'suppress_filters' ) ) {
+      return;
+    }
 
     // Prevent multiple calls
     static $alreadyRegistered = FALSE;
