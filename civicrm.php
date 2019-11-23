@@ -367,8 +367,16 @@ class CiviCRM_For_WordPress {
      */
     global $civicrm_paths;
     if (empty($civicrm_paths['cms.root']['path'])) {
-      $civicrm_paths['cms.root']['path'] = ABSPATH;
+      $civicrm_paths['cms.root']['path'] = untrailingslashit(ABSPATH);
     }
+
+    $e = new Exception;
+    $trace = $e->getTraceAsString();
+    error_log( print_r( array(
+      'method' => __METHOD__,
+      'civicrm_paths' => $civicrm_paths,
+      'backtrace' => $trace,
+    ), true ) );
 
     // Get classes and instantiate
     $this->include_files();
