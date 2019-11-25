@@ -165,13 +165,6 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
         return WP_CLI::error( "Unrecognized command - '$command'" );
       }
 
-      # if --path is set, save for later use by Civi
-      global $civicrm_paths;
-      $wp_cli_config = WP_CLI::get_config();
-      if (!empty($wp_cli_config['path'])) {
-        $civicrm_paths['cms.root']['path'] = $wp_cli_config['path'];
-      }
-
       # run command
       return $this->{$command_router[ $command ]}();
 
@@ -1330,5 +1323,17 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
   WP_CLI::add_command( 'civicrm', 'CiviCRM_Command' );
   WP_CLI::add_command( 'cv', 'CiviCRM_Command' );
+
+  # Set path early.
+  WP_CLI::add_hook( 'before_wp_load', function() {
+
+    # if --path is set, save for later use by Civi
+    global $civicrm_paths;
+    $wp_cli_config = WP_CLI::get_config();
+    if (!empty($wp_cli_config['path'])) {
+      $civicrm_paths['cms.root']['path'] = $wp_cli_config['path'];
+    }
+
+  } );
 
 }
