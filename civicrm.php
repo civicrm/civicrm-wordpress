@@ -364,6 +364,15 @@ class CiviCRM_For_WordPress {
       session_start();
     }
 
+    /*
+     * AJAX calls do not set the 'cms.root' item, so make sure it is set here so
+     * the CiviCRM doesn't fall back on flaky directory traversal code.
+     */
+    global $civicrm_paths;
+    if (empty($civicrm_paths['cms.root']['path'])) {
+      $civicrm_paths['cms.root']['path'] = untrailingslashit(ABSPATH);
+    }
+
     // Get classes and instantiate
     $this->include_files();
 
