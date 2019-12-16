@@ -384,8 +384,14 @@ class CiviCRM_For_WordPress_Basepage {
     add_filter( 'wp_title', array( $this, 'wp_page_title' ), 100, 3 );
     add_filter( 'document_title_parts', array( $this, 'wp_page_title_parts' ), 100, 1 );
 
-    // Add compatibility with WordPress SEO plugin's Open Graph title
+    // Add compatibility with Yoast SEO plugin's Open Graph title
     add_filter( 'wpseo_opengraph_title', array( $this, 'wpseo_page_title' ), 100, 1 );
+
+    // Don't let the Yoast SEO plugin parse the basepage title
+    if ( class_exists( 'WPSEO_Frontend' ) ) {
+      $frontend = WPSEO_Frontend::get_instance();
+      remove_filter( 'pre_get_document_title', array( $frontend, 'title' ), 15 );
+    }
 
     // Include this content when base page is rendered
     add_filter( 'the_content', array( $this, 'basepage_render' ) );
