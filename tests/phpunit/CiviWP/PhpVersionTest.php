@@ -4,7 +4,7 @@ namespace CiviWP;
 
 use Civi\Test\EndToEndInterface;
 
-class PhpVersionTest extends \PHPUnit_Framework_TestCase implements EndToEndInterface {
+class PhpVersionTest extends \PHPUnit\Framework\TestCase implements EndToEndInterface {
 
   /**
    * CIVICRM_WP_PHP_MINIMUM (civicrm.module) should match MINIMUM_PHP_VERSION (CRM/Upgrade/Form.php).

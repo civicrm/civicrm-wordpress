@@ -9,7 +9,7 @@ namespace CiviWP {
    * @package CiviWP
    * @group e2e
    */
-  class HookTest extends \PHPUnit_Framework_TestCase implements EndToEndInterface {
+  class HookTest extends \PHPUnit\Framework\TestCase implements EndToEndInterface {
 
     public function testFoo() {
       add_action('civicrm_fakeAlterableHook', 'onFakeAlterableHook', 10, 2);
