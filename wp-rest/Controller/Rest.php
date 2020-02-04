@@ -519,7 +519,7 @@ class Rest extends Base {
 
 			// If this fails, get it from config.
 			if ( $domain_id === 0 ) {
-				$domain_id = CRM_Core_Config::domainID();
+				$domain_id = \CRM_Core_Config::domainID();
 			}
 
 			// Call API.

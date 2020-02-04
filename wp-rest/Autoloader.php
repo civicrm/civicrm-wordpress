@@ -93,9 +93,9 @@ class Autoloader {
 	 */
 	private function autoload( $class_name ) {
 
-		if ( false === strpos( $class_name, $this->namespace ) ) return;
-
 		$parts = explode( '\\', $class_name );
+
+		if ( $this->namespace !== $parts[0] ) return;
 
 		// remove namespace and join class path
 		$class_path = str_replace( '_', '-', implode( DIRECTORY_SEPARATOR, array_slice( $parts, 1 ) ) );
