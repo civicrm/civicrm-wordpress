@@ -88,7 +88,7 @@ abstract class Base extends \WP_REST_Controller implements Endpoint_Interface {
 	 * Wrapper for WP_Error.
 	 *
 	 * @since 0.1
-	 * @param string|\CiviCRM_API3_Exception $error
+	 * @param string|\CiviCRM_API3_Exception|\WP_Error $error
 	 * @param mixed $data Error data
 	 * @return WP_Error $error
 	 */
@@ -97,6 +97,10 @@ abstract class Base extends \WP_REST_Controller implements Endpoint_Interface {
 		if ( $error instanceof \CiviCRM_API3_Exception ) {
 
 			return $error->getExtraParams();
+
+		} elseif ( $error instanceof \WP_Error ) {
+
+			return $error;
 
 		}
 
