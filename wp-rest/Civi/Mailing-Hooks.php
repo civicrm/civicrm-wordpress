@@ -26,6 +26,14 @@ class Mailing_Hooks {
 	public $open_endpoint;
 
 	/**
+	 * The parsed WordPress REST url.
+	 *
+	 * @since 1.0
+	 * @var array
+	 */
+	public $parsed_rest_url;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1
@@ -35,6 +43,8 @@ class Mailing_Hooks {
 		$this->url_endpoint = rest_url( 'civicrm/v3/url' );
 
 		$this->open_endpoint = rest_url( 'civicrm/v3/open' );
+
+		$this->parsed_rest_url = parse_url( rest_url() );
 
 	}
 
@@ -46,6 +56,38 @@ class Mailing_Hooks {
 	public function register_hooks() {
 
 		add_filter( 'civicrm_alterMailParams', [ $this, 'do_mailing_urls' ], 10, 2 );
+
+		add_filter( 'civicrm_alterExternUrl', [ $this, 'alter_mailing_extern_urls' ], 10, 6 );
+
+	}
+
+	/**
+	 * Replaces the open, and click
+	 * tracking URLs for a mailing (CiviMail)
+	 * with thier REST counterparts.
+	 *
+	 * @uses 'civicrm_alterExternUrl' filter
+	 *
+	 * @param \GuzzleHttp\Psr7\Uri $url
+	 * @param string|null $path
+	 * @param string|null $query
+	 * @param string|null $fragment
+	 * @param bool|null $absolute
+	 * @param bool|null $isSSL
+	 */
+	public function alter_mailing_extern_urls( &$url, $path, $query, $fragment, $absolute, $isSSL ) {
+
+		if ( $path == 'extern/url' ) {
+			$url = $url
+				->withHost( $this->parsed_rest_url['host'] )
+				->withPath( "{$this->parsed_rest_url['path']}civicrm/v3/url" );
+		}
+
+		if ( $path == 'extern/open' ) {
+			$url = $url
+				->withHost( $this->parsed_rest_url['host'] )
+				->withPath( "{$this->parsed_rest_url['path']}civicrm/v3/open" );
+		}
 
 	}
 
@@ -62,11 +104,15 @@ class Mailing_Hooks {
 	 */
 	public function do_mailing_urls( &$params, $context ) {
 
-		if ( $context == 'civimail' ) {
+		if ( in_array( $context, [ 'civimail', 'flexmailer' ] ) ) {
 
-			$params['html'] = $this->replace_html_mailing_tracking_urls( $params['html'] );
+			$params['html'] = $this->is_mail_tracking_url_alterable( $params['html'] )
+				? $this->replace_html_mailing_tracking_urls( $params['html'] )
+				: $params['html'];
 
-			$params['text'] = $this->replace_text_mailing_tracking_urls( $params['text'] );
+			$params['text'] = $this->is_mail_tracking_url_alterable( $params['text'] )
+				? $this->replace_text_mailing_tracking_urls( $params['text'] )
+				: $params['text'];
 
 		}
 
@@ -130,6 +176,21 @@ class Mailing_Hooks {
 		$content = preg_replace( '/http.*civicrm\/extern\/open\.php/i', $this->open_endpoint, $content );
 
 		return $content;
+
+	}
+
+	/**
+	 * Checks whether for a given mail
+	 * content (text or html) the tracking URLs
+	 * are alterable/need to be altered.
+	 *
+	 * @since 0.1
+	 * @param string $content The mail content (text or  html)
+	 * @return bool $is_alterable
+	 */
+	public function is_mail_tracking_url_alterable( string $content ) {
+
+		return strpos( $content, 'civicrm/extern/url.php' ) || strpos( $content, 'civicrm/extern/open.php' );
 
 	}
 

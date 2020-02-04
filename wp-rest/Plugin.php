@@ -69,8 +69,19 @@ class Plugin {
 	 */
 	private function setup_objects() {
 
-		if ( CIVICRM_WP_REST_REPLACE_MAILING_TRACKING ) {
+		/**
+ 		 * Filter to replace the mailing tracking URLs.
+ 		 *
+ 		 * @since 0.1
+ 		 * @param bool $replace_mailing_tracking_urls
+ 		 */
+ 		$replace_mailing_tracking_urls = apply_filters( 'civi_wp_rest/plugin/replace_mailing_tracking_urls', false );
 
+ 		// keep CIVICRM_WP_REST_REPLACE_MAILING_TRACKING for backwards compatibility
+ 		if (
+ 			$replace_mailing_tracking_urls
+ 			|| ( defined( 'CIVICRM_WP_REST_REPLACE_MAILING_TRACKING' ) && CIVICRM_WP_REST_REPLACE_MAILING_TRACKING )
+ 		) {
 			// register mailing hooks
 			$mailing_hooks = ( new Mailing_Hooks )->register_hooks();
 
