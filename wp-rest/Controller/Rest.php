@@ -45,13 +45,52 @@ class Rest extends Base {
 	 */
 	public function permissions_check( $request ) {
 
-		if ( ! $this->is_valid_api_key( $request ) )
-			return $this->civi_rest_error( __( 'Param api_key is not valid.', 'civicrm' ) );
+		/**
+		 * Opportunity to bypass CiviCRM's
+		 * authentication ('api_key' and 'site_key'),
+		 * return 'true' or 'false' to grant
+		 * or deny access to this endpoint.
+		 *
+		 * To deny and throw an error, return either
+		 * a string, an array, or a \WP_Error.
+		 *
+		 * NOTE: if you use your won authentication,
+		 * you still must log in the user in order
+		 * to respect/apply CiviCRM ACLs.
+		 *
+		 * @since 0.1
+		 * @param null|bool|string|array|\WP_Error $grant_auth Grant, deny, or error
+		 * @param \WP_REST_Request $request The request
+		 */
+		$grant_auth = apply_filters( 'civi_wp_rest/controller/rest/permissions_check', null, $request );
 
-		if ( ! $this->is_valid_site_key() )
-			return $this->civi_rest_error( __( 'Param key is not valid.', 'civicrm' ) );
+		if ( is_bool( $grant_auth ) ) {
 
-		return true;
+			return $grant_auth;
+
+		} elseif ( is_string( $grant_auth ) ) {
+
+			return $this->civi_rest_error( $grant_auth );
+
+		} elseif ( is_array( $grant_auth ) ) {
+
+			return $this->civi_rest_error( __( 'CiviCRM WP REST permission check error.', 'civicrm' ), $grant_auth );
+
+		} elseif ( $grant_auth instanceof \WP_Error ) {
+
+			return $grant_auth;
+
+		} else {
+
+			if ( ! $this->is_valid_api_key( $request ) )
+				return $this->civi_rest_error( __( 'Param api_key is not valid.', 'civicrm' ) );
+
+			if ( ! $this->is_valid_site_key() )
+				return $this->civi_rest_error( __( 'Param key is not valid.', 'civicrm' ) );
+
+			return true;
+
+		}
 
 	}
 
@@ -358,7 +397,7 @@ class Rest extends Base {
 		return [
 			'key' => [
 				'type' => 'string',
-				'required' => true,
+				'required' => false,
 				'validate_callback' => function( $value, $request, $key ) {
 
 					return $this->is_valid_site_key();
@@ -367,7 +406,7 @@ class Rest extends Base {
 			],
 			'api_key' => [
 				'type' => 'string',
-				'required' => true,
+				'required' => false,
 				'validate_callback' => function( $value, $request, $key ) {
 
 					return $this->is_valid_api_key( $request );
