@@ -124,6 +124,8 @@ class Url extends Base {
 
 		}
 
+		if ( strpos( $url, 'mailto' ) ) $url = strstr( $url, 'mailto' );
+
 		return apply_filters( 'civi_wp_rest/controller/url/parsed_url', $url, $params );
 
 	}
