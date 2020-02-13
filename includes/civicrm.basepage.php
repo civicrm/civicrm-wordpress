@@ -300,6 +300,9 @@ class CiviCRM_For_WordPress_Basepage {
       restore_current_blog();
     }
 
+    // Make sure Rewrite Rules are flushed.
+    delete_option( 'civicrm_rules_flushed' );
+
     return $page_id;
 
   }
