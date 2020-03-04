@@ -83,7 +83,7 @@ if ( !defined( 'CIVICRM_WP_PHP_MINIMUM' ) ) {
    * @see CRM_Upgrade_Form::MINIMUM_PHP_VERSION
    * @see CiviWP\PhpVersionTest::testConstantMatch()
    */
-  define( 'CIVICRM_WP_PHP_MINIMUM', '7.0.0' );
+  define( 'CIVICRM_WP_PHP_MINIMUM', '7.1.0' );
 }
 
 /*
