@@ -698,6 +698,14 @@ class CiviCRM_For_WordPress_Shortcodes {
         $args['q'] = 'civicrm/contribute/transact';
         break;
 
+      case 'pcp':
+
+        if ( $mode == 'preview' || $mode == 'test' ) {
+          $args['action'] = 'preview';
+        }
+        $args['q'] = 'civicrm/pcp/info';
+        break;
+
       case 'event':
 
         switch ( $action ) {
@@ -739,7 +747,6 @@ class CiviCRM_For_WordPress_Shortcodes {
         }
         $args['gid'] = $gid;
         break;
-
 
       case 'petition':
 
