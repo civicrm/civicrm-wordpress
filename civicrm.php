@@ -75,12 +75,13 @@ if ( !defined( 'CIVICRM_WP_PHP_MINIMUM' ) ) {
   /**
    * Minimum required PHP
    *
-   * Note: This duplicates CRM_Upgrade_Form::MINIMUM_PHP_VERSION. The
-   * duplication helps avoid dependency issues. (Reading `Form::MINIMUM_PHP_VERSION`
-   * requires loading `civicrm.settings.php`, but that triggers a parse-error
+   * Note: This duplicates CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER.
+   * The duplication helps avoid dependency issues. (Reading
+   * `CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER` requires loading
+   * `civicrm.settings.php`, but that triggers a parse-error
    * on PHP 5.x.)
    *
-   * @see CRM_Upgrade_Form::MINIMUM_PHP_VERSION
+   * @see CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER
    * @see CiviWP\PhpVersionTest::testConstantMatch()
    */
   define( 'CIVICRM_WP_PHP_MINIMUM', '7.1.0' );
