@@ -7,7 +7,8 @@ use Civi\Test\EndToEndInterface;
 class PhpVersionTest extends \PHPUnit\Framework\TestCase implements EndToEndInterface {
 
   /**
-   * CIVICRM_WP_PHP_MINIMUM (civicrm.module) should match MINIMUM_PHP_VERSION (CRM/Upgrade/Form.php).
+   * CIVICRM_WP_PHP_MINIMUM (civicrm.module) should match
+   * CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER.
    *
    * The literal value should be duplicated in the define() to prevent dependency issues.
    */
@@ -16,7 +17,9 @@ class PhpVersionTest extends \PHPUnit\Framework\TestCase implements EndToEndInte
     $this->assertFileExists($constantFile);
     $content = file_get_contents($constantFile);
     if (preg_match(";define\\(\\s*'CIVICRM_WP_PHP_MINIMUM'\\s*,\\s*'(.*)'\\s*\\);", $content, $m)) {
-      $this->assertEquals(\CRM_Upgrade_Form::MINIMUM_PHP_VERSION, $m[1]);
+      $a = preg_replace(';^(\d+\.\d+(?:\.[1-9]\d*)?).*$;', '\1', \CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER);
+      $b = preg_replace(';^(\d+\.\d+(?:\.[1-9]\d*)?).*$;', '\1', $m[1]);
+      $this->assertEquals($a, $b);
     }
     else {
       $this->fail('Failed to find CIVICRM_WP_PHP_MINIMUM in ' . $constantFile);
