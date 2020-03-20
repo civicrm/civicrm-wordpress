@@ -451,7 +451,7 @@ class Rest extends Base {
 	 * @param string $param
 	 * @return bool
 	 */
-	protected function is_valid_json( $param ) {
+	public function is_valid_json( $param ) {
 
 		$param = json_decode( $param, true );
 
@@ -467,7 +467,7 @@ class Rest extends Base {
 	 * @since 0.1
 	 * @return bool $is_valid_site_key
 	 */
-	private function is_valid_site_key() {
+	public function is_valid_site_key() {
 
 		return \CRM_Utils_System::authenticateKey( false );
 
@@ -480,7 +480,7 @@ class Rest extends Base {
 	 * @param WP_REST_Resquest $request
 	 * @return bool $is_valid_api_key
 	 */
-	private function is_valid_api_key( $request ) {
+	public function is_valid_api_key( $request ) {
 
 		$api_key = $request->get_param( 'api_key' );
 
@@ -488,73 +488,9 @@ class Rest extends Base {
 
 		$contact_id = \CRM_Core_DAO::getFieldValue( 'CRM_Contact_DAO_Contact', $api_key, 'id', 'api_key' );
 
-		// validate contact and login
-		if ( $contact_id ) {
+		if ( ! $contact_id ) return false;
 
-			$wp_user = $this->get_wp_user( $contact_id );
-
-			$this->do_user_login( $wp_user );
-
-			return true;
-
-		}
-
-		return false;
-
-	}
-
-	/**
-	 * Get WordPress user data.
-	 *
-	 * @since 0.1
-	 * @param int $contact_id The contact id
-	 * @return bool|WP_User $user The WordPress user data
-	 */
-	protected function get_wp_user( int $contact_id ) {
-
-		try {
-
-			// Get CiviCRM domain group ID from constant, if set.
-			$domain_id = defined( 'CIVICRM_DOMAIN_ID' ) ? CIVICRM_DOMAIN_ID : 0;
-
-			// If this fails, get it from config.
-			if ( $domain_id === 0 ) {
-				$domain_id = \CRM_Core_Config::domainID();
-			}
-
-			// Call API.
-			$uf_match = civicrm_api3( 'UFMatch', 'getsingle', [
-				'contact_id' => $contact_id,
-				'domain_id' => $domain_id,
-			] );
-
-		} catch ( \CiviCRM_API3_Exception $e ) {
-
-			return $this->civi_rest_error( $e->getMessage() );
-
-		}
-
-		$wp_user = get_userdata( $uf_match['uf_id'] );
-
-		return $wp_user;
-
-	}
-
-	/**
-	 * Logs in the WordPress user, needed to respect CiviCRM ACL and permissions.
-	 *
-	 * @since 0.1
-	 * @param  WP_User $user
-	 */
-	protected function do_user_login( \WP_User $user ) {
-
-		if ( is_user_logged_in() ) return;
-
-		wp_set_current_user( $user->ID, $user->user_login );
-
-		wp_set_auth_cookie( $user->ID );
-
-		do_action( 'wp_login', $user->user_login, $user );
+		return true;
 
 	}
 
