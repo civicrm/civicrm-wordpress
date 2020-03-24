@@ -368,6 +368,9 @@ class CiviCRM_For_WordPress {
     if (empty($civicrm_paths['cms.root']['path'])) {
       $civicrm_paths['cms.root']['path'] = untrailingslashit(ABSPATH);
     }
+    if (empty($civicrm_paths['cms.root']['url'])) {
+      $civicrm_paths['cms.root']['url'] = home_url();
+    }
 
     // Get classes and instantiate
     $this->include_files();

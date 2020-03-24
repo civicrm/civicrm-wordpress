@@ -1311,11 +1311,16 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
   # Set path early.
   WP_CLI::add_hook( 'before_wp_load', function() {
 
-    # if --path is set, save for later use by Civi
+    # If --path is set, save for later use by CiviCRM.
     global $civicrm_paths;
     $wp_cli_config = WP_CLI::get_config();
     if (!empty($wp_cli_config['path'])) {
       $civicrm_paths['cms.root']['path'] = $wp_cli_config['path'];
+    }
+
+    # If --url is set, save for later use by CiviCRM.
+    if (!empty($wp_cli_config['url'])) {
+      $civicrm_paths['cms.root']['url'] = $wp_cli_config['url'];
     }
 
   } );
