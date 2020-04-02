@@ -204,6 +204,15 @@ class CiviCRM_For_WordPress {
    */
   public $users;
 
+  /**
+   * Compatibility object.
+   *
+   * @since 5.24
+   * @access public
+   * @var object CiviCRM_For_WordPress_Compat The plugin compatibility object.
+   */
+  public $compat;
+
 
   // ---------------------------------------------------------------------------
   // Setup
@@ -527,6 +536,10 @@ class CiviCRM_For_WordPress {
     include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.basepage.php';
     $this->basepage = new CiviCRM_For_WordPress_Basepage;
 
+    // Include compatibility class
+    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.compat.php';
+    $this->compat = new CiviCRM_For_WordPress_Compat;
+
     if ( ! class_exists( 'CiviCRM_WP_REST\Autoloader' ) ) {
       // Include REST API autoloader class
       require_once( CIVICRM_PLUGIN_DIR . 'wp-rest/Autoloader.php' );
@@ -813,10 +826,12 @@ class CiviCRM_For_WordPress {
      * Broadcast the rewrite rules event.
      *
      * @since 5.7
+     * @since 5.24 Added $basepage parameter.
      *
      * @param bool $flush_rewrite_rules True if rules flushed, false otherwise.
+     * @param WP_Post $basepage The Basepage post object.
      */
-    do_action( 'civicrm_after_rewrite_rules', $flush_rewrite_rules );
+    do_action( 'civicrm_after_rewrite_rules', $flush_rewrite_rules, $basepage );
 
   }
 
