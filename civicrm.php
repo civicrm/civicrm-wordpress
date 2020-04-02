@@ -204,6 +204,14 @@ class CiviCRM_For_WordPress {
    */
   public $users;
 
+  /**
+   * Compatibility object.
+   *
+   * @since 5.24
+   * @access public
+   * @var object CiviCRM_For_WordPress_Compat The plugin compatibility object.
+   */
+  public $compat;
 
   // ---------------------------------------------------------------------------
   // Setup
@@ -527,6 +535,10 @@ class CiviCRM_For_WordPress {
     include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.basepage.php';
     $this->basepage = new CiviCRM_For_WordPress_Basepage;
 
+    // Include compatilibity class
+    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.compat.php';
+    $this->compat = new CiviCRM_For_WordPress_Compat;
+
     if ( ! class_exists( 'CiviCRM_WP_REST\Autoloader' ) ) {
       // Include REST API autoloader class
       require_once( CIVICRM_PLUGIN_DIR . 'wp-rest/Autoloader.php' );
@@ -798,18 +810,6 @@ class CiviCRM_For_WordPress {
     }
 
     // Let's add rewrite rule when viewing the basepage(s)
-    if ( function_exists( 'pll_languages_list' ) ) {
-      // Support polylang language prefixes - eg. ^(?:en/|pt/|)
-      $languages = pll_languages_list();
-      foreach ( $languages as $language ) {
-        $postID = pll_get_post( $basepage->ID, $language );
-        add_rewrite_rule(
-          "^{$language}/" . $config->wpBasePage . '/([^?]*)?',
-          'index.php?page_id=' . $postID . '&page=CiviCRM&q=civicrm%2F$matches[1]',
-          'top'
-        );
-      };
-    }
     add_rewrite_rule(
       '^' . $config->wpBasePage . '/([^?]*)?',
       'index.php?page_id=' . $basepage->ID . '&page=CiviCRM&q=civicrm%2F$matches[1]',
@@ -824,11 +824,12 @@ class CiviCRM_For_WordPress {
     /**
      * Broadcast the rewrite rules event.
      *
-     * @since 5.7
+     * @since 5.24 Added $basepage parameter
      *
      * @param bool $flush_rewrite_rules True if rules flushed, false otherwise.
+     * @param WP_Post $basepage The Basepage post object.
      */
-    do_action( 'civicrm_after_rewrite_rules', $flush_rewrite_rules );
+    do_action('civicrm_after_rewrite_rules', $flush_rewrite_rules, $basepage);
 
   }
 
