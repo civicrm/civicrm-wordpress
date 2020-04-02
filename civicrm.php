@@ -797,7 +797,19 @@ class CiviCRM_For_WordPress {
         return;
     }
 
-    // Let's add rewrite rule when viewing the basepage
+    // Let's add rewrite rule when viewing the basepage(s)
+    if ( function_exists( 'pll_languages_list' ) ) {
+      // Support polylang language prefixes - eg. ^(?:en/|pt/|)
+      $languages = pll_languages_list();
+      foreach ( $languages as $language ) {
+        $postID = pll_get_post( $basepage->ID, $language );
+        add_rewrite_rule(
+          "^{$language}/" . $config->wpBasePage . '/([^?]*)?',
+          'index.php?page_id=' . $postID . '&page=CiviCRM&q=civicrm%2F$matches[1]',
+          'top'
+        );
+      };
+    }
     add_rewrite_rule(
       '^' . $config->wpBasePage . '/([^?]*)?',
       'index.php?page_id=' . $basepage->ID . '&page=CiviCRM&q=civicrm%2F$matches[1]',
