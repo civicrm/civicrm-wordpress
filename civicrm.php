@@ -809,7 +809,7 @@ class CiviCRM_For_WordPress {
         return;
     }
 
-    // Let's add rewrite rule when viewing the basepage(s)
+    // Let's add rewrite rule when viewing the basepage
     add_rewrite_rule(
       '^' . $config->wpBasePage . '/([^?]*)?',
       'index.php?page_id=' . $basepage->ID . '&page=CiviCRM&q=civicrm%2F$matches[1]',
