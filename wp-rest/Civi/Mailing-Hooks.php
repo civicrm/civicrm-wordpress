@@ -80,12 +80,14 @@ class Mailing_Hooks {
 		if ( $path == 'extern/url' ) {
 			$url = $url
 				->withHost( $this->parsed_rest_url['host'] )
+				->withQuery( $query )
 				->withPath( "{$this->parsed_rest_url['path']}civicrm/v3/url" );
 		}
 
 		if ( $path == 'extern/open' ) {
 			$url = $url
 				->withHost( $this->parsed_rest_url['host'] )
+				->withQuery( $query )
 				->withPath( "{$this->parsed_rest_url['path']}civicrm/v3/open" );
 		}
 
