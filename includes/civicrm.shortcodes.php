@@ -398,7 +398,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       if (!$config->cleanURL) {
 
         // Construct query parts
-        $queryParts[] = 'page=CiviCRM';
+        $queryParts[] = 'civiwp=CiviCRM';
         if (isset($args['q'])) {
           $queryParts[] = 'q=' . $args['q'];
         }
@@ -815,8 +815,6 @@ class CiviCRM_For_WordPress_Shortcodes {
      */
     $params = apply_filters( 'civicrm_shortcode_api_params', array(
       'version' => 3,
-      'page' => 'CiviCRM',
-      'q' => 'civicrm/ajax/rest',
       'sequential' => '1',
     ), $atts, $args );
 
