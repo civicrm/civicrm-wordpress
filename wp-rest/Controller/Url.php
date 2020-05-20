@@ -183,20 +183,20 @@ class Url extends Base {
 
 		return [
 			'qid' => [
-				'type' => 'integer',
+				'type' => ['integer', 'string'],
 				'required' => false,
 				'validate_callback' => function( $value, $request, $key ) {
 
-					return is_numeric( $value );
+					return is_numeric( $value ) || empty( $value );
 
 				}
 			],
 			'q' => [
-				'type' => 'integer',
+				'type' => ['integer', 'string'],
 				'required' => false,
 				'validate_callback' => function( $value, $request, $key ) {
 
-					return is_numeric( $value );
+					return is_numeric( $value ) || empty( $value );
 
 				}
 			],
