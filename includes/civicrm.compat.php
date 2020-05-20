@@ -137,7 +137,7 @@ class CiviCRM_For_WordPress_Compat {
         foreach ($rewrite as $path) {
           add_rewrite_rule(
             '^' . $path . '([^?]*)?',
-            'index.php?page_id=' . $post_id . '&page=CiviCRM&q=civicrm%2F$matches[1]',
+            'index.php?page_id=' . $post_id . '&civiwp=CiviCRM&q=civicrm%2F$matches[1]',
             'top'
           );
         }

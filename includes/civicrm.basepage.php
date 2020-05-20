@@ -558,14 +558,14 @@ class CiviCRM_For_WordPress_Basepage {
        * It would be better to specify which params are okay to accept as the
        * canonical URLs, but this will work for the time being.
        */
-      if ( empty( $_GET['page'] )
+      if ( empty( $_GET['civiwp'] )
         || empty( $_GET['q'] )
-        || 'CiviCRM' !== $_GET['page'] ) {
+        || 'CiviCRM' !== $_GET['civiwp'] ) {
         return $canonical;
       }
       $path = $_GET['q'];
       unset( $_GET['q'] );
-      unset( $_GET['page'] );
+      unset( $_GET['civiwp'] );
       $query = http_build_query( $_GET );
 
     }
