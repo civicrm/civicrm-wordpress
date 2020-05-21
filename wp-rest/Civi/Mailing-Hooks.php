@@ -106,13 +106,17 @@ class Mailing_Hooks {
 
 		if ( in_array( $context, [ 'civimail', 'flexmailer' ] ) ) {
 
-			$params['html'] = $this->is_mail_tracking_url_alterable( $params['html'] )
-				? $this->replace_html_mailing_tracking_urls( $params['html'] )
-				: $params['html'];
+			if ( ! empty( $params['html'] ) ) {
+				$params['html'] = $this->is_mail_tracking_url_alterable( $params['html'] )
+					? $this->replace_html_mailing_tracking_urls( $params['html'] )
+					: $params['html'];
+			}
 
-			$params['text'] = $this->is_mail_tracking_url_alterable( $params['text'] )
-				? $this->replace_text_mailing_tracking_urls( $params['text'] )
-				: $params['text'];
+			if ( ! empty( $params['text'] ) ) {
+				$params['text'] = $this->is_mail_tracking_url_alterable( $params['text'] )
+					? $this->replace_text_mailing_tracking_urls( $params['text'] )
+					: $params['text'];
+			}
 
 		}
 
@@ -188,7 +192,11 @@ class Mailing_Hooks {
 	 * @param string $content The mail content (text or  html)
 	 * @return bool $is_alterable
 	 */
-	public function is_mail_tracking_url_alterable( string $content ) {
+	public function is_mail_tracking_url_alterable( $content ) {
+
+		if ( ! is_string( $content ) ) {
+			return false;
+		}
 
 		return strpos( $content, 'civicrm/extern/url.php' ) || strpos( $content, 'civicrm/extern/open.php' );
 
