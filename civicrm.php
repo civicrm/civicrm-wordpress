@@ -578,6 +578,9 @@ class CiviCRM_For_WordPress {
     // Go no further if CiviCRM not installed yet
     if ( ! CIVICRM_INSTALLED ) return;
 
+    // Attempt to replace 'page' query arg with 'civiwp'.
+    add_filter( 'request', array( $this, 'maybe_replace_page_query_var' ) );
+
     // Add our query vars.
     add_filter( 'query_vars', array( $this, 'query_vars' ) );
 
@@ -883,6 +886,36 @@ class CiviCRM_For_WordPress {
     foreach( $civicrm_query_vars as $civicrm_query_var ) {
       $query_vars[] = $civicrm_query_var;
     }
+
+    return $query_vars;
+
+  }
+
+
+  /**
+   * Filters the request right after WP's
+   * parsed it and replaces the 'page' query
+   * variable with 'civiwp' if applicable.
+   *
+   * Prevents old URLs like example.org/civicrm/?page=CiviCRM&q=what/ever/path&reset=1
+   * being redirected to example.org/civicrm/?civiwp=CiviCRM&q=what/ever/path&reset=1
+   *
+   * @see https://lab.civicrm.org/dev/wordpress/-/issues/49
+   *
+   * @since 5.26
+   *
+   * @param array $query_vars The existing query vars.
+   * @return array $query_vars The modified query vars.
+   */
+  public function maybe_replace_page_query_var( $query_vars ) {
+
+    $civi_query_arg = array_search( 'CiviCRM', $query_vars );
+
+    // Bail if the query var is not 'page'.
+    if ( false === $civi_query_arg || $civi_query_arg !== 'page' ) return $query_vars;
+
+    unset( $query_vars['page'] );
+    $query_vars['civiwp'] = 'CiviCRM';
 
     return $query_vars;
 
