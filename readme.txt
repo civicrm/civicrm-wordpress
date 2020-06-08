@@ -1,9 +1,9 @@
 === CiviCRM ===
 Contributors: needle
 Tags: civicrm, crm
-Requires at least: 3.4
-Tested up to: 4.0
-Stable tag: 4.7
+Requires at least: 4.9
+Tested up to: 5.5
+Stable tag: 5.26.1
 License: AGPL3
 License URI: http://www.gnu.org/licenses/agpl-3.0.html
 
@@ -27,7 +27,7 @@ CiviCRM is localized in over 20 languages including: Chinese (Taiwan, China), Du
 == Installation ==
 
 1. Download CiviCRM for WordPress from the [CiviCRM website](https://civicrm.org/download)
-1. Extract the plugin archive 
+1. Extract the plugin archive
 1. Upload plugin files to your plugins directory, normally `/wp-content/plugins/`
 1. Follow the instructions on the [CiviCRM website](http://wiki.civicrm.org/confluence/display/CRMDOC/WordPress+Installation+Guide+for+CiviCRM+4.5)
 
@@ -35,12 +35,4 @@ CiviCRM is localized in over 20 languages including: Chinese (Taiwan, China), Du
 
 == Changelog ==
 
-= 4.5 =
-Support for CiviCRM version 4.5.x
-
-= 4.4 =
-Support for CiviCRM version 4.4.x
-
-= 4.3 =
-Support for CiviCRM version 4.3.x
-
+[Full Release Notes](https://github.com/civicrm/civicrm-core/blob/master/release-notes.md)

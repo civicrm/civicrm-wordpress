@@ -3,6 +3,8 @@
 Plugin Name: CiviCRM
 Description: CiviCRM - Growing and Sustaining Relationships
 Version: 4.7
+Requires at least: 4.9
+Requires PHP:      7.1
 Author: CiviCRM LLC
 Author URI: https://civicrm.org/
 Plugin URI: https://docs.civicrm.org/sysadmin/en/latest/install/wordpress/
