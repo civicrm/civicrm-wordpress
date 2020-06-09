@@ -89,6 +89,22 @@ if ( !defined( 'CIVICRM_WP_PHP_MINIMUM' ) ) {
   define( 'CIVICRM_WP_PHP_MINIMUM', '7.1.0' );
 }
 
+if ( !defined( 'CIVICRM_WP_MYSQL_MINIMUM' ) ) {
+  /**
+   * Minimum required MySQL
+   *
+   * Note: This duplicates CRM_Upgrade_Incremental_General::MIN_INSTALL_MYSQL_VER.
+   * The duplication helps avoid dependency issues. (Reading
+   * `CRM_Upgrade_Incremental_General::MIN_INSTALL_PHP_VER` requires loading
+   * `civicrm.settings.php`, but that triggers a parse-error
+   * on PHP 5.x.)
+   *
+   * @see CRM_Upgrade_Incremental_General::MIN_INSTALL_MYSQL_VER
+   * @see CiviWP\MySQLVersionTest::testConstantMatch()
+   */
+  define( 'CIVICRM_WP_MYSQL_MINIMUM', '5.6.5' );
+}
+
 /*
  * The constant CIVICRM_SETTINGS_PATH is also defined in civicrm.config.php and
  * may already have been defined there - e.g. by cron or external scripts.
@@ -948,6 +964,23 @@ class CiviCRM_For_WordPress {
   }
 
   /**
+   * Check that the MySQL version is supported
+   */
+  protected function assertMySQLSupport() {
+    global $wpdb;
+    $db_version = $wpdb->get_results('SELECT VERSION() as version')[0]->version;
+    if ( version_compare( $db_version, CIVICRM_WP_MYSQL_MINIMUM ) < 0 ) {
+      echo '<p>' .
+         sprintf(
+          __( 'CiviCRM requires MySQL/MariaDB version %1$s or greater. You are running PHP version %2$s', 'civicrm' ),
+          CIVICRM_WP_MYSQL_MINIMUM,
+         $db_version) .
+         '<p>';
+      exit();
+    }
+  }
+
+  /**
    * Initialize CiviCRM.
    *
    * @since 4.4
@@ -966,6 +999,7 @@ class CiviCRM_For_WordPress {
     if ( ! $initialized ) {
 
       $this->assertPhpSupport();
+      $this->assertMySQLSupport();
 
       // Check for settings
       if ( ! CIVICRM_INSTALLED ) {
@@ -1178,6 +1212,7 @@ class CiviCRM_For_WordPress {
    */
   public function run_installer() {
     $this->assertPhpSupport();
+    $this->assertMySQLSupport();
     $civicrmCore = CIVICRM_PLUGIN_DIR . 'civicrm';
 
     $setupPaths = array(
