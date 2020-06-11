@@ -596,8 +596,18 @@ class CiviCRM_For_WordPress_Basepage {
    */
   public function basepage_template( $template ) {
 
-    // Get template filename
-    $template_name = basename( $template );
+    // Get template path relative to the theme's root directory.
+    $template_name = str_replace( trailingslashit( get_stylesheet_directory() ), '', $template );
+
+    // If the above fails, try parent theme.
+    if ( $template_name == $template ) {
+      $template_name = str_replace( trailingslashit( get_template_directory() ), '', $template );
+    }
+
+    // Bail in the unlikely event that the template name has not been found.
+    if ( $template_name == $template ) {
+      return $template;
+    }
 
     // Use the provided page template, but allow overrides.
     $page_template = locate_template( array(
@@ -618,12 +628,12 @@ class CiviCRM_For_WordPress_Basepage {
 
     ) );
 
-    // If not homepage and template is found
+    // If not homepage and template is found.
     if ( '' != $page_template && !is_front_page() ) {
       return $page_template;
     }
 
-    // Find homepage the template
+    // Find homepage the template.
     $home_template = locate_template( array(
 
       /**
@@ -648,12 +658,12 @@ class CiviCRM_For_WordPress_Basepage {
 
     ) );
 
-    // Use it if found
+    // Use it if found.
     if ( '' != $home_template ) {
       return $home_template;
     }
 
-    // Fall back to provided template
+    // Fall back to provided template.
     return $template;
 
   }
