@@ -1721,6 +1721,8 @@ class CiviCRM_For_WordPress {
 
     if (!empty($q)) {
       $argString = trim($q);
+      // remove / from the beginning and ending of query string.
+      $argString = trim($argString, '/');
       $args = explode('/', $argString);
     }
     $args = array_pad($args, 2, '');
