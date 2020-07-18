@@ -367,7 +367,7 @@ class CiviCRM_For_WordPress {
      * There is no session handling in WP - hence we start it for CiviCRM pages
      * except when running via WP-CLI which does not require sessions.
      */
-    if ( empty( $session_id ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+    if ( empty( $session_id ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) && ( PHP_SAPI !== 'cli' ) ) {
       session_start();
     }
 
@@ -772,7 +772,32 @@ class CiviCRM_For_WordPress {
     // Enable shortcode modal
     $this->modal->register_hooks();
 
+		// Prevent auto-updates.
+		add_filter( 'plugin_auto_update_setting_html', [ $this, 'auto_update_prevent' ], 10, 3 );
+
   }
+
+
+	/**
+	 * Prevent auto-updates of this plugin in WordPress 5.5.
+	 *
+	 * @link https://make.wordpress.org/core/2020/07/15/controlling-plugin-and-theme-auto-updates-ui-in-wordpress-5-5/
+	 *
+	 * @since 5.28
+	 */
+	function auto_update_prevent( $html, $plugin_file, $plugin_data ) {
+
+		// Test for this plugin.
+		$this_plugin = plugin_basename( dirname( __FILE__ ) . '/civicrm.php' );
+		if ( $this_plugin === $plugin_file ) {
+			$html = __( 'Auto-updates are not available for this plugin.', 'civicrm' );
+		}
+
+		// --<
+		return $html;
+
+	}
+
 
 
   /**
