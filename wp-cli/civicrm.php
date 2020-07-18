@@ -1046,6 +1046,10 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
       civicrm_initialize();
 
+      if ( ! defined( 'CIVICRM_UPGRADE_ACTIVE' ) ) {
+        define( 'CIVICRM_UPGRADE_ACTIVE', 1 );
+      }
+
       if ( class_exists( 'CRM_Upgrade_Headless' ) ) {
         # Note: CRM_Upgrade_Headless introduced in 4.2 -- at the same time as class auto-loading
         try {
