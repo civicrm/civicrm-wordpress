@@ -360,16 +360,8 @@ class CiviCRM_For_WordPress {
       wp_die( __( 'Only one instance of CiviCRM_For_WordPress please', 'civicrm' ) );
     }
 
-    // Get existing session ID
-    $session_id = session_id();
-
-    /*
-     * There is no session handling in WP - hence we start it for CiviCRM pages
-     * except when running via WP-CLI which does not require sessions.
-     */
-    if ( empty( $session_id ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) && ( PHP_SAPI !== 'cli' ) ) {
-      session_start();
-    }
+    // Maybe start session.
+    $this->maybe_start_session();
 
     /*
      * AJAX calls do not set the 'cms.root' item, so make sure it is set here so
@@ -401,6 +393,53 @@ class CiviCRM_For_WordPress {
      * @since 4.4
      */
     do_action( 'civicrm_instance_loaded' );
+
+  }
+
+
+  /**
+   * Maybe start a session for CiviCRM.
+   *
+   * There is no session handling in WordPress so start it for CiviCRM pages.
+   *
+   * Not needed when running:
+   *
+   * - via WP-CLI
+   * - via wp-cron.php
+   * - via PHP on the command line
+   *
+   * none of which require sessions.
+   *
+   *
+   * @since 5.28
+   */
+  public function maybe_start_session() {
+
+    // Get existing session ID
+    $session_id = session_id();
+
+    // Check WordPress pseudo-cron.
+    $wp_cron = FALSE;
+    if (function_exists('wp_doing_cron') && wp_doing_cron()) {
+      $wp_cron = TRUE;
+    }
+
+    // Check WP-CLI.
+    $wp_cli = FALSE;
+    if (defined('WP_CLI') && WP_CLI) {
+      $wp_cli = TRUE;
+    }
+
+    // Check PHP on the command line - e.g. `cv`.
+    $php_cli = TRUE;
+    if (PHP_SAPI !== 'cli') {
+      $php_cli = FALSE;
+    }
+
+    // Maybe start session.
+    if (empty($session_id) && !$wp_cron && !$wp_cli && !$php_cli) {
+      session_start();
+    }
 
   }
 
