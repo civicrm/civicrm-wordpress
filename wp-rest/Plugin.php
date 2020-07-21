@@ -352,7 +352,6 @@ class Plugin {
 		$session = \CRM_Core_Session::singleton();
 		$session->set( 'ufID', $wp_user->ID );
 		$session->set( 'userID', $uf_match['contact_id'] );
-		$session->set( 'ufUniqID', $uf_match['uf_name'] );
 
 	}
 
