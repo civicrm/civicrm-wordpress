@@ -387,6 +387,9 @@ class CiviCRM_For_WordPress {
     // Register all hooks on init
     add_action( 'init', array( $this, 'register_hooks' ) );
 
+    // Filter Heartbeat on CiviCRM admin pages as late as is practical.
+    add_filter( 'heartbeat_settings', array( $this, 'heartbeat' ), 1000, 1 );
+
     /**
      * Broadcast that this plugin is now loaded.
      *
@@ -440,6 +443,56 @@ class CiviCRM_For_WordPress {
     if (empty($session_id) && !$wp_cron && !$wp_cli && !$php_cli) {
       session_start();
     }
+
+  }
+
+
+  /**
+   * Slow down the frequency of WordPress heartbeat calls.
+   *
+   * Heartbeat is important to WordPress for a number of tasks - e.g. checking
+   * continued authentication whilst on a page - but it does consume server
+   * resources. Reducing the frequency of calls minimises the impact on servers
+   * and can make CiviCRM more responsive.
+   *
+   * @since 5.29
+   *
+   * @param array $settings The existing heartbeat settings.
+   * @return array $settings The modified heartbeat settings.
+   */
+  public function heartbeat( $settings ) {
+
+    // Access script identifier.
+    global $pagenow;
+
+    // Bail if not admin.
+    if (!is_admin()) {
+      return $settings;
+    }
+
+    // Process the requested URL.
+    $requested_url  = filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL);
+    if ( $requested_url ) {
+      $current_url = wp_unslash($requested_url);
+    } else {
+      $current_url = admin_url();
+    }
+    $current_screen = wp_parse_url($current_url);
+
+    // Bail if this is not CiviCRM admin.
+    if ($pagenow != 'admin.php' || false === strpos($current_screen['query'], 'page=CiviCRM')) {
+      return $settings;
+    }
+
+    // Defer to any previously set value, but only if it's greater than ours.
+    if (!empty($settings['interval']) && intval($settings['interval']) > 120) {
+      return $settings;
+    }
+
+    // Slow down heartbeat.
+    $settings['interval'] = 120;
+
+    return $settings;
 
   }
 
