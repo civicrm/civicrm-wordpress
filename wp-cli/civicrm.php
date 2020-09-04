@@ -915,8 +915,8 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
       $legacy_settings_file = $plugins_dir . '/civicrm.settings.php';
       $upload_dir      = wp_upload_dir();
       $settings_file     = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR . 'civicrm.settings.php';
-      if ( ! file_exists( $legacy_settings_file ) || ! file_exists( $settings_file ) ) {
-        return WP_CLI::error( 'Unable to locate settings file at ' . $legacy_settings_file . 'or at ' . $settings_file );
+      if ( ! file_exists( $legacy_settings_file ) && ! file_exists( $settings_file ) ) {
+        return WP_CLI::error( 'Unable to locate settings file at ' . $legacy_settings_file . ' or at ' . $settings_file );
       }
 
       # nb: we don't want to require civicrm.settings.php here, because ..
@@ -929,16 +929,19 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
       # pull out the lines we need using a regex and run them - yes, it's pretty silly ..
       # don't try this at home, kids.
 
-      $legacy_settings = file_get_contents( $legacy_settings_file );
-      $legacy_settings = str_replace( "\r", '', $legacy_settings );
-      $legacy_settings = explode( "\n", $legacy_settings );
-      $settings = file_get_contents( $settings_file );
-      $settings = str_replace( "\r", '', $settings );
-      $settings = explode( "\n", $settings );
+      if ( file_exists( $settings_file ) ) {
+        $settings = file_get_contents( $settings_file );
+        $settings = str_replace( "\r", '', $settings );
+        $settings = explode( "\n", $settings );
+      } elseif ( file_exists( $legacy_settings_file ) ) {
+        $legacy_settings = file_get_contents( $legacy_settings_file );
+        $legacy_settings = str_replace( "\r", '', $legacy_settings );
+        $legacy_settings = explode( "\n", $legacy_settings );
+      }
 
-      if ( $civicrm_root_code = reset( preg_grep( '/^\s*\$civicrm_root\s*=.*$/', $legacy_settings ) ) ) {
+      if ( isset( $legacy_settings ) && $civicrm_root_code = reset( preg_grep( '/^\s*\$civicrm_root\s*=.*$/', $legacy_settings ) ) ) {
         eval( $civicrm_root_code );
-      } elseif ( $civicrm_root_code = reset( preg_grep( '/^\s*\$civicrm_root\s*=.*$/', $settings ) ) ) {
+      } elseif ( isset( $settings ) && $civicrm_root_code = reset( preg_grep( '/^\s*\$civicrm_root\s*=.*$/', $settings ) ) ) {
         eval( $civicrm_root_code );
       } else {
         return WP_CLI::error( 'Unable to read $civicrm_root from civicrm.settings.php' );
