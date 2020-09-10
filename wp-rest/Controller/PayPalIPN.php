@@ -29,6 +29,7 @@ class PayPalIPN extends Base {
 		register_rest_route( $this->get_namespace(), $this->get_rest_base(), [
 			[
 				'methods' => \WP_REST_Server::ALLMETHODS,
+				'permission_callback' => '__return_true',
 				'callback' => [ $this, 'get_item' ]
 			]
 		] );

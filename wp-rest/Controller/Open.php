@@ -28,6 +28,7 @@ class Open extends Base {
 			[
 				'methods' => \WP_REST_Server::READABLE,
 				'callback' => [ $this, 'get_item' ],
+				'permission_callback' => '__return_true',
 				'args' => $this->get_item_args()
 			],
 			'schema' => [ $this, 'get_item_schema' ]
