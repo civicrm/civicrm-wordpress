@@ -479,6 +479,11 @@ class CiviCRM_For_WordPress {
     }
     $current_screen = wp_parse_url($current_url);
 
+    // Bail if entry is missing for some reason.
+    if (!isset($current_screen['query'])) {
+      return $settings;
+    }
+
     // Bail if this is not CiviCRM admin.
     if ($pagenow != 'admin.php' || false === strpos($current_screen['query'], 'page=CiviCRM')) {
       return $settings;
