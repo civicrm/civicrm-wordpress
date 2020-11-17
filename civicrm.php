@@ -1183,14 +1183,14 @@ class CiviCRM_For_WordPress {
 
       }
 
-    }
+      /**
+       * Broadcast that CiviCRM is now initialized.
+       *
+       * @since 4.4
+       */
+      do_action( 'civicrm_initialized' );
 
-    /**
-     * Broadcast that CiviCRM is now initialized.
-     *
-     * @since 4.4
-     */
-    do_action( 'civicrm_initialized' );
+    }
 
     // Success!
     return TRUE;
