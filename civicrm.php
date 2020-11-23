@@ -1119,7 +1119,7 @@ class CiviCRM_For_WordPress {
       CRM_Core_ClassLoader::singleton()->register();
 
       // Get ready for problems.
-      $installLink    = admin_url() . "options-general.php?page=civicrm-install";
+      $installLink    = admin_url('options-general.php?page=civicrm-install');
       $docLinkInstall = "https://docs.civicrm.org/installation/en/latest/wordpress/";
       $docLinkTrouble = "https://docs.civicrm.org/sysadmin/en/latest/troubleshooting/";
       $forumLink      = "https://civicrm.stackexchange.com/";
@@ -1140,8 +1140,8 @@ class CiviCRM_For_WordPress {
       );
 
       if ($error == FALSE) {
-        header('Location: ' . admin_url() . 'options-general.php?page=civicrm-install');
-        return FALSE;
+        wp_redirect(admin_url('options-general.php?page=civicrm-install'));
+        exit;
       }
 
       // Access global defined in civicrm.settings.php.
@@ -1343,7 +1343,7 @@ class CiviCRM_For_WordPress {
         ]);
         $ctrl = \Civi\Setup::instance()->createController()->getCtrl();
         $ctrl->setUrls([
-          'ctrl' => admin_url() . "options-general.php?page=civicrm-install",
+          'ctrl' => admin_url('options-general.php?page=civicrm-install'),
           'res' => CIVICRM_PLUGIN_URL . 'civicrm/' . strtr($setupPath, DIRECTORY_SEPARATOR, '/') . '/res/',
           'jquery.js' => CIVICRM_PLUGIN_URL . 'civicrm/bower_components/jquery/dist/jquery.min.js',
           'font-awesome.css' => CIVICRM_PLUGIN_URL . 'civicrm/bower_components/font-awesome/css/font-awesome.min.css',
@@ -1365,7 +1365,7 @@ class CiviCRM_For_WordPress {
    */
   public function show_setup_warning() {
 
-    $installLink = admin_url() . "options-general.php?page=civicrm-install";
+    $installLink = admin_url('options-general.php?page=civicrm-install');
     echo '<div id="civicrm-warning" class="updated fade">' .
        '<p><strong>' .
        __('CiviCRM is almost ready.', 'civicrm') .
