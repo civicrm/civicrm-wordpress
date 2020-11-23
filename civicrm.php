@@ -1120,8 +1120,8 @@ class CiviCRM_For_WordPress {
 
       // Get ready for problems.
       $installLink    = admin_url() . "options-general.php?page=civicrm-install";
-      $docLinkInstall = "https://wiki.civicrm.org/confluence/display/CRMDOC/Installing+CiviCRM+for+WordPress";
-      $docLinkTrouble = "https://wiki.civicrm.org/confluence/display/CRMDOC/Installation+and+Upgrades";
+      $docLinkInstall = "https://docs.civicrm.org/installation/en/latest/wordpress/";
+      $docLinkTrouble = "https://docs.civicrm.org/sysadmin/en/latest/troubleshooting/";
       $forumLink      = "https://civicrm.stackexchange.com/";
 
 
