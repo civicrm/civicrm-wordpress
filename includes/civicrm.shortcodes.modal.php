@@ -63,14 +63,14 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
 
     // Adds the CiviCRM button to post and page edit screens
     // Use priority 100 to position button to the farright
-    add_action( 'media_buttons', array( $this, 'add_form_button' ), 100 );
+    add_action( 'media_buttons', [ $this, 'add_form_button' ], 100 );
 
 
     // Add the javascript and styles to make it all happen
-    add_action('load-post.php', array($this, 'add_core_resources'));
-    add_action('load-post-new.php', array($this, 'add_core_resources'));
-    add_action('load-page.php', array($this, 'add_core_resources'));
-    add_action('load-page-new.php', array($this, 'add_core_resources'));
+    add_action('load-post.php', [$this, 'add_core_resources']);
+    add_action('load-post-new.php', [$this, 'add_core_resources']);
+    add_action('load-page.php', [$this, 'add_core_resources']);
+    add_action('load-page-new.php', [$this, 'add_core_resources']);
 
   }
 
@@ -159,16 +159,16 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
    */
   public function get_post_types_with_editor() {
 
-    static $supported_post_types = array();
+    static $supported_post_types = [];
     if ( !empty( $supported_post_types) ) {
       return $supported_post_types;
     }
 
     // Get only post types with an admin UI
-    $args = array(
+    $args = [
       'public' => true,
       'show_ui' => true,
-    );
+    ];
 
     // Get post types
     $post_types = get_post_types($args);

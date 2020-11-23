@@ -72,7 +72,7 @@ class CiviCRM_For_WordPress_Compat {
     }
 
     // Support Clean URLs when Polylang is active.
-    add_action( 'civicrm_after_rewrite_rules', array( $this, 'rewrite_rules_polylang' ), 10, 2 );
+    add_action( 'civicrm_after_rewrite_rules', [ $this, 'rewrite_rules_polylang' ], 10, 2 );
 
   }
 

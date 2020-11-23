@@ -49,13 +49,13 @@ class CiviCRM_For_WordPress_Basepage {
     $this->civi = civi_wp();
 
     // Always listen for activation action
-    add_action( 'civicrm_activation', array( $this, 'activate' ) );
+    add_action( 'civicrm_activation', [ $this, 'activate' ] );
 
     // Always listen for deactivation action
-    add_action( 'civicrm_deactivation', array( $this, 'deactivate' ) );
+    add_action( 'civicrm_deactivation', [ $this, 'deactivate' ] );
 
     // Always check if the basepage needs to be created
-    add_action( 'civicrm_instance_loaded', array( $this, 'maybe_create_basepage' ) );
+    add_action( 'civicrm_instance_loaded', [ $this, 'maybe_create_basepage' ] );
 
   }
 
@@ -73,26 +73,26 @@ class CiviCRM_For_WordPress_Basepage {
     }
 
     // In WP 4.6.0+, tell it URL params are part of canonical URL
-    add_filter( 'get_canonical_url', array( $this, 'basepage_canonical_url' ), 999 );
+    add_filter( 'get_canonical_url', [ $this, 'basepage_canonical_url' ], 999 );
 
     // Yoast SEO has separate way of establishing canonical URL
-    add_filter( 'wpseo_canonical', array( $this, 'basepage_canonical_url' ), 999 );
+    add_filter( 'wpseo_canonical', [ $this, 'basepage_canonical_url' ], 999 );
 
     // And also for All in One SEO to handle canonical URL
-    add_filter( 'aioseop_canonical_url', array( $this, 'basepage_canonical_url' ), 999 );
+    add_filter( 'aioseop_canonical_url', [ $this, 'basepage_canonical_url' ], 999 );
 
     // Regardless of URL, load page template
-    add_filter( 'template_include', array( $this, 'basepage_template' ), 999 );
+    add_filter( 'template_include', [ $this, 'basepage_template' ], 999 );
 
     // Check permission
     $argdata = $this->civi->get_request_args();
     if ( ! $this->civi->users->check_permission( $argdata['args'] ) ) {
-      add_filter( 'the_content', array( $this->civi->users, 'get_permission_denied' ) );
+      add_filter( 'the_content', [ $this->civi->users, 'get_permission_denied' ] );
       return;
     }
 
     // Cache CiviCRM base page markup
-    add_action( 'wp', array( $this, 'basepage_handler' ), 10, 1 );
+    add_action( 'wp', [ $this, 'basepage_handler' ], 10, 1 );
 
   }
 
@@ -159,7 +159,7 @@ class CiviCRM_For_WordPress_Basepage {
     }
 
     // Create basepage
-    add_action( 'wp_loaded', array( $this, 'create_wp_basepage' ) );
+    add_action( 'wp_loaded', [ $this, 'create_wp_basepage' ] );
 
     // Change option so the callback above never runs again
     update_option( 'civicrm_activation_create_basepage', 'done' );
@@ -218,10 +218,10 @@ class CiviCRM_For_WordPress_Basepage {
       // Get the post object
       $post = get_post( $result );
 
-      $params = array(
+      $params = [
         'version' => 3,
         'wpBasePage' => $post->post_name,
-      );
+      ];
 
       // Save the setting
       civicrm_api3('setting', 'create', $params);
@@ -255,7 +255,7 @@ class CiviCRM_For_WordPress_Basepage {
     }
 
     // Define basepage
-    $page = array(
+    $page = [
       'post_status' => 'publish',
       'post_type' => 'page',
       'post_parent' => 0,
@@ -267,7 +267,7 @@ class CiviCRM_For_WordPress_Basepage {
       'post_excerpt' => '', // Quick fix for Windows
       'menu_order' => 0,
       'post_name' => $slug,
-    );
+    ];
 
     /**
      * Filter the default page title.
@@ -333,7 +333,7 @@ class CiviCRM_For_WordPress_Basepage {
     }
 
     // Add core resources for front end
-    add_action( 'wp', array( $this->civi, 'front_end_page_load' ), 100 );
+    add_action( 'wp', [ $this->civi, 'front_end_page_load' ], 100 );
 
     // CMW: why do we need this? Nothing that follows uses it...
     require_once ABSPATH . WPINC . '/pluggable.php';
@@ -384,29 +384,29 @@ class CiviCRM_For_WordPress_Basepage {
     rewind_posts();
 
     // Override page title with high priority
-    add_filter( 'wp_title', array( $this, 'wp_page_title' ), 100, 3 );
-    add_filter( 'document_title_parts', array( $this, 'wp_page_title_parts' ), 100, 1 );
+    add_filter( 'wp_title', [ $this, 'wp_page_title' ], 100, 3 );
+    add_filter( 'document_title_parts', [ $this, 'wp_page_title_parts' ], 100, 1 );
 
     // Add compatibility with Yoast SEO plugin's Open Graph title
-    add_filter( 'wpseo_opengraph_title', array( $this, 'wpseo_page_title' ), 100, 1 );
+    add_filter( 'wpseo_opengraph_title', [ $this, 'wpseo_page_title' ], 100, 1 );
 
     // Don't let the Yoast SEO plugin parse the basepage title
     if ( class_exists( 'WPSEO_Frontend' ) ) {
       $frontend = WPSEO_Frontend::get_instance();
-      remove_filter( 'pre_get_document_title', array( $frontend, 'title' ), 15 );
+      remove_filter( 'pre_get_document_title', [ $frontend, 'title' ], 15 );
     }
 
     // Include this content when base page is rendered
-    add_filter( 'the_content', array( $this, 'basepage_render' ) );
+    add_filter( 'the_content', [ $this, 'basepage_render' ] );
 
     // Hide the edit link
-    add_action( 'edit_post_link', array( $this->civi, 'clear_edit_post_link' ) );
+    add_action( 'edit_post_link', [ $this->civi, 'clear_edit_post_link' ] );
 
     // Tweak admin bar
-    add_action( 'wp_before_admin_bar_render', array( $this->civi, 'clear_edit_post_menu_item' ) );
+    add_action( 'wp_before_admin_bar_render', [ $this->civi, 'clear_edit_post_menu_item' ] );
 
     // Add body classes for easier styling
-    add_filter( 'body_class', array( $this, 'add_body_classes' ) );
+    add_filter( 'body_class', [ $this, 'add_body_classes' ] );
 
     // Flag that we have parsed the base page
     $this->basepage_parsed = TRUE;
@@ -610,7 +610,7 @@ class CiviCRM_For_WordPress_Basepage {
     }
 
     // Use the provided page template, but allow overrides.
-    $page_template = locate_template( array(
+    $page_template = locate_template( [
 
       /**
        * Allow base page template to be overridden.
@@ -626,7 +626,7 @@ class CiviCRM_For_WordPress_Basepage {
        */
       apply_filters( 'civicrm_basepage_template', $template_name )
 
-    ) );
+    ] );
 
     // If not homepage and template is found.
     if ( '' != $page_template && !is_front_page() ) {
@@ -634,7 +634,7 @@ class CiviCRM_For_WordPress_Basepage {
     }
 
     // Find homepage the template.
-    $home_template = locate_template( array(
+    $home_template = locate_template( [
 
       /**
        * Override the template, but allow plugins to amend.
@@ -656,7 +656,7 @@ class CiviCRM_For_WordPress_Basepage {
        */
       apply_filters( 'civicrm_basepage_home_template', 'page.php' )
 
-    ) );
+    ] );
 
     // Use it if found.
     if ( '' != $home_template ) {

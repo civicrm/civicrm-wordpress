@@ -49,7 +49,7 @@ class CiviCRM_For_WordPress_Users {
     $this->civi = civi_wp();
 
     // Always listen for activation action
-    add_action( 'civicrm_activation', array( $this, 'activate' ) );
+    add_action( 'civicrm_activation', [ $this, 'activate' ] );
 
   }
 
@@ -81,11 +81,11 @@ class CiviCRM_For_WordPress_Users {
     if ( ! CIVICRM_INSTALLED ) return;
 
     // Synchronise users on insert and update
-    add_action( 'user_register', array( $this, 'update_user' ) );
-    add_action( 'profile_update', array( $this, 'update_user' ) );
+    add_action( 'user_register', [ $this, 'update_user' ] );
+    add_action( 'profile_update', [ $this, 'update_user' ] );
 
     // Delete ufMatch record when a WordPress user is deleted
-    add_action( 'deleted_user', array( $this, 'delete_user_ufmatch' ), 10, 1 );
+    add_action( 'deleted_user', [ $this, 'delete_user_ufmatch' ], 10, 1 );
 
   }
 
@@ -115,7 +115,7 @@ class CiviCRM_For_WordPress_Users {
 
     // All profile and file urls, as well as user dashboard and tell-a-friend are valid
     $arg1 = CRM_Utils_Array::value(1, $args);
-    $invalidPaths = array('admin');
+    $invalidPaths = ['admin'];
     if ( in_array( $arg1, $invalidPaths ) ) {
       return FALSE;
     }
@@ -253,7 +253,7 @@ class CiviCRM_For_WordPress_Users {
     }
 
     // Minimum capabilities (Civicrm permissions) arrays
-    $default_min_capabilities =  array(
+    $default_min_capabilities =  [
       'access_civimail_subscribe_unsubscribe_pages' => 1,
       'access_all_custom_data' => 1,
       'access_uploaded_files' => 1,
@@ -265,7 +265,7 @@ class CiviCRM_For_WordPress_Users {
       'view_event_info' => 1,
       'sign_civicrm_petition' => 1,
       'view_public_civimail_content' => 1,
-    );
+    ];
 
     /**
      * Allow minimum capabilities to be filtered.
@@ -326,7 +326,7 @@ class CiviCRM_For_WordPress_Users {
      * @param array The default roles with access to CiviCRM.
      * @return array The modified roles with access to CiviCRM.
      */
-    $roles = apply_filters( 'civicrm_access_roles', array( 'super admin', 'administrator' ) );
+    $roles = apply_filters( 'civicrm_access_roles', [ 'super admin', 'administrator' ] );
 
      // Give access to CiviCRM to particular roles.
     foreach ( $roles as $role ) {

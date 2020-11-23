@@ -44,7 +44,7 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @access public
    * @var array $shortcodes The stored shortcodes.
    */
-  public $shortcodes = array();
+  public $shortcodes = [];
 
   /**
    * Rendered shortcode markup.
@@ -53,7 +53,7 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @access public
    * @var array $shortcode_markup The array of rendered shortcode markup.
    */
-  public $shortcode_markup = array();
+  public $shortcode_markup = [];
 
   /**
    * Count multiple passes of do_shortcode in a post.
@@ -62,7 +62,7 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @access public
    * @var array $shortcode_in_post Count multiple passes of do_shortcode in a post.
    */
-  public $shortcode_in_post = array();
+  public $shortcode_in_post = [];
 
 
   /**
@@ -86,10 +86,10 @@ class CiviCRM_For_WordPress_Shortcodes {
   public function register_hooks() {
 
     // Register the CiviCRM shortcode
-    add_shortcode( 'civicrm', array( $this, 'render_single' ) );
+    add_shortcode( 'civicrm', [ $this, 'render_single' ] );
 
     // Add CiviCRM core resources when a shortcode is detected in the post content
-    add_action( 'wp', array( $this, 'prerender' ), 10, 1 );
+    add_action( 'wp', [ $this, 'prerender' ], 10, 1 );
 
   }
 
@@ -163,7 +163,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       if ( $shortcodes_present > 1 ) {
 
         // Add CSS resources for front end
-        add_action( 'wp_enqueue_scripts', array( $this->civi, 'front_end_css_load' ), 100 );
+        add_action( 'wp_enqueue_scripts', [ $this->civi, 'front_end_css_load' ], 100 );
 
         // Let's add dummy markup
         foreach( $this->shortcodes AS $post_id => $shortcode_array ) {
@@ -183,7 +183,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       } else {
 
         // Add core resources for front end
-        add_action( 'wp', array( $this->civi, 'front_end_page_load' ), 100 );
+        add_action( 'wp', [ $this->civi, 'front_end_page_load' ], 100 );
 
         /*
          * Since we have only one shortcode, run the_loop again
@@ -207,7 +207,7 @@ class CiviCRM_For_WordPress_Shortcodes {
 
             // Test for hijacking
             if ( isset( $atts['hijack'] ) AND $atts['hijack'] == '1' ) {
-              add_filter( 'civicrm_context', array( $this, 'get_context' ) );
+              add_filter( 'civicrm_context', [ $this, 'get_context' ] );
             }
 
             // Store corresponding markup
@@ -217,17 +217,17 @@ class CiviCRM_For_WordPress_Shortcodes {
             if ( isset( $atts['hijack'] ) AND $atts['hijack'] == '1' ) {
 
               // Ditch the filter
-              remove_filter( 'civicrm_context', array( $this, 'get_context' ) );
+              remove_filter( 'civicrm_context', [ $this, 'get_context' ] );
 
               // Set title
               global $civicrm_wp_title;
               $post->post_title = $civicrm_wp_title;
 
               // Override page title
-              add_filter( 'single_post_title', array( $this->civi, 'single_page_title' ), 50, 2 );
+              add_filter( 'single_post_title', [ $this->civi, 'single_page_title' ], 50, 2 );
 
               // Overwrite content
-              add_filter( 'the_content', array( $this, 'get_content' ) );
+              add_filter( 'the_content', [ $this, 'get_content' ] );
 
             }
 
@@ -380,7 +380,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     // Do we have multiple shortcodes?
     if ( $multiple != 0 ) {
 
-      $links = array();
+      $links = [];
       foreach( $args AS $var => $arg ) {
         if ( ! empty( $arg ) AND $var != 'q' ) {
           $links[] = $var . '=' . $arg;
@@ -392,7 +392,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       $base_url = $this->civi->get_base_url(TRUE, FALSE, FALSE);
 
       // Init query parts
-      $queryParts = array();
+      $queryParts = [];
 
       // When not using clean URLs
       if (!$config->cleanURL) {
@@ -437,10 +437,10 @@ class CiviCRM_For_WordPress_Shortcodes {
         $this->post_titles[$post_id] = $data['title'];
 
         // Override title
-        add_filter( 'the_title', array( $this, 'get_title' ), 100, 2 );
+        add_filter( 'the_title', [ $this, 'get_title' ], 100, 2 );
 
         // Overwrite content
-        add_filter( 'the_content', array( $this, 'get_content' ) );
+        add_filter( 'the_content', [ $this, 'get_content' ] );
 
         // Don't show title
         $show_title = FALSE;
@@ -608,7 +608,7 @@ class CiviCRM_For_WordPress_Shortcodes {
   private function get_for_post( $content ) {
 
     // Init return array
-    $shortcodes = array();
+    $shortcodes = [];
 
     // Attempt to discover all instances of the shortcode
     $pattern = get_shortcode_regex();
@@ -665,7 +665,7 @@ class CiviCRM_For_WordPress_Shortcodes {
    */
   public function preprocess_atts( $atts ) {
 
-    $shortcode_atts = shortcode_atts( array(
+    $shortcode_atts = shortcode_atts( [
       'component' => 'contribution',
       'action' => NULL,
       'mode' => NULL,
@@ -674,18 +674,18 @@ class CiviCRM_For_WordPress_Shortcodes {
       'gid' => NULL,
       'cs' => NULL,
       'force' => NULL,
-      ),
+      ],
       $atts,
       'civicrm'
     );
 
     extract( $shortcode_atts );
 
-    $args = array(
+    $args = [
       'reset' => 1,
       'id'    => $id,
       'force' => $force,
-    );
+    ];
 
     // Construct args for known components
     switch ( $component ) {
@@ -794,7 +794,7 @@ class CiviCRM_For_WordPress_Shortcodes {
   public function get_data( $atts, $args ) {
 
     // Init return array
-    $data = array();
+    $data = [];
 
     if (!$this->civi->initialize()) {
       return FALSE;
@@ -813,10 +813,10 @@ class CiviCRM_For_WordPress_Shortcodes {
      * @param array $args Shortcode arguments array.
      * @return array $params Modified API params.
      */
-    $params = apply_filters( 'civicrm_shortcode_api_params', array(
+    $params = apply_filters( 'civicrm_shortcode_api_params', [
       'version' => 3,
       'sequential' => '1',
-    ), $atts, $args );
+    ], $atts, $args );
 
     // Get the CiviCRM entity via the API
     switch ( $atts['component'] ) {

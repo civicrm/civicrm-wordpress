@@ -116,7 +116,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
       $this->assoc_args = $assoc_args;
 
       # define command router
-      $command_router = array(
+      $command_router = [
         'api'                => 'api',
         'cache-clear'        => 'cacheClear',
         'enable-debug'       => 'enableDebug',
@@ -134,7 +134,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
         'update-cfg'         => 'updateConfig',
         'upgrade'            => 'upgrade',
         'upgrade-db'         => 'upgradeDB',
-       );
+      ];
 
       # get command
       $command = array_shift( $args );
@@ -159,7 +159,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
      */
     private function api() {
 
-      $defaults = array( 'version' => 3 );
+      $defaults = [ 'version' => 3 ];
 
       array_shift( $this->args );
       list( $entity, $action ) = explode( '.', $this->args[0] );
@@ -251,10 +251,10 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
      */
     private function enableDebug() {
       civicrm_initialize();
-      Civi::settings()->add( array(
+      Civi::settings()->add( [
         'debug_enabled' => 1,
         'backtrace' => 1,
-      ) );
+      ] );
       WP_CLI::success( 'Debug setting enabled.' );
     }
 
@@ -263,10 +263,10 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
      */
     private function disableDebug() {
       civicrm_initialize();
-      Civi::settings()->add( array(
+      Civi::settings()->add( [
         'debug_enabled' => 0,
         'backtrace' => 0,
-      ) );
+      ] );
       WP_CLI::success( 'Debug setting disabled.' );
     }
 
@@ -435,7 +435,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
       if ( substr( $base_url, -1 ) != '/' ) {
         $base_url .= '/';
       }
-      $params = array(
+      $params = [
         'crmRoot'            => $crmPath . '/',
         'templateCompileDir' => "{$settings_dir}templates_c",
         'frontEnd'           => 0,
@@ -450,7 +450,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
         'CMSdbHost'          => DB_HOST,
         'CMSdbName'          => DB_NAME,
         'siteKey'            => md5(rand() . mt_rand() . rand() . uniqid('', TRUE) . $params['baseURL']),
-       );
+      ];
 
       $str = file_get_contents( $tplPath . 'civicrm.settings.php.template' );
       foreach ( $params as $key => $value ) {
@@ -465,7 +465,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
       WP_CLI::success( sprintf( 'Settings file generated: %s', $config_file ) );
 
       # activate plugin and we're done
-      @WP_CLI::run_command( array( 'plugin', 'activate', 'civicrm' ), array() );
+      @WP_CLI::run_command( [ 'plugin', 'activate', 'civicrm' ], [] );
       WP_CLI::success( 'CiviCRM installed.' );
 
     }
@@ -490,12 +490,12 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
         $_REQUEST['key']  = $this->getOption( 'civicrm_sitekey', null );
 
         global $argv;
-        $argv = array(
+        $argv = [
           0 => 'drush',
           1 => '-u' . $_REQUEST['name'],
           2 => '-p' . $_REQUEST['pass'],
           3 => '-s' . $this->getOption( 'uri', false ),
-         );
+        ];
 
         # if ( !defined( 'CIVICRM_CONFDIR' ) ) {
         # $plugins_dir = plugin_dir_path( __FILE__ );
@@ -523,7 +523,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
       } else {
 
-        $result = civicrm_api( 'Mailing', 'Process', array( 'version' => 3 ) );
+        $result = civicrm_api( 'Mailing', 'Process', [ 'version' => 3 ] );
         if ( $result['is_error'] ) {
           WP_CLI::error( $result['error_message'] );
         }
@@ -656,8 +656,8 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
       # 2. backup, drop and create database
       WP_CLI::run_command(
-        array( 'civicrm', 'sql-dump' ),
-        array( 'result-file' => $restore_backup_dir . '/civicrm.sql' )
+        [ 'civicrm', 'sql-dump' ],
+        [ 'result-file' => $restore_backup_dir . '/civicrm.sql' ]
       );
 
       WP_CLI::success( 'Database backed up.' );
@@ -699,7 +699,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
       WP_CLI::success( 'Database restored.' );
 
       WP_CLI::line( 'Clearing caches..' );
-      WP_CLI::run_command( array( 'civicrm', 'cache-clear' ) );
+      WP_CLI::run_command( [ 'civicrm', 'cache-clear' ] );
 
       WP_CLI::success( 'Restore process completed.' );
 
@@ -767,7 +767,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
       $assoc_args       = $this->assoc_args;
       $stdout           = ! isset( $assoc_args['result-file'] );
       $command          = "mysqldump --no-defaults --host={$dsn['hostspec']} --user={$dsn['username']} --password='{$dsn['password']}' %s";
-      $command_esc_args = array( $dsn['database'] );
+      $command_esc_args = [ $dsn['database'] ];
 
       if ( isset( $assoc_args['tables'] ) ) {
         $tables = explode( ',', $assoc_args['tables'] );
@@ -782,7 +782,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
       $escaped_command = call_user_func_array(
         '\WP_CLI\Utils\esc_cmd',
         array_merge(
-          array( $command ),
+          [ $command ],
           $command_esc_args
         )
       );
@@ -814,13 +814,13 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
       $dsn = DB::parseDSN( CIVICRM_DSN );
 
-      $mysql_args = array(
+      $mysql_args = [
         'host'     => $dsn['hostspec'],
         'database' => $dsn['database'],
         'user'     => $dsn['username'],
         'password' => $dsn['password'],
         'execute'  => $query,
-       );
+      ];
 
       \WP_CLI\Utils\run_mysql_command( 'mysql --no-defaults', $mysql_args );
 
@@ -838,12 +838,12 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
       $dsn = DB::parseDSN( CIVICRM_DSN );
 
-      $mysql_args = array(
+      $mysql_args = [
         'host'     => $dsn['hostspec'],
         'database' => $dsn['database'],
         'user'     => $dsn['username'],
         'password' => $dsn['password'],
-       );
+      ];
 
       \WP_CLI\Utils\run_mysql_command( 'mysql --no-defaults', $mysql_args );
 
@@ -856,8 +856,8 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
       civicrm_initialize();
 
-      $default_values = array();
-      $states        = array( 'old', 'new' );
+      $default_values = [];
+      $states         = [ 'old', 'new' ];
 
       for ( $i = 1; $i <= 3; $i++ ) {
         foreach ( $states as $state ) {
@@ -1001,8 +1001,8 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
       WP_CLI::success( '1. Code backed up.' );
 
       WP_CLI::run_command(
-        array( 'civicrm', 'sql-dump' ),
-        array( 'result-file' => $backup_target . '.sql' )
+        [ 'civicrm', 'sql-dump' ],
+        [ 'result-file' => $backup_target . '.sql' ]
       );
 
       WP_CLI::success( '2. Database backed up.' );
@@ -1033,7 +1033,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
 
       WP_CLI::success( '4. ' );
 
-      WP_CLI::run_command( array( 'civicrm', 'upgrade-db' ), array() );
+      WP_CLI::run_command( [ 'civicrm', 'upgrade-db' ], [] );
 
       WP_CLI::success( 'Process completed.' );
 
@@ -1069,7 +1069,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
         $upgrade = new CRM_Upgrade_Page_Upgrade();
 
         // new since CiviCRM 4.1
-        if ( is_callable( array( $upgrade, 'setPrint' ) ) ) {
+        if ( is_callable( [ $upgrade, 'setPrint' ] ) ) {
           $upgrade->setPrint( true );
         }
 
@@ -1093,7 +1093,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
      */
     private static function parseDSN( $dsn ) {
 
-      $parsed = array(
+      $parsed = [
         'phptype'  => false,
         'dbsyntax' => false,
         'username' => false,
@@ -1103,7 +1103,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
         'port'     => false,
         'socket'   => false,
         'database' => false,
-       );
+      ];
 
       if ( is_array( $dsn ) ) {
         $dsn = array_merge( $parsed, $dsn );
@@ -1195,7 +1195,7 @@ if ( ! defined( 'CIVICRM_WPCLI_LOADED' ) ) {
           if ( strpos( $dsn, '&' ) !== false ) {
             $opts = explode( '&', $dsn );
           } else { // database?param1=value1
-            $opts = array( $dsn );
+            $opts = [ $dsn ];
           }
           foreach ( $opts as $opt ) {
             list( $key, $value ) = explode( '=', $opt );
