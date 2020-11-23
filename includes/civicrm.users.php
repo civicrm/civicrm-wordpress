@@ -17,7 +17,7 @@
  */
 
 
-// This file must not accessed directly
+// This file must not accessed directly.
 if (!defined('ABSPATH')) {
   exit;
 }
@@ -47,10 +47,10 @@ class CiviCRM_For_WordPress_Users {
    */
   public function __construct() {
 
-    // Store reference to CiviCRM plugin object
+    // Store reference to CiviCRM plugin object.
     $this->civi = civi_wp();
 
-    // Always listen for activation action
+    // Always listen for activation action.
     add_action('civicrm_activation', [$this, 'activate']);
 
   }
@@ -63,7 +63,10 @@ class CiviCRM_For_WordPress_Users {
    */
   public function activate() {
 
-    // Assign minimum capabilities for all WP roles and create 'anonymous_user' role
+    /*
+     * Assign minimum capabilities for all WordPress roles and create
+     * 'anonymous_user' role.
+     */
     $this->set_wp_user_capabilities();
 
   }
@@ -76,19 +79,19 @@ class CiviCRM_For_WordPress_Users {
    */
   public function register_hooks() {
 
-    // Add CiviCRM access capabilities to WordPress roles
+    // Add CiviCRM access capabilities to WordPress roles.
     $this->set_access_capabilities();
 
-    // Do not hook into user updates if CiviCRM not installed yet
+    // Do not hook into user updates if CiviCRM not installed yet.
     if (!CIVICRM_INSTALLED) {
       return;
     }
 
-    // Synchronise users on insert and update
+    // Synchronise users on insert and update.
     add_action('user_register', [$this, 'update_user']);
     add_action('profile_update', [$this, 'update_user']);
 
-    // Delete ufMatch record when a WordPress user is deleted
+    // Delete ufMatch record when a WordPress user is deleted.
     add_action('deleted_user', [$this, 'delete_user_ufmatch'], 10, 1);
 
   }
@@ -112,12 +115,12 @@ class CiviCRM_For_WordPress_Users {
 
     $config = CRM_Core_Config::singleton();
 
-    // Set frontend true
+    // Set frontend true.
     $config->userFrameworkFrontend = TRUE;
 
     require_once 'CRM/Utils/Array.php';
 
-    // All profile and file urls, as well as user dashboard and tell-a-friend are valid
+    // All profile and file urls, as well as user dashboard and tell-a-friend are valid.
     $arg1 = CRM_Utils_Array::value(1, $args);
     $invalidPaths = ['admin'];
     if (in_array($arg1, $invalidPaths)) {
@@ -146,15 +149,15 @@ class CiviCRM_For_WordPress_Users {
   /**
    * Handle WordPress user events.
    *
-   * Callback function for 'user_register' hook
-   * Callback function for 'profile_update' hook
+   * Callback function for 'user_register' hook.
+   * Callback function for 'profile_update' hook.
    *
-   * CMW: seems to (wrongly) create new CiviCRM Contact every time a user changes their
-   * first_name or last_name attributes in WordPress.
+   * CMW: seems to (wrongly) create new CiviCRM Contact every time a user changes
+   * their first_name or last_name attributes in WordPress.
    *
    * @since 4.6
    *
-   * @param int $user_id The numeric ID of the WordPress user
+   * @param int $user_id The numeric ID of the WordPress user.
    */
   public function update_user($user_id) {
 
@@ -191,24 +194,24 @@ class CiviCRM_For_WordPress_Users {
      * to the CiviCRM Contact, we have to search for it all over again.
      */
     CRM_Core_BAO_UFMatch::synchronize(
-      $user, // User object
-      TRUE, // Update = true
-      'WordPress', // CMS
-      'Individual' // contact type
+      $user, // User object.
+      TRUE, // Update = true.
+      'WordPress', // CMS.
+      'Individual' // Contact Type.
     );
 
     /*
-    // IN PROGRESS: synchronizeUFMatch does return the contact object, however
+    // IN PROGRESS: synchronizeUFMatch does return the Contact object, however
     $civi_contact = CRM_Core_BAO_UFMatch::synchronizeUFMatch(
-      $user, // User object
-      $user->ID, // ID
-      $user->user_mail, // Unique identifier
-      null // Unused
-      'WordPress' // CMS
-      'Individual' // contact type
+      $user, // User object.
+      $user->ID, // ID.
+      $user->user_mail, // Unique identifier.
+      null // Unused.
+      'WordPress' // CMS.
+      'Individual' // Contact Type.
     );
 
-    // Now we can allow other plugins to do their thing
+    // Now we can allow other plugins to do their thing.
     do_action('civicrm_contact_synced', $user, $civi_contact);
     */
 
@@ -216,9 +219,9 @@ class CiviCRM_For_WordPress_Users {
 
 
   /**
-   * When a WordPress user is deleted, delete the ufMatch record.
+   * When a WordPress user is deleted, delete the UFMatch record.
    *
-   * Callback function for 'delete_user' hook
+   * Callback function for 'delete_user' hook.
    *
    * @since 4.6
    *
@@ -230,7 +233,7 @@ class CiviCRM_For_WordPress_Users {
       return;
     }
 
-    // Delete the ufMatch record
+    // Delete the UFMatch record.
     require_once 'CRM/Core/BAO/UFMatch.php';
     CRM_Core_BAO_UFMatch::deleteUser($user_id);
 
@@ -256,7 +259,7 @@ class CiviCRM_For_WordPress_Users {
       $wp_roles = new WP_Roles();
     }
 
-    // Minimum capabilities (Civicrm permissions) arrays
+    // Define minimum capabilities (CiviCRM permissions).
     $default_min_capabilities =  [
       'access_civimail_subscribe_unsubscribe_pages' => 1,
       'access_all_custom_data' => 1,
@@ -281,7 +284,7 @@ class CiviCRM_For_WordPress_Users {
      */
     $min_capabilities = apply_filters('civicrm_min_capabilities', $default_min_capabilities);
 
-    // Assign the Minimum capabilities (Civicrm permissions) to all WP roles
+    // Assign the minimum capabilities to all WordPress roles.
     foreach ($wp_roles->role_names as $role => $name) {
       $roleObj = $wp_roles->get_role($role);
       foreach ($min_capabilities as $capability_name => $capability_value) {
@@ -348,17 +351,19 @@ class CiviCRM_For_WordPress_Users {
 
 
   /**
-   * Get CiviCRM contact type.
+   * Get CiviCRM Contact Type.
    *
    * @since 4.6
    *
-   * @param string $default The requested contact type.
-   * @return string $ctype The computed contact type.
+   * @param string $default The requested Contact Type.
+   * @return string $ctype The computed Contact Type.
    */
   public function get_civicrm_contact_type($default = NULL) {
 
-    // Here we are creating a new contact
-    // Get the contact type from the POST variables if any
+    /*
+     * Here we are creating a new Contact.
+     * Get the Contact Type from the POST variables if any.
+     */
     if (isset($_REQUEST['ctype'])) {
       $ctype = $_REQUEST['ctype'];
     }
@@ -385,6 +390,6 @@ class CiviCRM_For_WordPress_Users {
   }
 
 
-} // Class CiviCRM_For_WordPress_Users ends
+} // Class CiviCRM_For_WordPress_Users ends.
 
 

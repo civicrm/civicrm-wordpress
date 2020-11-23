@@ -17,7 +17,7 @@
  */
 
 
-// This file must not accessed directly
+// This file must not accessed directly.
 if (!defined('ABSPATH' ) ) {
   exit;
 }
@@ -146,11 +146,11 @@ class CiviCRM_For_WordPress_Compat {
       }
     }
 
-    // Maybe force flush
+    // Maybe force flush.
     if ($flush_rewrite_rules) {
       flush_rewrite_rules();
     }
 
   }
 
-} // Class CiviCRM_For_WordPress_Compat ends
+} // Class CiviCRM_For_WordPress_Compat ends.
