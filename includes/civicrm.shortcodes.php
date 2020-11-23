@@ -18,7 +18,9 @@
 
 
 // This file must not accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
+if (!defined('ABSPATH')) {
+  exit;
+}
 
 
 /**
@@ -70,7 +72,7 @@ class CiviCRM_For_WordPress_Shortcodes {
    *
    * @since 4.6
    */
-  function __construct() {
+  public function __construct() {
 
     // Store reference to CiviCRM plugin object
     $this->civi = civi_wp();
@@ -86,10 +88,10 @@ class CiviCRM_For_WordPress_Shortcodes {
   public function register_hooks() {
 
     // Register the CiviCRM shortcode
-    add_shortcode( 'civicrm', [ $this, 'render_single' ] );
+    add_shortcode('civicrm', [$this, 'render_single']);
 
     // Add CiviCRM core resources when a shortcode is detected in the post content
-    add_action( 'wp', [ $this, 'prerender' ], 10, 1 );
+    add_action('wp', [$this, 'prerender'], 10, 1);
 
   }
 
@@ -103,7 +105,7 @@ class CiviCRM_For_WordPress_Shortcodes {
    *
    * @param object $wp The WP object, present but not used.
    */
-  public function prerender( $wp ) {
+  public function prerender($wp) {
 
     /*
      * At this point, all conditional tags are available
@@ -111,7 +113,9 @@ class CiviCRM_For_WordPress_Shortcodes {
      */
 
     // Bail if this is a 404
-    if ( is_404() ) return;
+    if (is_404()) {
+      return;
+    }
 
     // A counter's useful
     $shortcodes_present = 0;
@@ -121,25 +125,25 @@ class CiviCRM_For_WordPress_Shortcodes {
      * This also has the effect of bypassing the logic in
      * https://github.com/civicrm/civicrm-wordpress/pull/36
      */
-    if ( have_posts() ) {
-      while ( have_posts() ) : the_post();
+    if (have_posts()) {
+      while (have_posts()) : the_post();
 
         global $post;
 
         // Check for existence of shortcode in content
-        if ( has_shortcode( $post->post_content, 'civicrm' ) ) {
+        if (has_shortcode($post->post_content, 'civicrm')) {
 
           // Get CiviCRM shortcodes in this post
-          $shortcodes_array = $this->get_for_post( $post->post_content );
+          $shortcodes_array = $this->get_for_post($post->post_content);
 
           // Sanity check
-          if ( !empty( $shortcodes_array ) ) {
+          if (!empty($shortcodes_array)) {
 
             // Add it to our property
             $this->shortcodes[$post->ID] = $shortcodes_array;
 
             // Bump shortcode counter
-            $shortcodes_present += count( $this->shortcodes[$post->ID] );
+            $shortcodes_present += count($this->shortcodes[$post->ID]);
 
           }
 
@@ -152,7 +156,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     rewind_posts();
 
     // Did we get any?
-    if ( $shortcodes_present ) {
+    if ($shortcodes_present) {
 
       // We need CiviCRM initialised prior to parsing shortcodes
       if (!$this->civi->initialize()) {
@@ -160,42 +164,43 @@ class CiviCRM_For_WordPress_Shortcodes {
       }
 
       // How should we handle multiple shortcodes?
-      if ( $shortcodes_present > 1 ) {
+      if ($shortcodes_present > 1) {
 
         // Add CSS resources for front end
-        add_action( 'wp_enqueue_scripts', [ $this->civi, 'front_end_css_load' ], 100 );
+        add_action('wp_enqueue_scripts', [$this->civi, 'front_end_css_load'], 100);
 
         // Let's add dummy markup
-        foreach( $this->shortcodes AS $post_id => $shortcode_array ) {
+        foreach ($this->shortcodes AS $post_id => $shortcode_array) {
 
           // Set flag if there are multple shortcodes in this post
-          $multiple = ( count( $shortcode_array ) > 1 ) ? 1 : 0;
+          $multiple = (count($shortcode_array) > 1) ? 1 : 0;
 
-          foreach( $shortcode_array AS $shortcode ) {
+          foreach ($shortcode_array AS $shortcode) {
 
             // Mimic invoke in multiple shortcode context
-            $this->shortcode_markup[$post_id][] = $this->render_multiple( $post_id, $shortcode, $multiple );
+            $this->shortcode_markup[$post_id][] = $this->render_multiple($post_id, $shortcode, $multiple);
 
           }
 
         }
 
-      } else {
+      }
+      else {
 
         // Add core resources for front end
-        add_action( 'wp', [ $this->civi, 'front_end_page_load' ], 100 );
+        add_action('wp', [$this->civi, 'front_end_page_load'], 100);
 
         /*
          * Since we have only one shortcode, run the_loop again
          * the DB query has already been done, so this has no significant impact
          */
-        if ( have_posts() ) {
-          while ( have_posts() ) : the_post();
+        if (have_posts()) {
+          while (have_posts()) : the_post();
 
             global $post;
 
             // Is this the post?
-            if ( ! array_key_exists( $post->ID, $this->shortcodes ) ) {
+            if (!array_key_exists($post->ID, $this->shortcodes)) {
               continue;
             }
 
@@ -203,31 +208,31 @@ class CiviCRM_For_WordPress_Shortcodes {
             $shortcode = $this->shortcodes[$post->ID][0];
 
             // Check to see if a shortcode component has been repeated?
-            $atts = $this->get_atts( $shortcode );
+            $atts = $this->get_atts($shortcode);
 
             // Test for hijacking
-            if ( isset( $atts['hijack'] ) AND $atts['hijack'] == '1' ) {
-              add_filter( 'civicrm_context', [ $this, 'get_context' ] );
+            if (isset($atts['hijack']) && $atts['hijack'] == '1') {
+              add_filter('civicrm_context', [$this, 'get_context']);
             }
 
             // Store corresponding markup
-            $this->shortcode_markup[$post->ID][] = do_shortcode( $shortcode );
+            $this->shortcode_markup[$post->ID][] = do_shortcode($shortcode);
 
             // Test for hijacking
-            if ( isset( $atts['hijack'] ) AND $atts['hijack'] == '1' ) {
+            if (isset($atts['hijack']) && $atts['hijack'] == '1') {
 
               // Ditch the filter
-              remove_filter( 'civicrm_context', [ $this, 'get_context' ] );
+              remove_filter('civicrm_context', [$this, 'get_context']);
 
               // Set title
               global $civicrm_wp_title;
               $post->post_title = $civicrm_wp_title;
 
               // Override page title
-              add_filter( 'single_post_title', [ $this->civi, 'single_page_title' ], 50, 2 );
+              add_filter('single_post_title', [$this->civi, 'single_page_title'], 50, 2);
 
               // Overwrite content
-              add_filter( 'the_content', [ $this, 'get_content' ] );
+              add_filter('the_content', [$this, 'get_content']);
 
             }
 
@@ -249,7 +254,7 @@ class CiviCRM_For_WordPress_Shortcodes {
      *
      * @since 4.6
      */
-    do_action( 'civicrm_shortcodes_parsed' );
+    do_action('civicrm_shortcodes_parsed');
 
   }
 
@@ -262,12 +267,12 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @param array $atts Shortcode attributes array.
    * @return string HTML for output.
    */
-  public function render_single( $atts ) {
+  public function render_single($atts) {
     // Do not parse shortcodes in REST context for PUT, POST and DELETE methods
-    if(defined('REST_REQUEST') && REST_REQUEST && (isset($_PUT) || isset($_POST) || isset($_DELETE)) ){
+    if (defined('REST_REQUEST') && REST_REQUEST && (isset($_PUT) || isset($_POST) || isset($_DELETE))) {
         // Return the original shortcode
         $shortcode = '[civicrm';
-        foreach($atts as $att=>$val){
+        foreach ($atts as $att=>$val) {
             $shortcode.=' '.$att.'="'.$val.'"';
         }
         $shortcode.=']';
@@ -276,14 +281,15 @@ class CiviCRM_For_WordPress_Shortcodes {
 
     // Check if we've already parsed this shortcode
     global $post;
-    if ( is_object($post) ) {
-      if ( !empty( $this->shortcode_markup ) ) {
-        if ( isset( $this->shortcode_markup[$post->ID] ) ) {
+    if (is_object($post)) {
+      if (!empty($this->shortcode_markup)) {
+        if (isset($this->shortcode_markup[$post->ID])) {
 
           // Set counter flag
-          if ( ! isset( $this->shortcode_in_post[$post->ID] ) ) {
+          if (!isset($this->shortcode_in_post[$post->ID])) {
             $this->shortcode_in_post[$post->ID] = 0;
-          } else {
+          }
+          else {
             $this->shortcode_in_post[$post->ID]++;
           }
 
@@ -295,16 +301,16 @@ class CiviCRM_For_WordPress_Shortcodes {
     }
 
     // Preprocess shortcode attributes
-    $args = $this->preprocess_atts( $atts );
+    $args = $this->preprocess_atts($atts);
 
     // Sanity check for improperly constructed shortcode
-    if ( $args === FALSE ) {
-      return '<p>' . __( 'Do not know how to handle this shortcode.', 'civicrm' ) . '</p>';
+    if ($args === FALSE) {
+      return '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
     }
 
     // invoke() requires environment variables to be set
-    foreach ( $args as $key => $value ) {
-      if ( $value !== NULL ) {
+    foreach ($args as $key => $value) {
+      if ($value !== NULL) {
         set_query_var($key, $value);
         $_REQUEST[$key] = $_GET[$key] = $value;
       }
@@ -317,7 +323,7 @@ class CiviCRM_For_WordPress_Shortcodes {
 
     // Check permission
     $argdata = $this->civi->get_request_args();
-    if ( ! $this->civi->users->check_permission( $argdata['args'] ) ) {
+    if (!$this->civi->users->check_permission($argdata['args'])) {
       return $this->civi->users->get_permission_denied();;
     }
 
@@ -342,34 +348,38 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @param bool $multiple Boolean flag, TRUE if post has multiple shortcodes, FALSE otherwise.
    * @return string $markup Generic markup for multiple instances.
    */
-  private function render_multiple( $post_id = FALSE, $shortcode = FALSE, $multiple = 0 ) {
+  private function render_multiple($post_id = FALSE, $shortcode = FALSE, $multiple = 0) {
 
     // Get attributes
-    $atts = $this->get_atts( $shortcode );
+    $atts = $this->get_atts($shortcode);
 
     // Pre-process shortcode and retrieve args
-    $args = $this->preprocess_atts( $atts );
+    $args = $this->preprocess_atts($atts);
 
     // Sanity check for improperly constructed shortcode
-    if ( $args === FALSE ) {
-      return '<p>' . __( 'Do not know how to handle this shortcode.', 'civicrm' ) . '</p>';
+    if ($args === FALSE) {
+      return '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
     }
 
     // Get data for this shortcode
-    $data = $this->get_data( $atts, $args );
+    $data = $this->get_data($atts, $args);
 
     // Sanity check
-    if ( $data === FALSE ) return '';
+    if ($data === FALSE) {
+      return '';
+    }
 
     // Did we get a title?
-    $title = __( 'Content via CiviCRM', 'civicrm' );
-    if ( ! empty( $data['title'] ) ) $title = $data['title'];
+    $title = __('Content via CiviCRM', 'civicrm');
+    if (!empty($data['title'])) {
+      $title = $data['title'];
+    }
 
     // Init title flag
     $show_title = TRUE;
 
     // Default link
-    $link = get_permalink( $post_id );
+    $link = get_permalink($post_id);
 
     // Default to no class
     $class = '';
@@ -378,15 +388,15 @@ class CiviCRM_For_WordPress_Shortcodes {
     $config = CRM_Core_Config::singleton();
 
     // Do we have multiple shortcodes?
-    if ( $multiple != 0 ) {
+    if ($multiple != 0) {
 
       $links = [];
-      foreach( $args AS $var => $arg ) {
-        if ( ! empty( $arg ) AND $var != 'q' ) {
+      foreach ($args AS $var => $arg) {
+        if (!empty($arg) && $var != 'q') {
           $links[] = $var . '=' . $arg;
         }
       }
-      $query = implode( '&', $links );
+      $query = implode('&', $links);
 
       // $absolute, $frontend, $forceBackend
       $base_url = $this->civi->get_base_url(TRUE, FALSE, FALSE);
@@ -407,14 +417,14 @@ class CiviCRM_For_WordPress_Shortcodes {
         }
 
         // Construct link
-        $link = trailingslashit( $base_url ) . '?' . implode('&', $queryParts);
+        $link = trailingslashit($base_url) . '?' . implode('&', $queryParts);
 
       }
       else {
 
         // Clean URLs
         if (isset($args['q'])) {
-          $base_url = trailingslashit( $base_url ) . str_replace('civicrm/', '', $args['q']) . '/';
+          $base_url = trailingslashit($base_url) . str_replace('civicrm/', '', $args['q']) . '/';
         }
         if (isset($query)) {
           $queryParts[] = $query;
@@ -429,18 +439,18 @@ class CiviCRM_For_WordPress_Shortcodes {
     }
 
     // Test for hijacking
-    if ( !$multiple ) {
+    if (!$multiple) {
 
-      if ( isset( $atts['hijack'] ) AND $atts['hijack'] == '1' ) {
+      if (isset($atts['hijack']) && $atts['hijack'] == '1') {
 
         // Add title to array
         $this->post_titles[$post_id] = $data['title'];
 
         // Override title
-        add_filter( 'the_title', [ $this, 'get_title' ], 100, 2 );
+        add_filter('the_title', [$this, 'get_title'], 100, 2);
 
         // Overwrite content
-        add_filter( 'the_content', [ $this, 'get_content' ] );
+        add_filter('the_content', [$this, 'get_content']);
 
         // Don't show title
         $show_title = FALSE;
@@ -456,7 +466,7 @@ class CiviCRM_For_WordPress_Shortcodes {
 
     // Description
     $description = FALSE;
-    if ( isset( $data['text'] ) AND ! empty( $data['text'] ) ) {
+    if (isset($data['text']) && !empty($data['text'])) {
       $description = $data['text'];
     }
 
@@ -473,7 +483,7 @@ class CiviCRM_For_WordPress_Shortcodes {
        * @param str The existing shortcode more link text.
        * @return str The modified shortcode more link text.
        */
-      apply_filters( 'civicrm_shortcode_more_link', __( 'Find out more...', 'civicrm' ) )
+      apply_filters('civicrm_shortcode_more_link', __('Find out more...', 'civicrm'))
 
     );
 
@@ -482,13 +492,13 @@ class CiviCRM_For_WordPress_Shortcodes {
     $footer = '';
 
     // Test config object for setting
-    if ( $config->empoweredBy == 1 ) {
+    if ($config->empoweredBy == 1) {
 
       // Footer enabled - define it
-      $civi = __( 'CiviCRM.org - Growing and Sustaining Relationships', 'civicrm' );
-      $logo = '<div class="empowered-by-logo"><span>' . __( 'CiviCRM', 'civicrm' ) . '</span></div>';
+      $civi = __('CiviCRM.org - Growing and Sustaining Relationships', 'civicrm');
+      $logo = '<div class="empowered-by-logo"><span>' . __('CiviCRM', 'civicrm') . '</span></div>';
       $civi_link = '<a href="https://civicrm.org/" title="' . $civi . '" target="_blank" class="empowered-by-link">' . $logo . '</a>';
-      $empowered = sprintf( __( 'Empowered by %s', 'civicrm' ), $civi_link );
+      $empowered = sprintf(__('Empowered by %s', 'civicrm'), $civi_link);
 
       /**
        * Filter the CiviCRM shortcode footer text.
@@ -498,7 +508,7 @@ class CiviCRM_For_WordPress_Shortcodes {
        * @param str $empowered The existing shortcode footer.
        * @return str $empowered The modified shortcode footer.
        */
-      $footer = apply_filters( 'civicrm_shortcode_footer', $empowered );
+      $footer = apply_filters('civicrm_shortcode_footer', $empowered);
 
       $empowered_enabled = TRUE;
 
@@ -508,7 +518,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     ob_start();
 
     // Include template
-    include( CIVICRM_PLUGIN_DIR . 'assets/templates/civicrm.shortcode.php' );
+    include(CIVICRM_PLUGIN_DIR . 'assets/templates/civicrm.shortcode.php');
 
     // Save the output and flush the buffer
     $markup = ob_get_clean();
@@ -523,7 +533,7 @@ class CiviCRM_For_WordPress_Shortcodes {
      * @param string $shortcode The shortcode being parsed.
      * @return str $markup The modified shortcode markup.
      */
-    return apply_filters( 'civicrm_shortcode_render_multiple', $markup, $post_id, $shortcode );
+    return apply_filters('civicrm_shortcode_render_multiple', $markup, $post_id, $shortcode);
 
   }
 
@@ -547,17 +557,17 @@ class CiviCRM_For_WordPress_Shortcodes {
    *
    * @return string The overridden content.
    */
-  public function get_content( $content ) {
+  public function get_content($content) {
 
     global $post;
 
     // Is this the post?
-    if ( ! array_key_exists( $post->ID, $this->shortcode_markup ) ) {
+    if (!array_key_exists($post->ID, $this->shortcode_markup)) {
       return $content;
     }
 
     // Bail if it has multiple shortcodes
-    if ( count( $this->shortcode_markup[$post->ID] ) > 1 ) {
+    if (count($this->shortcode_markup[$post->ID]) > 1) {
       return $content;
     }
 
@@ -575,20 +585,20 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @param int $post_id The numeric ID of the WordPress post.
    * @return string $title The overridden title.
    */
-  public function get_title( $title, $post_id ) {
+  public function get_title($title, $post_id) {
 
     // Is this the post?
-    if ( ! array_key_exists( $post_id, $this->shortcode_markup ) ) {
+    if (!array_key_exists($post_id, $this->shortcode_markup)) {
       return $title;
     }
 
     // Bail if it has multiple shortcodes
-    if ( count( $this->shortcode_markup[$post_id] ) > 1 ) {
+    if (count($this->shortcode_markup[$post_id]) > 1) {
       return $title;
     }
 
     // Shortcodes may or may not override title
-    if ( array_key_exists( $post_id, $this->post_titles ) ) {
+    if (array_key_exists($post_id, $this->post_titles)) {
       $title = $this->post_titles[$post_id];
     }
 
@@ -605,7 +615,7 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @param str $content The content to parse.
    * @return array $shortcodes Array of shortcodes.
    */
-  private function get_for_post( $content ) {
+  private function get_for_post($content) {
 
     // Init return array
     $shortcodes = [];
@@ -614,15 +624,15 @@ class CiviCRM_For_WordPress_Shortcodes {
     $pattern = get_shortcode_regex();
 
     if (
-      preg_match_all( '/' . $pattern . '/s', $content, $matches )
-      && array_key_exists( 2, $matches )
-      && in_array( 'civicrm', $matches[2] ) )
-    {
+      preg_match_all('/' . $pattern . '/s', $content, $matches)
+      && array_key_exists(2, $matches)
+      && in_array('civicrm', $matches[2])
+    ) {
 
       // Get keys for our shortcode
-      $keys = array_keys( $matches[2], 'civicrm' );
+      $keys = array_keys($matches[2], 'civicrm');
 
-      foreach( $keys AS $key ) {
+      foreach ($keys AS $key) {
         $shortcodes[] = $matches[0][$key];
       }
 
@@ -641,14 +651,14 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @param $shortcode The shortcode to parse.
    * @return array $shortcode_atts Array of shortcode attributes.
    */
-  private function get_atts( $shortcode ) {
+  private function get_atts($shortcode) {
 
     // Strip all but attributes definitions
-    $text = str_replace( '[civicrm ', '', $shortcode );
-    $text = str_replace( ']', '', $text );
+    $text = str_replace('[civicrm ', '', $shortcode);
+    $text = str_replace(']', '', $text);
 
     // Extract attributes
-    $shortcode_atts = shortcode_parse_atts( $text );
+    $shortcode_atts = shortcode_parse_atts($text);
 
     return $shortcode_atts;
 
@@ -663,9 +673,9 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @param array $atts Shortcode attributes array.
    * @return array $args Shortcode arguments array.
    */
-  public function preprocess_atts( $atts ) {
+  public function preprocess_atts($atts) {
 
-    $shortcode_atts = shortcode_atts( [
+    $shortcode_atts = shortcode_atts([
       'component' => 'contribution',
       'action' => NULL,
       'mode' => NULL,
@@ -679,7 +689,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       'civicrm'
     );
 
-    extract( $shortcode_atts );
+    extract($shortcode_atts);
 
     $args = [
       'reset' => 1,
@@ -688,11 +698,11 @@ class CiviCRM_For_WordPress_Shortcodes {
     ];
 
     // Construct args for known components
-    switch ( $component ) {
+    switch ($component) {
 
       case 'contribution':
 
-        if ( $mode == 'preview' || $mode == 'test' ) {
+        if ($mode == 'preview' || $mode == 'test') {
           $args['action'] = 'preview';
         }
         $args['q'] = 'civicrm/contribute/transact';
@@ -700,7 +710,7 @@ class CiviCRM_For_WordPress_Shortcodes {
 
       case 'pcp':
 
-        if ( $mode == 'preview' || $mode == 'test' ) {
+        if ($mode == 'preview' || $mode == 'test') {
           $args['action'] = 'preview';
         }
         $args['q'] = 'civicrm/pcp/info';
@@ -708,10 +718,10 @@ class CiviCRM_For_WordPress_Shortcodes {
 
       case 'event':
 
-        switch ( $action ) {
+        switch ($action) {
           case 'register':
             $args['q'] = 'civicrm/event/register';
-            if ( $mode == 'preview' || $mode == 'test' ) {
+            if ($mode == 'preview' || $mode == 'test') {
               $args['action'] = 'preview';
             }
             break;
@@ -728,7 +738,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       case 'user-dashboard':
 
         $args['q'] = 'civicrm/user';
-        unset( $args['id'] );
+        unset($args['id']);
         break;
 
       case 'profile':
@@ -770,10 +780,10 @@ class CiviCRM_For_WordPress_Shortcodes {
      * @param array $shortcode_atts Shortcode attributes.
      * @return array $args Modified shortcode arguments.
      */
-    $args = apply_filters( 'civicrm_shortcode_preprocess_atts', $args, $shortcode_atts );
+    $args = apply_filters('civicrm_shortcode_preprocess_atts', $args, $shortcode_atts);
 
     // Sanity check for path
-    if ( ! isset( $args['q'] ) ) {
+    if (!isset($args['q'])) {
       return FALSE;
     }
 
@@ -791,7 +801,7 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @param array $args Shortcode arguments array
    * @return array|bool $data The array data used to build the shortcode markup (or false on failure)
    */
-  public function get_data( $atts, $args ) {
+  public function get_data($atts, $args) {
 
     // Init return array
     $data = [];
@@ -813,13 +823,13 @@ class CiviCRM_For_WordPress_Shortcodes {
      * @param array $args Shortcode arguments array.
      * @return array $params Modified API params.
      */
-    $params = apply_filters( 'civicrm_shortcode_api_params', [
+    $params = apply_filters('civicrm_shortcode_api_params', [
       'version' => 3,
       'sequential' => '1',
-    ], $atts, $args );
+    ], $atts, $args);
 
     // Get the CiviCRM entity via the API
-    switch ( $atts['component'] ) {
+    switch ($atts['component']) {
 
       case 'contribution':
 
@@ -827,14 +837,14 @@ class CiviCRM_For_WordPress_Shortcodes {
         $params['id'] = $args['id'];
 
         // Call API
-        $civi_entity = civicrm_api( 'contribution_page', 'getsingle', $params );
+        $civi_entity = civicrm_api('contribution_page', 'getsingle', $params);
 
         // Set title
         $data['title'] = $civi_entity['title'];
 
         // Set text, if present
         $data['text'] = '';
-        if ( isset( $civi_entity['intro_text'] ) ) {
+        if (isset($civi_entity['intro_text'])) {
           $data['text'] = $civi_entity['intro_text'];
         }
 
@@ -846,13 +856,13 @@ class CiviCRM_For_WordPress_Shortcodes {
         $params['id'] = $args['id'];
 
         // Call API
-        $civi_entity = civicrm_api( 'event', 'getsingle', $params );
+        $civi_entity = civicrm_api('event', 'getsingle', $params);
 
         // Set title
-        switch ( $atts['action'] ) {
+        switch ($atts['action']) {
           case 'register':
             $data['title'] = sprintf(
-              __( 'Register for %s', 'civicrm' ),
+              __('Register for %s', 'civicrm'),
               $civi_entity['title']
             );
             break;
@@ -865,15 +875,15 @@ class CiviCRM_For_WordPress_Shortcodes {
 
         // Set text, if present
         $data['text'] = '';
-        if ( isset( $civi_entity['summary'] ) ) {
+        if (isset($civi_entity['summary'])) {
           $data['text'] = $civi_entity['summary'];
         }
         if (
           // Summary is not present or is empty
-          ( !isset($civi_entity['summary']) OR empty($civi_entity['summary']) )
-          AND
+          (!isset($civi_entity['summary']) OR empty($civi_entity['summary']))
+          &&
           // We do have a description
-          isset( $civi_entity['description'] ) AND !empty( $civi_entity['description'] )
+          isset($civi_entity['description']) && !empty($civi_entity['description'])
         ) {
           // Override with description
           $data['text'] = $civi_entity['description'];
@@ -884,7 +894,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       case 'user-dashboard':
 
         // Set title
-        $data['title'] = __( 'Dashboard', 'civicrm' );
+        $data['title'] = __('Dashboard', 'civicrm');
         break;
 
       case 'profile':
@@ -893,7 +903,7 @@ class CiviCRM_For_WordPress_Shortcodes {
         $params['id'] = $args['gid'];
 
         // Call API
-        $civi_entity = civicrm_api( 'uf_group', 'getsingle', $params );
+        $civi_entity = civicrm_api('uf_group', 'getsingle', $params);
 
         // Set title
         $data['title'] = $civi_entity['title'];
@@ -909,14 +919,14 @@ class CiviCRM_For_WordPress_Shortcodes {
         $params['id'] = $atts['id'];
 
         // Call API
-        $civi_entity = civicrm_api( 'survey', 'getsingle', $params );
+        $civi_entity = civicrm_api('survey', 'getsingle', $params);
 
         // Set title
         $data['title'] = $civi_entity['title'];
 
         // Set text, if present
         $data['text'] = '';
-        if ( isset( $civi_entity['instructions'] ) ) {
+        if (isset($civi_entity['instructions'])) {
           $data['text'] = $civi_entity['instructions'];
         }
 
@@ -942,7 +952,7 @@ class CiviCRM_For_WordPress_Shortcodes {
      * @param array $args Shortcode arguments array
      * @return array $data Modified shortcode data
      */
-    return apply_filters( 'civicrm_shortcode_get_data', $data, $atts, $args );
+    return apply_filters('civicrm_shortcode_get_data', $data, $atts, $args);
 
   }
 

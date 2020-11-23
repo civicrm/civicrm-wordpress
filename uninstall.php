@@ -19,8 +19,10 @@
 
 
 // Kick out if uninstall not called from WordPress
-if ( !defined( 'WP_UNINSTALL_PLUGIN' ) ) { exit(); }
+if (!defined('WP_UNINSTALL_PLUGIN')) {
+  exit();
+}
 
 
 // Delete options that this plugin has set
-delete_option( 'civicrm_activation_in_progress' );
+delete_option('civicrm_activation_in_progress');
