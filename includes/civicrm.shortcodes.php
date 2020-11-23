@@ -107,7 +107,7 @@ class CiviCRM_For_WordPress_Shortcodes {
 
     /*
      * At this point, all conditional tags are available
-     * @see http://codex.wordpress.org/Conditional_Tags
+     * @see https://codex.wordpress.org/Conditional_Tags
      */
 
     // Bail if this is a 404
@@ -487,7 +487,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       // Footer enabled - define it
       $civi = __( 'CiviCRM.org - Growing and Sustaining Relationships', 'civicrm' );
       $logo = '<div class="empowered-by-logo"><span>' . __( 'CiviCRM', 'civicrm' ) . '</span></div>';
-      $civi_link = '<a href="http://civicrm.org/" title="' . $civi . '" target="_blank" class="empowered-by-link">' . $logo . '</a>';
+      $civi_link = '<a href="https://civicrm.org/" title="' . $civi . '" target="_blank" class="empowered-by-link">' . $logo . '</a>';
       $empowered = sprintf( __( 'Empowered by %s', 'civicrm' ), $civi_link );
 
       /**

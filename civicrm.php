@@ -40,13 +40,13 @@ Not that they're ever adhered to anywhere other than core, but people do their
 best to comply...
 
 WordPress core coding standards:
-http://make.wordpress.org/core/handbook/coding-standards/php/
+https://developer.wordpress.org/coding-standards/wordpress-coding-standards/php/
 
 WordPress HTML standards:
-http://make.wordpress.org/core/handbook/coding-standards/html/
+https://make.wordpress.org/core/handbook/best-practices/coding-standards/html/
 
 WordPress JavaScript standards:
-http://make.wordpress.org/core/handbook/coding-standards/javascript/
+https://developer.wordpress.org/coding-standards/wordpress-coding-standards/javascript/
 --------------------------------------------------------------------------------
 */
 
@@ -1209,6 +1209,9 @@ class CiviCRM_For_WordPress {
    * A good reference on how to implement translation in WordPress:
    * http://ottopress.com/2012/internationalization-youre-probably-doing-it-wrong/
    *
+   * Also see:
+   * https://developer.wordpress.org/plugins/internationalization/
+   *
    * @since 4.4
    */
   public function enable_translation() {
@@ -2011,7 +2014,7 @@ register_deactivation_hook( CIVICRM_PLUGIN_FILE, [ civi_wp(), 'deactivate' ] );
 
 
 // Uninstall uses the 'uninstall.php' method
-// See: http://codex.wordpress.org/Function_Reference/register_uninstall_hook
+// See: https://developer.wordpress.org/reference/functions/register_uninstall_hook/
 
 
 

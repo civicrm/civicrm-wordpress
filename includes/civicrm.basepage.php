@@ -321,7 +321,7 @@ class CiviCRM_For_WordPress_Basepage {
 
     /*
      * At this point, all conditional tags are available
-     * @see http://codex.wordpress.org/Conditional_Tags
+     * @see https://codex.wordpress.org/Conditional_Tags
      */
 
     // Bail if this is a 404
