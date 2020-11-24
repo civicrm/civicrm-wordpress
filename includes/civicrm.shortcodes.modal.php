@@ -17,8 +17,10 @@
  */
 
 
-// This file must not accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
+// This file must not accessed directly.
+if (!defined('ABSPATH')) {
+  exit;
+}
 
 
 /**
@@ -43,9 +45,9 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
    *
    * @since 4.6
    */
-  function __construct() {
+  public function __construct() {
 
-    // Store reference to CiviCRM plugin object
+    // Store reference to CiviCRM plugin object.
     $this->civi = civi_wp();
 
   }
@@ -58,25 +60,29 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
    */
   public function register_hooks() {
 
-    // Bail if CiviCRM not installed yet
-    if ( ! CIVICRM_INSTALLED ) return;
+    // Bail if CiviCRM not installed yet.
+    if (!CIVICRM_INSTALLED) {
+      return;
+    }
 
-    // Adds the CiviCRM button to post and page edit screens
-    // Use priority 100 to position button to the farright
-    add_action( 'media_buttons', array( $this, 'add_form_button' ), 100 );
+    /*
+     * Adds the CiviCRM button to post and page edit screens.
+     * Use priority 100 to position button to the far right.
+     */
+    add_action('media_buttons', [$this, 'add_form_button'], 100);
 
 
-    // Add the javascript and styles to make it all happen
-    add_action('load-post.php', array($this, 'add_core_resources'));
-    add_action('load-post-new.php', array($this, 'add_core_resources'));
-    add_action('load-page.php', array($this, 'add_core_resources'));
-    add_action('load-page-new.php', array($this, 'add_core_resources'));
+    // Add the Javascript and styles to make it all happen.
+    add_action('load-post.php', [$this, 'add_core_resources']);
+    add_action('load-post-new.php', [$this, 'add_core_resources']);
+    add_action('load-page.php', [$this, 'add_core_resources']);
+    add_action('load-page-new.php', [$this, 'add_core_resources']);
 
   }
 
 
   /**
-   * Add button to editor for WP selected post types.
+   * Add button to editor for selected WordPress Post Types.
    *
    * Callback method for 'media_buttons' hook as set in register_hooks().
    *
@@ -84,13 +90,13 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
    */
   public function add_form_button() {
 
-    // Add button to WP selected post types, if allowed
-    if ( $this->post_type_has_button() ) {
+    // Add button to selected WordPress Post Types, if allowed.
+    if ($this->post_type_has_button()) {
 
-      $civilogo = file_get_contents( plugin_dir_path( __FILE__ ) . '../assets/civilogo.svg.b64' );
+      $civilogo = file_get_contents(plugin_dir_path(__FILE__) . '../assets/civilogo.svg.b64');
 
-      $url = admin_url( 'admin.php?page=CiviCRM&q=civicrm/shortcode&reset=1' );
-      echo '<a href= "' . $url . '" class="button crm-shortcode-button" style="padding-left: 4px;" title="' . __( 'Add CiviCRM Public Pages', 'civicrm' ) . '"><img src="' . $civilogo . '" height="15" width="15" alt="' . __( 'Add CiviCRM Public Pages', 'civicrm' ) . '" />'. __( 'CiviCRM', 'civicrm' ) .'</a>';
+      $url = admin_url('admin.php?page=CiviCRM&q=civicrm/shortcode&reset=1');
+      echo '<a href= "' . $url . '" class="button crm-shortcode-button" style="padding-left: 4px;" title="' . __('Add CiviCRM Public Pages', 'civicrm') . '"><img src="' . $civilogo . '" height="15" width="15" alt="' . __('Add CiviCRM Public Pages', 'civicrm') . '" />'. __('CiviCRM', 'civicrm') .'</a>';
 
     }
 
@@ -122,17 +128,19 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
    */
   public function post_type_has_button() {
 
-    // Get screen object
+    // Get screen object.
     $screen = get_current_screen();
 
     // Bail if no post type (e.g. Ninja Forms)
-    if ( ! isset( $screen->post_type ) ) return;
+    if (!isset($screen->post_type)) {
+      return;
+    }
 
-    // Get post types that support the editor
+    // Get post types that support the editor.
     $capable_post_types = $this->get_post_types_with_editor();
 
-    // Default allowed to true on all capable post types
-    $allowed = ( in_array( $screen->post_type, $capable_post_types ) ) ? true : false;
+    // Default allowed to true on all capable post types.
+    $allowed = (in_array($screen->post_type, $capable_post_types)) ? TRUE : FALSE;
 
     /**
      * Filter the appearance of the CiviCRM button.
@@ -143,7 +151,7 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
      * @param object $screen The current WordPress screen object.
      * @return bool $allowed True if the button is allowed, false otherwise.
      */
-    $allowed = apply_filters( 'civicrm_restrict_button_appearance', $allowed, $screen );
+    $allowed = apply_filters('civicrm_restrict_button_appearance', $allowed, $screen);
 
     return $allowed;
 
@@ -159,22 +167,22 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
    */
   public function get_post_types_with_editor() {
 
-    static $supported_post_types = array();
-    if ( !empty( $supported_post_types) ) {
+    static $supported_post_types = [];
+    if (!empty($supported_post_types)) {
       return $supported_post_types;
     }
 
-    // Get only post types with an admin UI
-    $args = array(
-      'public' => true,
-      'show_ui' => true,
-    );
+    // Get only post types with an admin UI.
+    $args = [
+      'public' => TRUE,
+      'show_ui' => TRUE,
+    ];
 
-    // Get post types
+    // Get post types.
     $post_types = get_post_types($args);
 
     foreach ($post_types AS $post_type) {
-      // Filter only those which have an editor
+      // Filter only those which have an editor.
       if (post_type_supports($post_type, 'editor')) {
         $supported_post_types[] = $post_type;
       }
@@ -183,4 +191,4 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
     return $supported_post_types;
   }
 
-} // Class CiviCRM_For_WordPress_Shortcodes_Modal ends
+} // Class CiviCRM_For_WordPress_Shortcodes_Modal ends.

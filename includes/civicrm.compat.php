@@ -17,8 +17,10 @@
  */
 
 
-// This file must not accessed directly
-if ( ! defined( 'ABSPATH' ) ) exit;
+// This file must not accessed directly.
+if (!defined('ABSPATH')) {
+  exit;
+}
 
 
 /**
@@ -67,12 +69,12 @@ class CiviCRM_For_WordPress_Compat {
   public function register_hooks() {
 
     // Bail if CiviCRM not installed yet.
-    if ( ! CIVICRM_INSTALLED ) {
+    if (!CIVICRM_INSTALLED) {
       return;
     }
 
     // Support Clean URLs when Polylang is active.
-    add_action( 'civicrm_after_rewrite_rules', array( $this, 'rewrite_rules_polylang' ), 10, 2 );
+    add_action('civicrm_after_rewrite_rules', [$this, 'rewrite_rules_polylang'], 10, 2);
 
   }
 
@@ -85,7 +87,7 @@ class CiviCRM_For_WordPress_Compat {
    * @param bool $flush_rewrite_rules True if rules flushed, false otherwise.
    * @param WP_Post $basepage The Basepage post object.
    */
-  public function rewrite_rules_polylang( $flush_rewrite_rules, $basepage ) {
+  public function rewrite_rules_polylang($flush_rewrite_rules, $basepage) {
 
     // Bail if Polylang is not present.
     if (!function_exists('pll_languages_list')) {
@@ -102,16 +104,16 @@ class CiviCRM_For_WordPress_Compat {
     $collected_rewrites = [];
 
     // Support prefixes for a single Basepage.
-    $basepage_url = get_permalink( $basepage->ID );
-    $basepage_raw_url = PLL()->links_model->remove_language_from_link( $basepage_url );
+    $basepage_url = get_permalink($basepage->ID);
+    $basepage_raw_url = PLL()->links_model->remove_language_from_link($basepage_url);
     $language_slugs = pll_languages_list();
     foreach ($language_slugs as $slug) {
-      $language = PLL()->model->get_language( $slug );
-      $language_url = PLL()->links_model->add_language_to_link( $basepage_raw_url, $language );
-      $parsed_url = wp_parse_url( $language_url, PHP_URL_PATH );
-      $regex_path = substr( $parsed_url, 1 );
+      $language = PLL()->model->get_language($slug);
+      $language_url = PLL()->links_model->add_language_to_link($basepage_raw_url, $language);
+      $parsed_url = wp_parse_url($language_url, PHP_URL_PATH);
+      $regex_path = substr($parsed_url, 1);
       $collected_rewrites[$basepage->ID][] = $regex_path;
-      $post_id = pll_get_post( $basepage->ID, $slug );
+      $post_id = pll_get_post($basepage->ID, $slug);
       if (!empty($post_id)) {
         $collected_rewrites[$post_id][] = $regex_path;
       }
@@ -119,13 +121,13 @@ class CiviCRM_For_WordPress_Compat {
 
     // Support prefixes for Basepages in multiple languages.
     foreach ($language_slugs as $slug) {
-      $post_id = pll_get_post( $basepage->ID, $slug );
+      $post_id = pll_get_post($basepage->ID, $slug);
       if (empty($post_id)) {
         continue;
       }
-      $url = get_permalink( $post_id );
-      $parsed_url = wp_parse_url( $url, PHP_URL_PATH );
-      $regex_path = substr( $parsed_url, 1 );
+      $url = get_permalink($post_id);
+      $parsed_url = wp_parse_url($url, PHP_URL_PATH);
+      $regex_path = substr($parsed_url, 1);
       $collected_rewrites[$basepage->ID][] = $regex_path;
       $collected_rewrites[$post_id][] = $regex_path;
     };
@@ -144,11 +146,11 @@ class CiviCRM_For_WordPress_Compat {
       }
     }
 
-    // Maybe force flush
+    // Maybe force flush.
     if ($flush_rewrite_rules) {
       flush_rewrite_rules();
     }
 
   }
 
-} // Class CiviCRM_For_WordPress_Compat ends
+} // Class CiviCRM_For_WordPress_Compat ends.
