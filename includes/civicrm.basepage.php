@@ -238,12 +238,37 @@ class CiviCRM_For_WordPress_Basepage {
     // If multisite, switch to main site.
     if (is_multisite() && !is_main_site()) {
 
-      // Store this site.
-      $original_site = get_current_blog_id();
+      /**
+       * Allow plugins to override the switch to the main site.
+       *
+       * This filter changes the default behaviour on WordPress Multisite so
+       * that the base page *is* created on every site on which CiviCRM is
+       * activated. This is a more sensible and inclusive default, since the
+       * absence of the base page on a sub-site often leads to confusion.
+       *
+       * To restore the previous functionality, return boolean TRUE.
+       *
+       * The previous functionality may be the desired behaviour when the
+       * WordPress Multisite instance in question is one where sub-sites aren't
+       * truly "separate" e.g. sites built on frameworks such as "Commons in
+       * a Box" or "MultilingualPress".
+       *
+       * @since 5.33
+       *
+       * @param bool False by default prevents the switch to the main site.
+       * @return bool Return true to enable the switch to the main site.
+       */
+      $switch = apply_filters('civicrm_basepage_main_site_only', FALSE);
 
-      // Switch.
-      global $current_site;
-      switch_to_blog($current_site->blog_id);
+      if ($switch !== FALSE) {
+
+        // Store this site.
+        $original_site = get_current_blog_id();
+
+        // Switch to main site.
+        switch_to_blog(get_main_site_id());
+
+      }
 
     }
 
