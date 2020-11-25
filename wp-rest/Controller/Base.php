@@ -11,101 +11,104 @@ use CiviCRM_WP_REST\Endpoint\Endpoint_Interface;
 
 abstract class Base extends \WP_REST_Controller implements Endpoint_Interface {
 
-	/**
-	 * Route namespace.
-	 *
-	 * @since 0.1
-	 * @var string
-	 */
-	protected $namespace = 'civicrm/v3';
+  /**
+   * @var string
+   * Route namespace.
+   * @since 0.1
+   */
+  protected $namespace = 'civicrm/v3';
 
-	/**
-	 * Gets the endpoint namespace.
-	 *
-	 * @since 0.1
-	 * @return string $namespace
-	 */
-	public function get_namespace() {
+  /**
+   * Gets the endpoint namespace.
+   *
+   * @since 0.1
+   * @return string $namespace
+   */
+  public function get_namespace() {
 
-		return $this->namespace;
+    return $this->namespace;
 
-	}
+  }
 
-	/**
-	 * Gets the rest base route.
-	 *
-	 * @since 0.1
-	 * @return string $rest_base
-	 */
-	public function get_rest_base() {
+  /**
+   * Gets the rest base route.
+   *
+   * @since 0.1
+   * @return string $rest_base
+   */
+  public function get_rest_base() {
 
-		return '/' . $this->rest_base;
+    return '/' . $this->rest_base;
 
-	}
+  }
 
-	/**
-	 * Retrieves the endpoint ie. '/civicrm/v3/rest'.
-	 *
-	 * @since 0.1
-	 * @return string $rest_base
-	 */
-	public function get_endpoint() {
+  /**
+   * Retrieves the endpoint ie. '/civicrm/v3/rest'.
+   *
+   * @since 0.1
+   * @return string $rest_base
+   */
+  public function get_endpoint() {
 
-		return '/' . $this->get_namespace() . $this->get_rest_base();
+    return '/' . $this->get_namespace() . $this->get_rest_base();
 
-	}
+  }
 
-	/**
-	 * Checks whether the requested route is equal to this endpoint.
-	 *
-	 * @since 0.1
-	 * @param WP_REST_Request $request
-	 * @return bool $is_current_endpoint True if it's equal, false otherwise
-	 */
-	public function is_current_endpoint( $request ) {
+  /**
+   * Checks whether the requested route is equal to this endpoint.
+   *
+   * @since 0.1
+   * @param WP_REST_Request $request
+   * @return bool $is_current_endpoint True if it's equal, false otherwise
+   */
+  public function is_current_endpoint($request) {
 
-		return $this->get_endpoint() == $request->get_route();
+    return $this->get_endpoint() == $request->get_route();
 
-	}
+  }
 
-	/**
-	 * Authorization status code.
-	 *
-	 * @since 0.1
-	 * @return int $status
-	 */
-	protected function authorization_status_code() {
+  /**
+   * Authorization status code.
+   *
+   * @since 0.1
+   * @return int $status
+   */
+  protected function authorization_status_code() {
 
-		$status = 401;
+    $status = 401;
 
-		if ( is_user_logged_in() ) $status = 403;
+    if (is_user_logged_in()) {
+      $status = 403;
+    }
 
-		return $status;
+    return $status;
 
-	}
+  }
 
-	/**
-	 * Wrapper for WP_Error.
-	 *
-	 * @since 0.1
-	 * @param string|\CiviCRM_API3_Exception|\WP_Error $error
-	 * @param mixed $data Error data
-	 * @return WP_Error $error
-	 */
-	protected function civi_rest_error( $error, $data = [] ) {
+  /**
+   * Wrapper for WP_Error.
+   *
+   * @since 0.1
+   * @param string|\CiviCRM_API3_Exception|\WP_Error $error
+   * @param mixed $data Error data
+   * @return WP_Error $error
+   */
+  protected function civi_rest_error($error, $data = []) {
 
-		if ( $error instanceof \CiviCRM_API3_Exception ) {
+    if ($error instanceof \CiviCRM_API3_Exception) {
 
-			return $error->getExtraParams();
+      return $error->getExtraParams();
 
-		} elseif ( $error instanceof \WP_Error ) {
+    }
 
-			return $error;
+    elseif ($error instanceof \WP_Error) {
 
-		}
+      return $error;
 
-		return new \WP_Error( 'civicrm_rest_api_error', $error, empty( $data ) ? [ 'status' => $this->authorization_status_code() ] : $data );
+    }
 
-	}
+    return new \WP_Error('civicrm_rest_api_error', $error, empty($data) ? ['status' => $this->authorization_status_code()] : $data);
+
+  }
 
 }

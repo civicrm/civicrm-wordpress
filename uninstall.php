@@ -8,7 +8,7 @@
  | permitted exceptions and without any warranty. For full license    |
  | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
@@ -17,12 +17,10 @@
  *
  */
 
-
 // Kick out if uninstall not called from WordPress.
 if (!defined('WP_UNINSTALL_PLUGIN')) {
   exit();
 }
-
 
 // Delete options that this plugin has set.
 delete_option('civicrm_activation_in_progress');

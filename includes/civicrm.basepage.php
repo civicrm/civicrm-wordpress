@@ -7,7 +7,7 @@
  | permitted exceptions and without any warranty. For full license    |
  | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
@@ -16,12 +16,10 @@
  *
  */
 
-
 // This file must not accessed directly.
 if (!defined('ABSPATH')) {
   exit;
 }
-
 
 /**
  * Define CiviCRM_For_WordPress_Basepage Class.
@@ -31,14 +29,12 @@ if (!defined('ABSPATH')) {
 class CiviCRM_For_WordPress_Basepage {
 
   /**
+   * @var object
    * Plugin object reference.
-   *
    * @since 4.6
    * @access public
-   * @var object $civi The plugin object reference.
    */
   public $civi;
-
 
   /**
    * Instance constructor.
@@ -60,7 +56,6 @@ class CiviCRM_For_WordPress_Basepage {
     add_action('civicrm_instance_loaded', [$this, 'maybe_create_basepage']);
 
   }
-
 
   /**
    * Register hooks to handle CiviCRM in a WordPress wpBasePage context.
@@ -98,7 +93,6 @@ class CiviCRM_For_WordPress_Basepage {
 
   }
 
-
   /**
    * Trigger the process whereby the WordPress basepage is created.
    *
@@ -120,7 +114,6 @@ class CiviCRM_For_WordPress_Basepage {
 
   }
 
-
   /**
    * Plugin deactivation.
    *
@@ -132,7 +125,6 @@ class CiviCRM_For_WordPress_Basepage {
     delete_option('civicrm_activation_create_basepage');
 
   }
-
 
   /**
    * Register the hook to create the WordPress basepage, if necessary.
@@ -167,7 +159,6 @@ class CiviCRM_For_WordPress_Basepage {
     update_option('civicrm_activation_create_basepage', 'done');
 
   }
-
 
   /**
    * Create WordPress basepage and save setting.
@@ -233,7 +224,6 @@ class CiviCRM_For_WordPress_Basepage {
 
   }
 
-
   /**
    * Create a WordPress page to act as the CiviCRM base page.
    *
@@ -264,10 +254,14 @@ class CiviCRM_For_WordPress_Basepage {
       'post_parent' => 0,
       'comment_status' => 'closed',
       'ping_status' => 'closed',
-      'to_ping' => '', // Quick fix for Windows.
-      'pinged' => '', // Quick fix for Windows.
-      'post_content_filtered' => '', // Quick fix for Windows.
-      'post_excerpt' => '', // Quick fix for Windows.
+      // Quick fix for Windows.
+      'to_ping' => '',
+      // Quick fix for Windows.
+      'pinged' => '',
+      // Quick fix for Windows.
+      'post_content_filtered' => '',
+      // Quick fix for Windows.
+      'post_excerpt' => '',
       'menu_order' => 0,
       'post_name' => $slug,
     ];
@@ -310,7 +304,6 @@ class CiviCRM_For_WordPress_Basepage {
 
   }
 
-
   /**
    * Build CiviCRM base page content.
    *
@@ -349,13 +342,18 @@ class CiviCRM_For_WordPress_Basepage {
      * @see https://github.com/civicrm/civicrm-wordpress/pull/36
      */
     if (have_posts()) {
-      while (have_posts()) : the_post();
+      while (have_posts()) {
+
+        the_post();
 
         global $post;
 
-        ob_start(); // Start buffering.
-        $this->civi->invoke(); // Now, instead of echoing, base page output ends up in buffer.
-        $this->basepage_markup = ob_get_clean(); // Save the output and flush the buffer.
+        // Start buffering.
+        ob_start();
+        // Now, instead of echoing, base page output ends up in buffer.
+        $this->civi->invoke();
+        // Save the output and flush the buffer.
+        $this->basepage_markup = ob_get_clean();
 
         /*
          * The following logic is in response to some of the complexities of how
@@ -382,7 +380,7 @@ class CiviCRM_For_WordPress_Basepage {
         // Disallow commenting.
         $post->comment_status = 'closed';
 
-      endwhile;
+      }
     }
 
     // Reset loop.
@@ -424,7 +422,6 @@ class CiviCRM_For_WordPress_Basepage {
     do_action('civicrm_basepage_parsed');
 
   }
-
 
   /**
    * Get CiviCRM basepage title for <title> element.
@@ -471,7 +468,6 @@ class CiviCRM_For_WordPress_Basepage {
 
   }
 
-
   /**
    * Get CiviCRM basepage title for <title> element.
    *
@@ -496,7 +492,6 @@ class CiviCRM_For_WordPress_Basepage {
 
   }
 
-
   /**
    * Get CiviCRM base page title for Open Graph elements.
    *
@@ -515,7 +510,6 @@ class CiviCRM_For_WordPress_Basepage {
 
   }
 
-
   /**
    * Get CiviCRM base page content.
    *
@@ -532,7 +526,6 @@ class CiviCRM_For_WordPress_Basepage {
     return $this->basepage_markup;
 
   }
-
 
   /**
    * Provide the canonical URL for a page accessed through a basepage.
@@ -594,7 +587,6 @@ class CiviCRM_For_WordPress_Basepage {
 
   }
 
-
   /**
    * Get CiviCRM base page template.
    *
@@ -621,54 +613,50 @@ class CiviCRM_For_WordPress_Basepage {
       return $template;
     }
 
+    /**
+     * Allow base page template to be overridden.
+     *
+     * In most cases, the logic will not progress beyond here. Shortcodes in
+     * posts and pages will have a template set, so we leave them alone unless
+     * specifically overridden by the filter.
+     *
+     * @since 4.6
+     *
+     * @param string $basepage_template The provided template name.
+     * @return string The overridden template name.
+     */
+    $basepage_template = apply_filters('civicrm_basepage_template', $basepage_template);
+
     // Use the provided page template, but allow overrides.
-    $page_template = locate_template([
-
-      /**
-       * Allow base page template to be overridden.
-       *
-       * In most cases, the logic will not progress beyond here. Shortcodes in
-       * posts and pages will have a template set, so we leave them alone unless
-       * specifically overridden by the filter.
-       *
-       * @since 4.6
-       *
-       * @param string $template_name The provided template name.
-       * @return string The overridden template name.
-       */
-      apply_filters('civicrm_basepage_template', $template_name)
-
-    ]);
+    $page_template = locate_template([$template_name]);
 
     // If not homepage and template is found.
     if ('' != $page_template && !is_front_page()) {
       return $page_template;
     }
 
+    /**
+     * Override the template, but allow plugins to amend.
+     *
+     * This filter handles the scenario where no basepage has been set, in
+     * which case CiviCRM will try to load its content in the site's homepage.
+     * Many themes, however, do not have a call to "the_content()" on the
+     * homepage - it is often used as a gateway page to display widgets,
+     * archives and so forth.
+     *
+     * Be aware that if the homepage is set to show latest posts, then this
+     * template override will not have the desired effect. A basepage *must*
+     * be set if this is the case.
+     *
+     * @since 4.6
+     *
+     * @param string The template name (set to the default page template).
+     * @return string The overridden template name.
+     */
+    $home_template_name = apply_filters('civicrm_basepage_home_template', 'page.php');
+
     // Find homepage the template.
-    $home_template = locate_template([
-
-      /**
-       * Override the template, but allow plugins to amend.
-       *
-       * This filter handles the scenario where no basepage has been set, in
-       * which case CiviCRM will try to load its content in the site's homepage.
-       * Many themes, however, do not have a call to "the_content()" on the
-       * homepage - it is often used as a gateway page to display widgets,
-       * archives and so forth.
-       *
-       * Be aware that if the homepage is set to show latest posts, then this
-       * template override will not have the desired effect. A basepage *must*
-       * be set if this is the case.
-       *
-       * @since 4.6
-       *
-       * @param string The template name (set to the default page template).
-       * @return string The overridden template name.
-       */
-      apply_filters('civicrm_basepage_home_template', 'page.php')
-
-    ]);
+    $home_template = locate_template([$home_template_name]);
 
     // Use it if found.
     if ('' != $home_template) {
@@ -679,7 +667,6 @@ class CiviCRM_For_WordPress_Basepage {
     return $template;
 
   }
-
 
   /**
    * Add classes to body element when on basepage.
@@ -694,36 +681,35 @@ class CiviCRM_For_WordPress_Basepage {
    */
   public function add_body_classes($classes) {
 
-     $args = $this->civi->get_request_args();
+    $args = $this->civi->get_request_args();
 
-     // Bail if we don't have any.
-     if (is_null($args['argString'])) {
-       return $classes;
-     }
+    // Bail if we don't have any.
+    if (is_null($args['argString'])) {
+      return $classes;
+    }
 
-     // Check for top level - it can be assumed this always 'civicrm'.
-     if (isset($args['args'][0]) && !empty($args['args'][0])) {
-       $classes[] = $args['args'][0];
-     }
+    // Check for top level - it can be assumed this always 'civicrm'.
+    if (isset($args['args'][0]) && !empty($args['args'][0])) {
+      $classes[] = $args['args'][0];
+    }
 
-     // Check for second level - the component.
-     if (isset($args['args'][1]) && !empty($args['args'][1])) {
-       $classes[] = $args['args'][0] . '-' . $args['args'][1];
-     }
+    // Check for second level - the component.
+    if (isset($args['args'][1]) && !empty($args['args'][1])) {
+      $classes[] = $args['args'][0] . '-' . $args['args'][1];
+    }
 
-     // Check for third level - the component's configuration.
-     if (isset($args['args'][2]) && !empty($args['args'][2])) {
-       $classes[] = $args['args'][0] . '-' . $args['args'][1] . '-' . $args['args'][2];
-     }
+    // Check for third level - the component's configuration.
+    if (isset($args['args'][2]) && !empty($args['args'][2])) {
+      $classes[] = $args['args'][0] . '-' . $args['args'][1] . '-' . $args['args'][2];
+    }
 
-     // Check for fourth level - because well, why not?
-     if (isset($args['args'][3]) && !empty($args['args'][3])) {
-       $classes[] = $args['args'][0] . '-' . $args['args'][1] . '-' . $args['args'][2] . '-' . $args['args'][3];
-     }
+    // Check for fourth level - because well, why not?
+    if (isset($args['args'][3]) && !empty($args['args'][3])) {
+      $classes[] = $args['args'][0] . '-' . $args['args'][1] . '-' . $args['args'][2] . '-' . $args['args'][3];
+    }
 
-     return $classes;
+    return $classes;
 
   }
 
-
-} // Class CiviCRM_For_WordPress_Basepage ends.
+}
