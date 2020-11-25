@@ -946,10 +946,14 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
       $settings = explode("\n", $settings);
 
       if ($civicrm_root_code = reset(preg_grep('/^\s*\$civicrm_root\s*=.*$/', $legacy_settings))) {
+        // phpcs:disable
         eval($civicrm_root_code);
+        // phpcs:enable
       }
       elseif ($civicrm_root_code = reset(preg_grep('/^\s*\$civicrm_root\s*=.*$/', $settings))) {
+        // phpcs:disable
         eval($civicrm_root_code);
+        // phpcs:enable
       }
       else {
         return WP_CLI::error('Unable to read $civicrm_root from civicrm.settings.php');
@@ -957,7 +961,9 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
 
       if ($civicrm_dsn_code = reset(preg_grep('/^\s*define.*CIVICRM_DSN.*$/', $settings))) {
         $civicrm_dsn_code = str_replace('CIVICRM_DSN', 'CIVICRM_OLD_DSN', $civicrm_dsn_code);
+        // phpcs:disable
         eval($civicrm_dsn_code);
+        // phpcs:enable
       }
       else {
         return WP_CLI::error('Unable to read CIVICRM_DSN from civicrm.settings.php');
