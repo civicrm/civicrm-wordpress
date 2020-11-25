@@ -7,7 +7,7 @@
  | permitted exceptions and without any warranty. For full license    |
  | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
@@ -16,12 +16,10 @@
  *
  */
 
-
 // This file must not accessed directly.
 if (!defined('ABSPATH')) {
   exit;
 }
-
 
 /**
  * Define CiviCRM_For_WordPress_Users Class.
@@ -31,14 +29,12 @@ if (!defined('ABSPATH')) {
 class CiviCRM_For_WordPress_Users {
 
   /**
+   * @var object
    * Plugin object reference.
-   *
    * @since 4.6
    * @access public
-   * @var object $civi The plugin object reference.
    */
   public $civi;
-
 
   /**
    * Instance constructor.
@@ -55,7 +51,6 @@ class CiviCRM_For_WordPress_Users {
 
   }
 
-
   /**
    * Plugin activation tasks.
    *
@@ -70,7 +65,6 @@ class CiviCRM_For_WordPress_Users {
     $this->set_wp_user_capabilities();
 
   }
-
 
   /**
    * Register hooks.
@@ -95,7 +89,6 @@ class CiviCRM_For_WordPress_Users {
     add_action('deleted_user', [$this, 'delete_user_ufmatch'], 10, 1);
 
   }
-
 
   /**
    * Check permissions.
@@ -131,7 +124,6 @@ class CiviCRM_For_WordPress_Users {
 
   }
 
-
   /**
    * Get "permission denied" text.
    *
@@ -144,7 +136,6 @@ class CiviCRM_For_WordPress_Users {
   public function get_permission_denied() {
     return __('You do not have permission to access this content.', 'civicrm');
   }
-
 
   /**
    * Handle WordPress user events.
@@ -168,7 +159,6 @@ class CiviCRM_For_WordPress_Users {
 
   }
 
-
   /**
    * Keep WordPress user synced with CiviCRM Contact.
    *
@@ -179,7 +169,7 @@ class CiviCRM_For_WordPress_Users {
   public function sync_user($user = FALSE) {
 
     // Sanity check
-    if ($user === FALSE OR !is_a($user, 'WP_User')) {
+    if ($user === FALSE || !is_a($user, 'WP_User')) {
       return;
     }
 
@@ -194,29 +184,17 @@ class CiviCRM_For_WordPress_Users {
      * to the CiviCRM Contact, we have to search for it all over again.
      */
     CRM_Core_BAO_UFMatch::synchronize(
-      $user, // User object.
-      TRUE, // Update = true.
-      'WordPress', // CMS.
-      'Individual' // Contact Type.
+      // User object.
+      $user,
+      // Update = true.
+      TRUE,
+      // CMS.
+      'WordPress',
+      // Contact Type.
+      'Individual'
     );
-
-    /*
-    // IN PROGRESS: synchronizeUFMatch does return the Contact object, however
-    $civi_contact = CRM_Core_BAO_UFMatch::synchronizeUFMatch(
-      $user, // User object.
-      $user->ID, // ID.
-      $user->user_mail, // Unique identifier.
-      null // Unused.
-      'WordPress' // CMS.
-      'Individual' // Contact Type.
-    );
-
-    // Now we can allow other plugins to do their thing.
-    do_action('civicrm_contact_synced', $user, $civi_contact);
-    */
 
   }
-
 
   /**
    * When a WordPress user is deleted, delete the UFMatch record.
@@ -239,7 +217,6 @@ class CiviCRM_For_WordPress_Users {
 
   }
 
-
   /**
    * Create anonymous role and define capabilities.
    *
@@ -260,7 +237,7 @@ class CiviCRM_For_WordPress_Users {
     }
 
     // Define minimum capabilities (CiviCRM permissions).
-    $default_min_capabilities =  [
+    $default_min_capabilities = [
       'access_civimail_subscribe_unsubscribe_pages' => 1,
       'access_all_custom_data' => 1,
       'access_uploaded_files' => 1,
@@ -293,7 +270,7 @@ class CiviCRM_For_WordPress_Users {
     }
 
     // Add the 'anonymous_user' role with minimum capabilities.
-    if (!in_array('anonymous_user' , $wp_roles->roles)) {
+    if (!in_array('anonymous_user', $wp_roles->roles)) {
       add_role(
         'anonymous_user',
         __('Anonymous User', 'civicrm'),
@@ -302,7 +279,6 @@ class CiviCRM_For_WordPress_Users {
     }
 
   }
-
 
   /**
    * Add CiviCRM access capabilities to WordPress roles.
@@ -335,7 +311,7 @@ class CiviCRM_For_WordPress_Users {
      */
     $roles = apply_filters('civicrm_access_roles', ['super admin', 'administrator']);
 
-     // Give access to CiviCRM to particular roles.
+    // Give access to CiviCRM to particular roles.
     foreach ($roles as $role) {
       $roleObj = $wp_roles->get_role($role);
       if (
@@ -348,7 +324,6 @@ class CiviCRM_For_WordPress_Users {
     }
 
   }
-
 
   /**
    * Get CiviCRM Contact Type.
@@ -389,7 +364,4 @@ class CiviCRM_For_WordPress_Users {
 
   }
 
-
-} // Class CiviCRM_For_WordPress_Users ends.
-
-
+}

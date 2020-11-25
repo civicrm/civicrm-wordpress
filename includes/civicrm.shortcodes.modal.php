@@ -7,7 +7,7 @@
  | permitted exceptions and without any warranty. For full license    |
  | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
@@ -16,12 +16,10 @@
  *
  */
 
-
 // This file must not accessed directly.
 if (!defined('ABSPATH')) {
   exit;
 }
-
 
 /**
  * Define CiviCRM_For_WordPress_Shortcodes_Modal Class.
@@ -31,14 +29,12 @@ if (!defined('ABSPATH')) {
 class CiviCRM_For_WordPress_Shortcodes_Modal {
 
   /**
+   * @var object
    * Plugin object reference.
-   *
    * @since 4.6
    * @access public
-   * @var object $civi The plugin object reference.
    */
   public $civi;
-
 
   /**
    * Instance constructor.
@@ -51,7 +47,6 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
     $this->civi = civi_wp();
 
   }
-
 
   /**
    * Register hooks to handle the shortcode modal.
@@ -71,7 +66,6 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
      */
     add_action('media_buttons', [$this, 'add_form_button'], 100);
 
-
     // Add the Javascript and styles to make it all happen.
     add_action('load-post.php', [$this, 'add_core_resources']);
     add_action('load-post-new.php', [$this, 'add_core_resources']);
@@ -79,7 +73,6 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
     add_action('load-page-new.php', [$this, 'add_core_resources']);
 
   }
-
 
   /**
    * Add button to editor for selected WordPress Post Types.
@@ -96,12 +89,11 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
       $civilogo = file_get_contents(plugin_dir_path(__FILE__) . '../assets/civilogo.svg.b64');
 
       $url = admin_url('admin.php?page=CiviCRM&q=civicrm/shortcode&reset=1');
-      echo '<a href= "' . $url . '" class="button crm-shortcode-button" style="padding-left: 4px;" title="' . __('Add CiviCRM Public Pages', 'civicrm') . '"><img src="' . $civilogo . '" height="15" width="15" alt="' . __('Add CiviCRM Public Pages', 'civicrm') . '" />'. __('CiviCRM', 'civicrm') .'</a>';
+      echo '<a href= "' . $url . '" class="button crm-shortcode-button" style="padding-left: 4px;" title="' . __('Add CiviCRM Public Pages', 'civicrm') . '"><img src="' . $civilogo . '" height="15" width="15" alt="' . __('Add CiviCRM Public Pages', 'civicrm') . '" />' . __('CiviCRM', 'civicrm') . '</a>';
 
     }
 
   }
-
 
   /**
    * Add core resources.
@@ -117,7 +109,6 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
         ->addScriptFile('civicrm', 'js/crm.insert-shortcode.js', 0, 'html-header');
     }
   }
-
 
   /**
    * Does a WordPress post type have the CiviCRM button on it?
@@ -157,7 +148,6 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
 
   }
 
-
   /**
    * Get WordPress post types that support the editor.
    *
@@ -181,7 +171,7 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
     // Get post types.
     $post_types = get_post_types($args);
 
-    foreach ($post_types AS $post_type) {
+    foreach ($post_types as $post_type) {
       // Filter only those which have an editor.
       if (post_type_supports($post_type, 'editor')) {
         $supported_post_types[] = $post_type;
@@ -191,4 +181,4 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
     return $supported_post_types;
   }
 
-} // Class CiviCRM_For_WordPress_Shortcodes_Modal ends.
+}

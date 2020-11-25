@@ -7,7 +7,7 @@
  | permitted exceptions and without any warranty. For full license    |
  | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
@@ -16,12 +16,10 @@
  *
  */
 
-
 // This file must not accessed directly.
 if (!defined('ABSPATH')) {
   exit;
 }
-
 
 /**
  * Define CiviCRM_For_WordPress_Compat Class.
@@ -31,14 +29,12 @@ if (!defined('ABSPATH')) {
 class CiviCRM_For_WordPress_Compat {
 
   /**
+   * @var object
    * Plugin object reference.
-   *
    * @since 5.24
    * @access public
-   * @var object $civi The plugin object reference.
    */
   public $civi;
-
 
   /**
    * Instance constructor.
@@ -54,7 +50,6 @@ class CiviCRM_For_WordPress_Compat {
     $this->register_hooks();
 
   }
-
 
   /**
    * Register plugin compatibility hooks.
@@ -77,7 +72,6 @@ class CiviCRM_For_WordPress_Compat {
     add_action('civicrm_after_rewrite_rules', [$this, 'rewrite_rules_polylang'], 10, 2);
 
   }
-
 
   /**
    * Support Polylang.
@@ -153,4 +147,4 @@ class CiviCRM_For_WordPress_Compat {
 
   }
 
-} // Class CiviCRM_For_WordPress_Compat ends.
+}
