@@ -1876,31 +1876,6 @@ class CiviCRM_For_WordPress {
   }
 
   /**
-   * Override a WordPress page title with the CiviCRM entity title.
-   *
-   * Callback method for 'single_page_title' hook, always called from WordPress
-   * front-end.
-   *
-   * @since 4.6
-   *
-   * @param string $post_title The title of the WordPress page or post.
-   * @param object $post The WordPress post object the title applies to.
-   * @return string $civicrm_wp_title The title of the CiviCRM entity.
-   */
-  public function single_page_title($post_title, $post) {
-
-    // Sanity check and override.
-    global $civicrm_wp_title;
-    if (!empty($civicrm_wp_title)) {
-      return $civicrm_wp_title;
-    }
-
-    // Fallback
-    return $post_title;
-
-  }
-
-  /**
    * Get base URL.
    *
    * Clone of CRM_Utils_System_WordPress::getBaseUrl() whose access is set to
