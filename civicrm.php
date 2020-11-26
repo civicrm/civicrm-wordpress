@@ -1215,7 +1215,7 @@ class CiviCRM_For_WordPress {
    */
   public function add_menu_items() {
 
-    $civilogo = file_get_contents(plugin_dir_path(__FILE__) . 'assets/civilogo.svg.b64');
+    $civilogo = file_get_contents(CIVICRM_PLUGIN_DIR . 'assets/images/civilogo.svg.b64');
 
     /**
      * Filter the position of the CiviCRM menu item.
