@@ -622,13 +622,13 @@ class CiviCRM_For_WordPress_Basepage {
      *
      * @since 4.6
      *
-     * @param string $basepage_template The provided template name.
+     * @param string $template_name The provided template name.
      * @return string The overridden template name.
      */
-    $basepage_template = apply_filters('civicrm_basepage_template', $basepage_template);
+    $basepage_template = apply_filters('civicrm_basepage_template', $template_name);
 
-    // Use the provided page template, but allow overrides.
-    $page_template = locate_template([$template_name]);
+    // Find the base page template.
+    $page_template = locate_template([$basepage_template]);
 
     // If not homepage and template is found.
     if ('' != $page_template && !is_front_page()) {
@@ -655,7 +655,7 @@ class CiviCRM_For_WordPress_Basepage {
      */
     $home_template_name = apply_filters('civicrm_basepage_home_template', 'page.php');
 
-    // Find homepage the template.
+    // Find the homepage template.
     $home_template = locate_template([$home_template_name]);
 
     // Use it if found.
