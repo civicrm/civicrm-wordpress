@@ -1901,41 +1901,6 @@ class CiviCRM_For_WordPress {
   }
 
   /**
-   * Remove edit link from page content.
-   *
-   * Callback from 'edit_post_link' hook.
-   *
-   * @since 4.6
-   *
-   * @return string Always empty.
-   */
-  public function clear_edit_post_link() {
-    return '';
-  }
-
-  /**
-   * Remove edit link in WordPress Admin Bar.
-   *
-   * Callback from 'wp_before_admin_bar_render' hook.
-   *
-   * @since 4.6
-   */
-  public function clear_edit_post_menu_item() {
-
-    // Access object.
-    global $wp_admin_bar;
-
-    // Bail if in admin.
-    if (is_admin()) {
-      return;
-    }
-
-    // Remove the menu item from front end.
-    $wp_admin_bar->remove_menu('edit');
-
-  }
-
-  /**
    * Get base URL.
    *
    * Clone of CRM_Utils_System_WordPress::getBaseUrl() whose access is set to
