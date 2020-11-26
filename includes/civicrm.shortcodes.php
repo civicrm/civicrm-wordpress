@@ -704,7 +704,18 @@ class CiviCRM_For_WordPress_Shortcodes {
         if ($mode == 'preview' || $mode == 'test') {
           $args['action'] = 'preview';
         }
-        $args['q'] = 'civicrm/pcp/info';
+
+        switch ($action) {
+          case 'transact':
+            $args['q'] = 'civicrm/contribute/transact';
+            $args['pcpId'] = $args['id'];
+            break;
+
+          case 'info':
+          default:
+            $args['q'] = 'civicrm/pcp/info';
+            break;
+        }
         break;
 
       case 'event':
