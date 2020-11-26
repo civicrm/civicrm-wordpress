@@ -340,6 +340,10 @@ class CiviCRM_For_WordPress {
 
   }
 
+  // ---------------------------------------------------------------------------
+  // Plugin set up
+  // ---------------------------------------------------------------------------
+
   /**
    * Set up the CiviCRM plugin instance.
    *
@@ -433,6 +437,74 @@ class CiviCRM_For_WordPress {
     }
 
   }
+
+  /**
+   * Include files.
+   *
+   * @since 4.4
+   */
+  public function include_files() {
+
+    // Include class files.
+    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.admin.php';
+    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.users.php';
+    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.shortcodes.php';
+    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.shortcodes.modal.php';
+    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.basepage.php';
+    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.compat.php';
+
+    // Maybe include REST API autoloader class.
+    if (!class_exists('CiviCRM_WP_REST\Autoloader')) {
+      require_once CIVICRM_PLUGIN_DIR . 'wp-rest/Autoloader.php';
+    }
+
+  }
+
+  /**
+   * Instantiate objects.
+   *
+   * @since 5.33
+   */
+  public function setup_objects() {
+
+    // Instantiate objects.
+    $this->admin = new CiviCRM_For_WordPress_Admin();
+    $this->users = new CiviCRM_For_WordPress_Users();
+    $this->shortcodes = new CiviCRM_For_WordPress_Shortcodes();
+    $this->modal = new CiviCRM_For_WordPress_Shortcodes_Modal();
+    $this->basepage = new CiviCRM_For_WordPress_Basepage();
+    $this->compat = new CiviCRM_For_WordPress_Compat();
+
+  }
+
+  /**
+   * Load translation files.
+   *
+   * A good reference on how to implement translation in WordPress:
+   * http://ottopress.com/2012/internationalization-youre-probably-doing-it-wrong/
+   *
+   * Also see:
+   * https://developer.wordpress.org/plugins/internationalization/
+   *
+   * @since 4.4
+   */
+  public function enable_translation() {
+
+    // Load translations.
+    load_plugin_textdomain(
+      // Unique name.
+      'civicrm',
+      // Deprecated argument.
+      FALSE,
+      // Relative path to translation files.
+      dirname(plugin_basename(__FILE__)) . '/languages/'
+    );
+
+  }
+
+  // ---------------------------------------------------------------------------
+  // Context
+  // ---------------------------------------------------------------------------
 
   /**
    * Set broad CiviCRM context.
@@ -532,49 +604,6 @@ class CiviCRM_For_WordPress {
      * @return bool $context The modified context in which CiviCRM is displayed in WordPress.
      */
     return apply_filters('civicrm_context', self::$context);
-
-  }
-
-  // ---------------------------------------------------------------------------
-  // Files
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Include files.
-   *
-   * @since 4.4
-   */
-  public function include_files() {
-
-    // Include class files.
-    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.admin.php';
-    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.users.php';
-    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.shortcodes.php';
-    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.shortcodes.modal.php';
-    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.basepage.php';
-    include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.compat.php';
-
-    // Maybe include REST API autoloader class.
-    if (!class_exists('CiviCRM_WP_REST\Autoloader')) {
-      require_once CIVICRM_PLUGIN_DIR . 'wp-rest/Autoloader.php';
-    }
-
-  }
-
-  /**
-   * Instantiate objects.
-   *
-   * @since 5.33
-   */
-  public function setup_objects() {
-
-    // Instantiate objects.
-    $this->admin = new CiviCRM_For_WordPress_Admin();
-    $this->users = new CiviCRM_For_WordPress_Users();
-    $this->shortcodes = new CiviCRM_For_WordPress_Shortcodes();
-    $this->modal = new CiviCRM_For_WordPress_Shortcodes_Modal();
-    $this->basepage = new CiviCRM_For_WordPress_Basepage();
-    $this->compat = new CiviCRM_For_WordPress_Compat();
 
   }
 
@@ -770,6 +799,10 @@ class CiviCRM_For_WordPress {
 
   }
 
+  // ---------------------------------------------------------------------------
+  // Construction of URLs
+  // ---------------------------------------------------------------------------
+
   /**
    * Add our rewrite rules.
    *
@@ -903,48 +936,22 @@ class CiviCRM_For_WordPress {
   /**
    * Initialize CiviCRM.
    *
-   * @since 4.4
+   * This method has been moved to "includes/civicrm.admin.php"
    *
-   * @return bool $success True if CiviCRM is initialized, false otherwise.
+   * @since 4.4
+   * @since 5.33 Placeholder for backwards (and semantic) compatibility.
+   *
+   * @return bool True if CiviCRM is initialized, false otherwise.
    */
   public function initialize() {
 
-    // Pass to relocated method in admin class.
+    // Pass to method in admin class.
     return $this->admin->initialize();
 
   }
 
   // ---------------------------------------------------------------------------
-  // Plugin setup
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Load translation files.
-   *
-   * A good reference on how to implement translation in WordPress:
-   * http://ottopress.com/2012/internationalization-youre-probably-doing-it-wrong/
-   *
-   * Also see:
-   * https://developer.wordpress.org/plugins/internationalization/
-   *
-   * @since 4.4
-   */
-  public function enable_translation() {
-
-    // Load translations.
-    load_plugin_textdomain(
-      // Unique name.
-      'civicrm',
-      // Deprecated argument.
-      FALSE,
-      // Relative path to translation files.
-      dirname(plugin_basename(__FILE__)) . '/languages/'
-    );
-
-  }
-
-  // ---------------------------------------------------------------------------
-  // HTML head
+  // Load Resources
   // ---------------------------------------------------------------------------
 
   /**
@@ -1440,7 +1447,8 @@ function civi_wp() {
 
 /*
  * Instantiate CiviCRM_For_WordPress immediately.
- * See CiviCRM_For_WordPress::setup_instance()
+ *
+ * @see CiviCRM_For_WordPress::setup_instance()
  */
 civi_wp();
 
@@ -1458,7 +1466,8 @@ register_deactivation_hook(CIVICRM_PLUGIN_FILE, [civi_wp(), 'deactivate']);
 
 /*
  * Uninstall uses the 'uninstall.php' method.
- * See: https://developer.wordpress.org/reference/functions/register_uninstall_hook/
+ *
+ * @see https://developer.wordpress.org/reference/functions/register_uninstall_hook/
  */
 
 // Include legacy global scope functions.
