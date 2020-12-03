@@ -403,10 +403,10 @@ class CiviCRM_For_WordPress_Basepage {
     add_filter('the_content', [$this, 'basepage_render']);
 
     // Hide the edit link.
-    add_action('edit_post_link', [$this->civi, 'clear_edit_post_link']);
+    add_action('edit_post_link', [$this, 'clear_edit_post_link']);
 
     // Tweak admin bar.
-    add_action('wp_before_admin_bar_render', [$this->civi, 'clear_edit_post_menu_item']);
+    add_action('wp_before_admin_bar_render', [$this, 'clear_edit_post_menu_item']);
 
     // Add body classes for easier styling.
     add_filter('body_class', [$this, 'add_body_classes']);
@@ -709,6 +709,42 @@ class CiviCRM_For_WordPress_Basepage {
     }
 
     return $classes;
+
+  }
+
+  /**
+   * Remove edit link from page content.
+   *
+   * Callback from 'edit_post_link' hook.
+   *
+   * @since 4.6
+   * @since 5.33 Moved to this class.
+   *
+   * @return string Always empty.
+   */
+  public function clear_edit_post_link() {
+    return '';
+  }
+
+  /**
+   * Remove edit link in WordPress Admin Bar.
+   *
+   * Callback from 'wp_before_admin_bar_render' hook.
+   *
+   * @since 4.6
+   */
+  public function clear_edit_post_menu_item() {
+
+    // Access object.
+    global $wp_admin_bar;
+
+    // Bail if in admin.
+    if (is_admin()) {
+      return;
+    }
+
+    // Remove the menu item from front end.
+    $wp_admin_bar->remove_menu('edit');
 
   }
 

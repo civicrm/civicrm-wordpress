@@ -86,10 +86,10 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
     // Add button to selected WordPress Post Types, if allowed.
     if ($this->post_type_has_button()) {
 
-      $civilogo = file_get_contents(plugin_dir_path(__FILE__) . '../assets/civilogo.svg.b64');
+      $civilogo = file_get_contents(CIVICRM_PLUGIN_DIR . 'assets/images/civilogo.svg.b64');
 
       $url = admin_url('admin.php?page=CiviCRM&q=civicrm/shortcode&reset=1');
-      echo '<a href= "' . $url . '" class="button crm-shortcode-button" style="padding-left: 4px;" title="' . __('Add CiviCRM Public Pages', 'civicrm') . '"><img src="' . $civilogo . '" height="15" width="15" alt="' . __('Add CiviCRM Public Pages', 'civicrm') . '" />' . __('CiviCRM', 'civicrm') . '</a>';
+      echo '<a href= "' . $url . '" class="button crm-shortcode-button" style="padding-left: 4px;" title="' . __('Add CiviCRM Public Pages', 'civicrm') . '"><img src="' . $civilogo . '" height="15" width="15" alt="' . __('Add CiviCRM Public Pages', 'civicrm') . '" style="margin: -3px 1px 0 -2px;" />' . __('CiviCRM', 'civicrm') . '</a>';
 
     }
 
