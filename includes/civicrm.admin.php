@@ -37,6 +37,14 @@ class CiviCRM_For_WordPress_Admin {
   public $civi;
 
   /**
+   * @var object
+   * Integration page object.
+   * @since 5.34
+   * @access public
+   */
+  public $page_integration;
+
+  /**
    * Instance constructor.
    *
    * @since 5.33
@@ -46,13 +54,41 @@ class CiviCRM_For_WordPress_Admin {
     // Store reference to CiviCRM plugin object.
     $this->civi = civi_wp();
 
+    // Include class files and instantiate.
+    $this->include_files();
+    $this->setup_objects();
+
     // Filter Heartbeat on CiviCRM admin pages as late as is practical.
     add_filter('heartbeat_settings', [$this, 'heartbeat'], 1000, 1);
 
   }
 
   /**
-   * Register hooks on init.
+   * Include files.
+   *
+   * @since 5.34
+   */
+  public function include_files() {
+
+    // Include class files.
+    include_once CIVICRM_PLUGIN_DIR . 'includes/admin-pages/civicrm.page.integration.php';
+
+  }
+
+  /**
+   * Instantiate objects.
+   *
+   * @since 5.34
+   */
+  public function setup_objects() {
+
+    // Instantiate objects.
+    $this->page_integration = new CiviCRM_For_WordPress_Admin_Page_Integration();
+
+  }
+
+  /**
+   * Register hooks on "init" action.
    *
    * @since 4.4
    * @since 5.33 Moved to this class.
@@ -81,10 +117,17 @@ class CiviCRM_For_WordPress_Admin {
     add_filter('admin_title', [$this, 'set_admin_title']);
 
     // Modify the admin menu.
-    add_action('admin_menu', [$this, 'add_menu_items']);
+    add_action('admin_menu', [$this, 'add_menu_items'], 9);
 
     // Add CiviCRM's resources in the admin header.
     add_action('admin_head', [$this->civi, 'wp_head'], 50);
+
+    /**
+     * Broadcast that this object has registered its callbacks.
+     *
+     * @since 5.34
+     */
+    do_action('civicrm/admin/hooks/registered');
 
   }
 
