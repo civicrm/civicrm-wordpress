@@ -18,9 +18,9 @@
  */
 
 ?><!-- assets/templates/page.options.php -->
-<div class="wrap">
+<div class="wrap civicrm-wrap civicrm-settings-wrap">
 
-  <img src="<?php echo CIVICRM_PLUGIN_URL . 'assets/images/civicrm-logo.png'; ?>" width="160" height="42" alt="<?php esc_attr_e('CiviCRM Logo', 'civicrm'); ?>" style="margin-top: 9px;">
+  <img src="<?php echo CIVICRM_PLUGIN_URL . 'assets/images/civicrm-logo.png'; ?>" width="160" height="42" alt="<?php esc_attr_e('CiviCRM Logo', 'civicrm'); ?>" id="civicrm-logo">
 
   <h1><?php _e('CiviCRM Settings', 'civicrm'); ?></h1>
 

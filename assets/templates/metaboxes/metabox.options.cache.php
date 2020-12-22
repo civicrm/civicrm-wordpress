@@ -38,7 +38,7 @@ do_action('civicrm/metabox/cache/pre');
 <p><?php _e('You may sometimes find yourself in situations that require the CiviCRM caches to be cleared, e.g. when template files need to be refreshed.', 'civicrm'); ?></p>
 
 <p class="submit">
-  <?php submit_button(esc_html__('Clear Caches', 'civicrm'), 'primary', 'civicrm_options_cache_submit', FALSE, $options); ?>
+  <?php submit_button(esc_html__('Clear Caches', 'civicrm'), 'primary', 'civicrm_cache_submit', FALSE, $options); ?>
   <span class="spinner"></span>
 </p>
 <br class="clear">

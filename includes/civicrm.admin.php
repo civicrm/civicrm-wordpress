@@ -53,6 +53,14 @@ class CiviCRM_For_WordPress_Admin {
   public $page_integration;
 
   /**
+   * @var object
+   * Quick Add meta box object.
+   * @since 5.34
+   * @access public
+   */
+  public $metabox_quick_add;
+
+  /**
    * Instance constructor.
    *
    * @since 5.33
@@ -81,6 +89,7 @@ class CiviCRM_For_WordPress_Admin {
     // Include class files.
     include_once CIVICRM_PLUGIN_DIR . 'includes/admin-pages/civicrm.page.options.php';
     include_once CIVICRM_PLUGIN_DIR . 'includes/admin-pages/civicrm.page.integration.php';
+    include_once CIVICRM_PLUGIN_DIR . 'includes/admin-metaboxes/civicrm.metabox.contact.add.php';
 
   }
 
@@ -94,6 +103,7 @@ class CiviCRM_For_WordPress_Admin {
     // Instantiate objects.
     $this->page_options = new CiviCRM_For_WordPress_Admin_Page_Options();
     $this->page_integration = new CiviCRM_For_WordPress_Admin_Page_Integration();
+    $this->metabox_quick_add = new CiviCRM_For_WordPress_Admin_Metabox_Contact_Add();
 
   }
 

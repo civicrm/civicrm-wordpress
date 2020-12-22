@@ -16,17 +16,21 @@
  * @since 5.34
  */
 
-.wrap > img {
+/* CiviCRM Logo */
+.wrap > img#civicrm-logo {
   float: right;
+  margin-top: 9px;
 }
 
-#normal-sortables .postbox p.submit,
-#side-sortables .postbox p.submit {
+/* Submit button on CiviCRM Settings page */
+.civicrm-wrap #normal-sortables .postbox p.submit,
+.civicrm-wrap #side-sortables .postbox p.submit {
   padding: 0;
   margin: 0;
   float: right;
 }
 
+/* Plugin listing on CiviCRM Integration page */
 .plugin-directory-list li {
   border-bottom: 1px solid #eee;
   padding-bottom: 10px;
@@ -42,4 +46,43 @@
 .plugin-directory-list li span.description {
   font-style: italic;
   color: #666;
+}
+
+/* CiviCRM Quick Add dashlet */
+#contact-first-name-wrap,
+#contact-last-name-wrap {
+  margin-bottom: 6px;
+  float: left;
+  width: 49%;
+  margin-right: 2%;
+}
+
+#contact-last-name-wrap {
+  margin-right: 0;
+}
+
+#contact-email-wrap {
+  margin-bottom: 12px;
+}
+
+#side-sortables #contact-quick-add p.submit {
+  float: none;
+}
+
+.contacts-added-wrap {
+  border-top: 1px solid #eee;
+  margin: 12px -12px 0;
+  padding: 8px 12px 4px;
+}
+
+.contacts-added-wrap {
+  display: none;
+}
+
+.contacts-added-wrap.contacts-added {
+  display: block;
+}
+
+.contacts-added-list {
+  margin-bottom: 0;
 }

@@ -18,9 +18,9 @@
  */
 
 ?><!-- assets/templates/page.integration.php -->
-<div class="wrap">
+<div class="wrap civicrm-wrap civicrm-integration-wrap">
 
-  <img src="<?php echo CIVICRM_PLUGIN_URL . 'assets/images/civicrm-logo.png'; ?>" width="160" height="42" alt="<?php esc_attr_e('CiviCRM Logo', 'civicrm'); ?>" style="margin-top: 9px;">
+  <img src="<?php echo CIVICRM_PLUGIN_URL . 'assets/images/civicrm-logo.png'; ?>" width="160" height="42" alt="<?php esc_attr_e('CiviCRM Logo', 'civicrm'); ?>" id="civicrm-logo">
 
   <h1><?php _e('Integrating CiviCRM with WordPress', 'civicrm'); ?></h1>
 
