@@ -735,6 +735,10 @@ class CiviCRM_For_WordPress_Shortcodes {
           case 'transact':
             $args['q'] = 'civicrm/contribute/transact';
             $args['pcpId'] = $args['id'];
+            $args['id'] = civicrm_api3('Pcp', 'getvalue', [
+              'return' => 'page_id',
+              'id' => $args['pcpId'],
+            ]);
             break;
 
           case 'info':
