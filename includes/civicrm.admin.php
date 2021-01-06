@@ -117,7 +117,7 @@ class CiviCRM_For_WordPress_Admin {
    */
   public function run_installer() {
 
-    $this->assert_php_pupport();
+    $this->assert_php_support();
 
     $civicrmCore = CIVICRM_PLUGIN_DIR . 'civicrm';
 
