@@ -454,7 +454,8 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
         'CMSdbPass'          => DB_PASSWORD,
         'CMSdbHost'          => DB_HOST,
         'CMSdbName'          => DB_NAME,
-        'siteKey'            => md5(rand() . mt_rand() . rand() . uniqid('', TRUE) . $params['baseURL']),
+        'siteKey'            => preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(32))),
+        'credKeys'           => 'aes-cbc:hkdf-sha256:' . preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(32))),
       ];
 
       $str = file_get_contents($tplPath . 'civicrm.settings.php.template');
