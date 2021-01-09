@@ -377,7 +377,7 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
         define('DB_DSN_MODE', 'auto');
       }
 
-      require_once "$crmPath/packages/DB.php";
+      include_once "$crmPath/vendor/pear/db/DB.php";
 
       $db = DB::connect($dsn);
       if (DB::iserror($db)) {
