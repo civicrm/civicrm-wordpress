@@ -925,7 +925,7 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
       $legacy_settings_file = $plugins_dir . '/civicrm.settings.php';
       $upload_dir      = wp_upload_dir();
       $settings_file     = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR . 'civicrm.settings.php';
-      if (!file_exists($legacy_settings_file) || !file_exists($settings_file)) {
+      if (!file_exists($legacy_settings_file) && !file_exists($settings_file)) {
         return WP_CLI::error('Unable to locate settings file at ' . $legacy_settings_file . 'or at ' . $settings_file);
       }
 
