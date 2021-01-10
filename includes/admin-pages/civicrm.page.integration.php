@@ -59,6 +59,9 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
    */
   public function __construct() {
 
+    // Disable until Messages API is active.
+    return;
+
     // Store reference to CiviCRM plugin object.
     $this->civi = civi_wp();
 
