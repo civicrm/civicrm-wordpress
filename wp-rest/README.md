@@ -4,7 +4,7 @@ This is a WordPress plugin that aims to expose CiviCRM's [extern](https://github
 
 This plugin requires:
 
--   PHP 7.1+
+-   PHP 7.2+
 -   WordPress 4.7+
 -   CiviCRM to be installed and activated.
 
