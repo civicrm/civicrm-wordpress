@@ -69,25 +69,6 @@ class CiviCRM_For_WordPress_Basepage {
       return;
     }
 
-    // In WordPress 4.6.0+, tell it URL params are part of canonical URL.
-    add_filter('get_canonical_url', [$this, 'basepage_canonical_url'], 999);
-
-    // Yoast SEO has separate way of establishing canonical URL.
-    add_filter('wpseo_canonical', [$this, 'basepage_canonical_url'], 999);
-
-    // And also for All in One SEO to handle canonical URL.
-    add_filter('aioseop_canonical_url', [$this, 'basepage_canonical_url'], 999);
-
-    // Regardless of URL, load page template.
-    add_filter('template_include', [$this, 'basepage_template'], 999);
-
-    // Check permission.
-    $argdata = $this->civi->get_request_args();
-    if (!$this->civi->users->check_permission($argdata['args'])) {
-      add_filter('the_content', [$this->civi->users, 'get_permission_denied']);
-      return;
-    }
-
     // Cache CiviCRM base page markup.
     add_action('wp', [$this, 'basepage_handler'], 10, 1);
 
@@ -325,16 +306,19 @@ class CiviCRM_For_WordPress_Basepage {
       return;
     }
 
+    // Bail if this is a Favicon request.
+    if (is_favicon()) {
+      return;
+    }
+
+    // Get the current Base Page and set a "found" flag.
+    $basepage = $this->basepage_get();
+    $basepage_found = FALSE;
+
     // Kick out if not CiviCRM.
     if (!$this->civi->initialize()) {
       return;
     }
-
-    // Add core resources for front end.
-    add_action('wp', [$this->civi, 'front_end_page_load'], 100);
-
-    // CMW: why do we need this? Nothing that follows uses it.
-    require_once ABSPATH . WPINC . '/pluggable.php';
 
     /*
      * Let's do the_loop.
@@ -347,6 +331,17 @@ class CiviCRM_For_WordPress_Basepage {
         the_post();
 
         global $post;
+
+        // Skip if this not the Base Page.
+        if ($basepage->ID !== $post->ID) {
+          continue;
+        }
+        else {
+          $basepage_found = TRUE;
+        }
+
+        // Set context.
+        $this->civi->civicrm_context_set('basepage');
 
         // Start buffering.
         ob_start();
@@ -386,6 +381,29 @@ class CiviCRM_For_WordPress_Basepage {
     // Reset loop.
     rewind_posts();
 
+    // Bail if the Base Page has not been processed.
+    if (!$basepage_found) {
+      return;
+    }
+
+    // Hide the edit link.
+    add_action('edit_post_link', [$this, 'clear_edit_post_link']);
+
+    // Tweak admin bar.
+    add_action('wp_before_admin_bar_render', [$this, 'clear_edit_post_menu_item']);
+
+    // Add body classes for easier styling.
+    add_filter('body_class', [$this, 'add_body_classes']);
+
+    // In WordPress 4.6.0+, tell it URL params are part of canonical URL.
+    add_filter('get_canonical_url', [$this, 'basepage_canonical_url'], 999);
+
+    // Yoast SEO has separate way of establishing canonical URL.
+    add_filter('wpseo_canonical', [$this, 'basepage_canonical_url'], 999);
+
+    // And also for All in One SEO to handle canonical URL.
+    add_filter('aioseop_canonical_url', [$this, 'basepage_canonical_url'], 999);
+
     // Override page title with high priority.
     add_filter('wp_title', [$this, 'wp_page_title'], 100, 3);
     add_filter('document_title_parts', [$this, 'wp_page_title_parts'], 100, 1);
@@ -399,17 +417,26 @@ class CiviCRM_For_WordPress_Basepage {
       remove_filter('pre_get_document_title', [$frontend, 'title'], 15);
     }
 
-    // Include this content when base page is rendered.
-    add_filter('the_content', [$this, 'basepage_render']);
+    // Regardless of URL, load page template.
+    add_filter('template_include', [$this, 'basepage_template'], 999);
 
-    // Hide the edit link.
-    add_action('edit_post_link', [$this, 'clear_edit_post_link']);
+    // Check permission.
+    $argdata = $this->civi->get_request_args();
+    if (!$this->civi->users->check_permission($argdata['args'])) {
 
-    // Tweak admin bar.
-    add_action('wp_before_admin_bar_render', [$this, 'clear_edit_post_menu_item']);
+      // Do not show content.
+      add_filter('the_content', [$this->civi->users, 'get_permission_denied']);
 
-    // Add body classes for easier styling.
-    add_filter('body_class', [$this, 'add_body_classes']);
+    }
+    else {
+
+      // Add core resources for front end.
+      add_action('wp', [$this->civi, 'front_end_page_load'], 100);
+
+      // Include this content when base page is rendered.
+      add_filter('the_content', [$this, 'basepage_render']);
+
+    }
 
     // Flag that we have parsed the base page.
     $this->basepage_parsed = TRUE;
@@ -745,6 +772,53 @@ class CiviCRM_For_WordPress_Basepage {
 
     // Remove the menu item from front end.
     $wp_admin_bar->remove_menu('edit');
+
+  }
+
+  /**
+   * Get the current Base Page object.
+   *
+   * @since 5.34
+   *
+   * @return WP_Post|bool The Base Page object or FALSE on failure.
+   */
+  public function basepage_get() {
+
+    // Kick out if not CiviCRM.
+    if (!$this->civi->initialize()) {
+      return FALSE;
+    }
+
+    // Get the setting.
+    $basepage_slug = civicrm_api3('Setting', 'getvalue', [
+      'name' => 'wpBasePage',
+      'group' => 'CiviCRM Preferences',
+    ]);
+
+    // Did we get a value?
+    if (!empty($basepage_slug)) {
+
+      // Define the query for our Base Page.
+      $args = [
+        'post_type' => 'page',
+        'name' => strtolower($basepage_slug),
+        'post_status' => 'publish',
+        'posts_per_page' => 1,
+      ];
+
+      // Do the query.
+      $pages = get_posts($args);
+
+    }
+
+    // Find the Base Page object.
+    $basepage = FALSE;
+    if (!empty($pages) && is_array($pages)) {
+      $basepage = array_pop($pages);
+    }
+
+    // Return it.
+    return $basepage;
 
   }
 

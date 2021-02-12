@@ -108,6 +108,11 @@ class CiviCRM_For_WordPress_Shortcodes {
       return;
     }
 
+    // Bail if this is a Favicon request.
+    if (is_favicon()) {
+      return;
+    }
+
     // A counter's useful.
     $shortcodes_present = 0;
 
@@ -147,6 +152,14 @@ class CiviCRM_For_WordPress_Shortcodes {
 
     // Reset loop.
     rewind_posts();
+
+    // Bail if there are no shortcodes.
+    if ($shortcodes_present === 0) {
+      return;
+    }
+
+    // Set context.
+    $this->civi->civicrm_context_set('shortcode');
 
     // Did we get any?
     if ($shortcodes_present) {
@@ -295,20 +308,25 @@ class CiviCRM_For_WordPress_Shortcodes {
       }
     }
 
-    // Preprocess shortcode attributes.
-    $args = $this->preprocess_atts($atts);
+    // If there are ACTUAL CiviCRM query vars, let them take priority.
+    if (!$this->civi->civicrm_in_wordpress()) {
 
-    // Sanity check for improperly constructed shortcode.
-    if ($args === FALSE) {
-      return '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
-    }
+      // Preprocess shortcode attributes.
+      $args = $this->preprocess_atts($atts);
 
-    // invoke() requires environment variables to be set.
-    foreach ($args as $key => $value) {
-      if ($value !== NULL) {
-        set_query_var($key, $value);
-        $_REQUEST[$key] = $_GET[$key] = $value;
+      // Sanity check for improperly constructed shortcode.
+      if ($args === FALSE) {
+        return '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
       }
+
+      // invoke() requires environment variables to be set.
+      foreach ($args as $key => $value) {
+        if ($value !== NULL) {
+          set_query_var($key, $value);
+          $_REQUEST[$key] = $_GET[$key] = $value;
+        }
+      }
+
     }
 
     // Kick out if not CiviCRM.
