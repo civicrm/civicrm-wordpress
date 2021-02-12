@@ -316,7 +316,7 @@ class CiviCRM_For_WordPress_Shortcodes {
 
       // Sanity check for improperly constructed shortcode.
       if ($args === FALSE) {
-        return '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
+        return '<p>' . __('The shortcode could not be handled. It could be malformed or used incorrectly.', 'civicrm') . '</p>';
       }
 
       // invoke() requires environment variables to be set.
