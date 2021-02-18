@@ -332,48 +332,58 @@ class CiviCRM_For_WordPress_Basepage {
 
         global $post;
 
-        // Skip if this not the Base Page.
-        if ($basepage->ID !== $post->ID) {
-          continue;
-        }
-        else {
-          $basepage_found = TRUE;
-        }
-
-        // Set context.
-        $this->civi->civicrm_context_set('basepage');
-
-        // Start buffering.
-        ob_start();
-        // Now, instead of echoing, base page output ends up in buffer.
-        $this->civi->invoke();
-        // Save the output and flush the buffer.
-        $this->basepage_markup = ob_get_clean();
-
-        /*
-         * The following logic is in response to some of the complexities of how
-         * titles are handled in WordPress, particularly when there are SEO
-         * plugins present that modify the title for Open Graph purposes. There
-         * have also been issues with the default WordPress themes, which modify
-         * the title using the 'wp_title' filter.
+        /**
+         * Skip if this not the Base Page, but allow "Base Page mode" to be forced.
          *
-         * First, we try and set the title of the page object, which will work
-         * if the loop is not run subsequently and if there are no additional
-         * filters on the title.
+         * Return TRUE to force CiviCRM to render a Post of Page as if on the Base Page.
          *
-         * Second, we store the CiviCRM title so that we can construct the base
-         * page title if other plugins modify it.
+         * @since 5.35
+         *
+         * @param bool By default "Base Page mode" should not be triggered.
+         * @param WP_Post $post The current WordPress Post object.
+         * @return bool Whether or not to force "Base Page mode" - FALSE by default.
          */
+        if ($basepage->ID === $post->ID || (bool) apply_filters('civicrm_force_basepage_mode', FALSE, $post)) {
 
-        // Override post title.
-        global $civicrm_wp_title;
-        $post->post_title = $civicrm_wp_title;
+          // Set context.
+          $this->civi->civicrm_context_set('basepage');
 
-        // Because the above seems unreliable, store title for later use.
-        $this->basepage_title = $civicrm_wp_title;
+          // Start buffering.
+          ob_start();
+          // Now, instead of echoing, base page output ends up in buffer.
+          $this->civi->invoke();
+          // Save the output and flush the buffer.
+          $this->basepage_markup = ob_get_clean();
 
-        // Disallow commenting.
-        $post->comment_status = 'closed';
+          /*
+           * The following logic is in response to some of the complexities of how
+           * titles are handled in WordPress, particularly when there are SEO
+           * plugins present that modify the title for Open Graph purposes. There
+           * have also been issues with the default WordPress themes, which modify
+           * the title using the 'wp_title' filter.
+           *
+           * First, we try and set the title of the page object, which will work
+           * if the loop is not run subsequently and if there are no additional
+           * filters on the title.
+           *
+           * Second, we store the CiviCRM title so that we can construct the base
+           * page title if other plugins modify it.
+           */
+
+          // Override post title.
+          global $civicrm_wp_title;
+          $post->post_title = $civicrm_wp_title;
+
+          // Because the above seems unreliable, store title for later use.
+          $this->basepage_title = $civicrm_wp_title;
+
+          // Disallow commenting.
+          $post->comment_status = 'closed';
+
+          // Make sure hooks are registered.
+          $basepage_found = TRUE;
+
+        }
 
       }
     }
