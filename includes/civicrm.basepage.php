@@ -337,7 +337,7 @@ class CiviCRM_For_WordPress_Basepage {
          *
          * Return TRUE to force CiviCRM to render a Post of Page as if on the Base Page.
          *
-         * @since 5.35
+         * @since 5.36
          *
          * @param bool By default "Base Page mode" should not be triggered.
          * @param WP_Post $post The current WordPress Post object.
