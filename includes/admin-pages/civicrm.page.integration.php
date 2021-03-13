@@ -89,6 +89,25 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
   }
 
   /**
+   * Get the capability required to access the Settings Page.
+   *
+   * @since 5.35
+   */
+  public function access_capability() {
+
+    /**
+     * Return default capability but allow overrides.
+     *
+     * @since 5.35
+     *
+     * @param str The default access capability.
+     * @return str The modified access capability.
+     */
+    return apply_filters('civicrm/admin/integration/cap', 'manage_options');
+
+  }
+
+  /**
    * Adds CiviCRM sub-menu items to WordPress admin menu.
    *
    * @since 5.34
@@ -100,12 +119,15 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
       return;
     }
 
+    // Get access capability.
+    $capability = $this->access_capability();
+
     // Add Integration submenu item.
     $integration_page = add_submenu_page(
       'CiviCRM',
       __('Integrating CiviCRM with WordPress', 'civicrm'),
       __('Integration', 'civicrm'),
-      'access_civicrm',
+      $capability,
       'civi_integration',
       [$this, 'page_integration']
     );
@@ -208,8 +230,9 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
       return;
     }
 
-    // Bail if user cannot access CiviCRM.
-    if (!current_user_can('access_civicrm')) {
+    // Bail if user cannot access the Integration Page.
+    $capability = $this->access_capability();
+    if (!current_user_can($capability)) {
       return;
     }
 
