@@ -125,6 +125,33 @@ class CiviCRM_For_WordPress_Users {
   }
 
   /**
+   * Check a CiviCRM permission.
+   *
+   * @since 5.35
+   *
+   * @param str $permission The permission string.
+   * @return bool $permitted True if allowed, false otherwise.
+   */
+  public function check_civicrm_permission($permission) {
+
+    // Always deny if CiviCRM is not initialised.
+    if (!$this->civi->initialize()) {
+      return FALSE;
+    }
+
+    // Deny by default.
+    $permitted = FALSE;
+
+    // Check CiviCRM permissions.
+    if (CRM_Core_Permission::check($permission)) {
+      $permitted = TRUE;
+    }
+
+    return $permitted;
+
+  }
+
+  /**
    * Get "permission denied" text.
    *
    * Called when authentication fails in basepage_register_hooks()
