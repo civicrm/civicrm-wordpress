@@ -11,7 +11,7 @@ namespace CiviWP {
    */
   class HookTest extends \PHPUnit\Framework\TestCase implements EndToEndInterface {
 
-    public function testFoo() {
+    public function testFoo(): void {
       add_action('civicrm_fakeAlterableHook', 'onFakeAlterableHook', 10, 2);
 
       $arg1 = 'hello';
