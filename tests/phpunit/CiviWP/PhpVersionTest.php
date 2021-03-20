@@ -12,7 +12,7 @@ class PhpVersionTest extends \PHPUnit\Framework\TestCase implements EndToEndInte
    *
    * The literal value should be duplicated in the define() to prevent dependency issues.
    */
-  public function testConstantMatch() {
+  public function testConstantMatch(): void {
     $constantFile = $this->getModulePath() . '/civicrm.php';
     $this->assertFileExists($constantFile);
     $content = file_get_contents($constantFile);

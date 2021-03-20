@@ -4,7 +4,6 @@
 define('CIVICRM_CONTAINER_CACHE', 'never');
 
 ini_set('memory_limit', '2G');
-ini_set('safe_mode', 0);
 // phpcs:disable
 eval(cv('php:boot', 'phpcode'));
 // phpcs:enable
@@ -22,11 +21,11 @@ assert("CIVICRM_UF === 'WordPress'");
  * @throws \RuntimeException
  *   If the command terminates abnormally.
  */
-function cv($cmd, $decode = 'json') {
+function cv(string $cmd, $decode = 'json'): string {
   $cmd = 'cv ' . $cmd;
-  $descriptorSpec = array(0 => array("pipe", "r"), 1 => array("pipe", "w"), 2 => STDERR);
+  $descriptorSpec = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => STDERR];
   $oldOutput = getenv('CV_OUTPUT');
-  putenv("CV_OUTPUT=json");
+  putenv('CV_OUTPUT=json');
   $process = proc_open($cmd, $descriptorSpec, $pipes, __DIR__);
   putenv("CV_OUTPUT=$oldOutput");
   fclose($pipes[0]);
@@ -41,7 +40,7 @@ function cv($cmd, $decode = 'json') {
 
     case 'phpcode':
       // If the last output is /*PHPCODE*/, then we managed to complete execution.
-      if (substr(trim($result), 0, 12) !== "/*BEGINPHP*/" || substr(trim($result), -10) !== "/*ENDPHP*/") {
+      if (substr(trim($result), 0, 12) !== '/*BEGINPHP*/' || substr(trim($result), -10) !== '/*ENDPHP*/') {
         throw new \RuntimeException("Command failed ($cmd):\n$result");
       }
       return $result;
