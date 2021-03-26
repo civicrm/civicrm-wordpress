@@ -59,6 +59,11 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
    */
   public function __construct() {
 
+    // Bail if CiviCRM is not installed.
+    if (!CIVICRM_INSTALLED) {
+      return;
+    }
+
     // Store reference to CiviCRM plugin object.
     $this->civi = civi_wp();
 
