@@ -98,14 +98,14 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
   /**
    * Get the capability required to access the Settings Page.
    *
-   * @since 5.35
+   * @since 5.37
    */
   public function access_capability() {
 
     /**
      * Return default capability but allow overrides.
      *
-     * @since 5.35
+     * @since 5.37
      *
      * @param str The default access capability.
      * @return str The modified access capability.
