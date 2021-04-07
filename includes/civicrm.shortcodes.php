@@ -303,37 +303,61 @@ class CiviCRM_For_WordPress_Shortcodes {
       return '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
     }
 
-    // invoke() requires environment variables to be set.
-    foreach ($args as $key => $value) {
-      if ($value !== NULL) {
-        set_query_var($key, $value);
-        $_REQUEST[$key] = $_GET[$key] = $value;
+    // If the shortcode has a path (`q`), fetch content by invoking the civicrm route
+    if (!empty($args['q'])) {
+      // invoke() requires environment variables to be set.
+      foreach ($args as $key => $value) {
+        if ($value !== NULL) {
+          set_query_var($key, $value);
+          $_REQUEST[$key] = $_GET[$key] = $value;
+        }
       }
+
+      // Kick out if not CiviCRM.
+      if (!$this->civi->initialize()) {
+        return '';
+      }
+
+      // Check permission.
+      $argdata = $this->civi->get_request_args();
+      if (!$this->civi->users->check_permission($argdata['args'])) {
+        return $this->civi->users->get_permission_denied();;
+      }
+
+      // CMW: why do we need this? Nothing that follows uses it.
+      require_once ABSPATH . WPINC . '/pluggable.php';
+
+      // Start buffering.
+      ob_start();
+      // Now, instead of echoing, shortcode output ends up in buffer.
+      $this->civi->invoke();
+      // Save the output and flush the buffer.
+      $content = ob_get_clean();
     }
-
-    // Kick out if not CiviCRM.
-    if (!$this->civi->initialize()) {
-      return '';
+    // If there is no path, rely on civicrm_shortcode_get_markup to provide the markup.
+    else {
+      $content = '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
+      /**
+       * Get the markup for "pathless" Shortcodes.
+       *
+       * This filter allows plugins or CiviCRM Extensions to modify the markup used
+       * to display a shortcode that has no CiviCRM route/path. This may be:
+       *
+       * * Accidental due to an improperly constructed shortcode or
+       * * Deliberate because a component may not require a route/path
+       *
+       * @since 5.37
+       *
+       * @param str $markup The default markup for an improperly constructed shortcode.
+       * @param array $atts The shortcode attributes array.
+       * @param array $args The shortcode arguments array.
+       * @param str Context flag - value is either 'single' or 'multiple'.
+       * @return str The modified shortcode markup.
+       */
+      $content = apply_filters('civicrm_shortcode_get_markup', $content, $atts, $args, 'single');
     }
-
-    // Check permission.
-    $argdata = $this->civi->get_request_args();
-    if (!$this->civi->users->check_permission($argdata['args'])) {
-      return $this->civi->users->get_permission_denied();;
-    }
-
-    // CMW: why do we need this? Nothing that follows uses it.
-    require_once ABSPATH . WPINC . '/pluggable.php';
-
-    // Start buffering.
-    ob_start();
-    // Now, instead of echoing, shortcode output ends up in buffer.
-    $this->civi->invoke();
-    // Save the output and flush the buffer.
-    $content = ob_get_clean();
 
     return $content;
-
   }
 
   /**
@@ -357,6 +381,12 @@ class CiviCRM_For_WordPress_Shortcodes {
     // Sanity check for improperly constructed shortcode.
     if ($args === FALSE) {
       return '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
+    }
+
+    // Get pathless markup from filter callback
+    if (empty($args['q'])) {
+      $markup = '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
+      return apply_filters('civicrm_shortcode_get_markup', $markup, $atts, $args, 'multiple');
     }
 
     // Get data for this shortcode.
@@ -813,11 +843,6 @@ class CiviCRM_For_WordPress_Shortcodes {
      * @return array $args Modified shortcode arguments.
      */
     $args = apply_filters('civicrm_shortcode_preprocess_atts', $args, $shortcode_atts);
-
-    // Sanity check for path
-    if (!isset($args['q'])) {
-      return FALSE;
-    }
 
     return $args;
 
