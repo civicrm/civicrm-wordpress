@@ -8,6 +8,7 @@
          stopOnFailure="false"
          beStrictAboutTestsThatDoNotTestAnything="false"
          bootstrap="tests/phpunit/bootstrap.php"
+         cacheResult="false"
 >
   <testsuites>
     <testsuite name="CiviCRM-WordPress Test Suite">
