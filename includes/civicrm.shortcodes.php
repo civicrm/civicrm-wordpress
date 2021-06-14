@@ -771,6 +771,15 @@ class CiviCRM_For_WordPress_Shortcodes {
             ]);
             break;
 
+          case 'setup':
+            $args['q'] = 'civicrm/contribute/campaign';
+            $args['action'] = 'add';
+            $args['component'] = 'contribute';
+            if ($args['id'] == '') {
+              $args['id'] = '1';
+            }
+            break;
+
           case 'info':
           default:
             $args['q'] = 'civicrm/pcp/info';
