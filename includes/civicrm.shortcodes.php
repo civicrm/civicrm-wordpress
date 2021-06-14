@@ -321,7 +321,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       // Check permission.
       $argdata = $this->civi->get_request_args();
       if (!$this->civi->users->check_permission($argdata['args'])) {
-        return $this->civi->users->get_permission_denied();;
+        return $this->civi->users->get_permission_denied();
       }
 
       // CMW: why do we need this? Nothing that follows uses it.
@@ -752,7 +752,24 @@ class CiviCRM_For_WordPress_Shortcodes {
         if ($mode == 'preview' || $mode == 'test') {
           $args['action'] = 'preview';
         }
-        $args['q'] = 'civicrm/contribute/transact';
+
+        switch ($action) {
+          case 'transact':
+            $args['q'] = 'civicrm/contribute/transact';
+            break;
+
+          case 'setup':
+            $args['q'] = 'civicrm/contribute/campaign';
+            $args['action'] = 'add';
+            $args['component'] = 'contribute';
+            unset($args['id']);
+            $args['pageId'] = $id;
+            break;
+
+          default:
+            $args['q'] = 'civicrm/contribute/transact';
+            break;
+        }
         break;
 
       case 'pcp':
