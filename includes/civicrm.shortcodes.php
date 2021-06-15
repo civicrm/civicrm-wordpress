@@ -775,9 +775,10 @@ class CiviCRM_For_WordPress_Shortcodes {
             $args['q'] = 'civicrm/contribute/campaign';
             $args['action'] = 'add';
             $args['component'] = 'contribute';
-            if ($args['id'] == '') {
-              $args['id'] = '1';
-            }
+            $args['id'] = civicrm_api3('Pcp', 'getvalue', [
+              'return' => 'page_id',
+              'id' => $args['id'],
+            ]);
             break;
 
           case 'info':
