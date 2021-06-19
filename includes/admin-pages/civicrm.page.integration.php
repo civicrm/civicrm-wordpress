@@ -120,7 +120,7 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
   public function add_menu_items() {
 
     // Bail if not fully installed.
-    if (!CIVICRM_INSTALLED) {
+    if (!$this->civi->initialize()) {
       return;
     }
 

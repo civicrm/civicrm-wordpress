@@ -121,6 +121,10 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
    */
   public function add_menu_items() {
 
+    if (!$this->civi->initialize()) {
+      return;
+    }
+
     // Get access capability.
     $capability = $this->access_capability();
 

@@ -54,6 +54,22 @@ class CiviCRM_For_WordPress_Admin {
 
   /**
    * @var object
+   * Error Information page object.
+   * @since 5.40
+   * @access public
+   */
+  public $page_error;
+
+  /**
+   * @var string
+   * Error handling flag to determine whether to show a troubleshooting page.
+   * @since 5.40
+   * @access public
+   */
+  public $error_flag = '';
+
+  /**
+   * @var object
    * Quick Add meta box object.
    * @since 5.34
    * @access public
@@ -115,32 +131,31 @@ class CiviCRM_For_WordPress_Admin {
    */
   public function register_hooks() {
 
-    // If settings file does not exist, show notice with link to installer.
-    if (!CIVICRM_INSTALLED) {
-      if (isset($_GET['page']) && $_GET['page'] == 'civicrm-install') {
-        // Set install type.
-        $_GET['civicrm_install_type'] = 'wordpress';
-      }
-      else {
-        // Show notice.
-        add_action('admin_notices', [$this, 'show_setup_warning']);
-      }
-    }
-
-    // Listen for changes to the basepage setting.
-    add_action('civicrm_postSave_civicrm_setting', [$this, 'settings_change'], 10);
-
     // Prevent auto-updates.
     add_filter('plugin_auto_update_setting_html', [$this, 'auto_update_prevent'], 10, 3);
-
-    // Set page title.
-    add_filter('admin_title', [$this, 'set_admin_title']);
 
     // Modify the admin menu.
     add_action('admin_menu', [$this, 'add_menu_items'], 9);
 
     // Add CiviCRM's resources in the admin header.
     add_action('admin_head', [$this->civi, 'wp_head'], 50);
+
+    // If settings file does not exist.
+    if (!CIVICRM_INSTALLED) {
+
+      // Maybe show notice with link to installer.
+      add_action('admin_notices', [$this, 'show_setup_warning']);
+
+    }
+    else {
+
+      // Listen for changes to the basepage setting.
+      add_action('civicrm_postSave_civicrm_setting', [$this, 'settings_change'], 10);
+
+      // Set page title.
+      add_filter('admin_title', [$this, 'set_admin_title']);
+
+    }
 
     /**
      * Broadcast that this object has registered its callbacks.
@@ -156,20 +171,42 @@ class CiviCRM_For_WordPress_Admin {
   // ---------------------------------------------------------------------------
 
   /**
-   * Callback method for missing settings file in register_hooks().
+   * Show an admin notice on pages other than the CiviCRM Installer.
    *
    * @since 4.4
    * @since 5.33 Moved to this class.
    */
   public function show_setup_warning() {
 
-    echo '<div id="civicrm-warning" class="updated fade">';
-    echo '<p><strong>' . __('CiviCRM is almost ready.', 'civicrm') . '</strong> ';
-    echo sprintf(
-      __('You must <a href="%s">configure CiviCRM</a> for it to work.', 'civicrm'),
-      admin_url('options-general.php?page=civicrm-install')
+    // Check user permissions.
+    if (!current_user_can('manage_options')) {
+      return;
+    }
+
+    // Get current screen.
+    $screen = get_current_screen();
+
+    // Bail if it's not what we expect.
+    if (!($screen instanceof WP_Screen)) {
+      return;
+    }
+
+    // Bail if we are on our installer page.
+    if ($screen->id == 'toplevel_page_civicrm-install') {
+      return;
+    }
+
+    $message = sprintf(
+      __('%1$sCiviCRM is almost ready.%2$s You must %3$sconfigure CiviCRM%4$s for it to work.', 'civicrm'),
+      '<strong>',
+      '</strong>',
+      '<a href="' . menu_page_url('civicrm-install', FALSE) . '">',
+      '</a>'
     );
-    echo '</p></div>';
+
+    echo '<div id="message" class="notice notice-warning">';
+    echo '<p>' . $message . '</p>';
+    echo '</div>';
 
   }
 
@@ -180,7 +217,8 @@ class CiviCRM_For_WordPress_Admin {
    */
   public function run_installer() {
 
-    $this->assert_php_support();
+    // Set install type.
+    $_GET['civicrm_install_type'] = 'wordpress';
 
     $civicrmCore = CIVICRM_PLUGIN_DIR . 'civicrm';
 
@@ -205,7 +243,7 @@ class CiviCRM_For_WordPress_Admin {
         ]);
         $ctrl = \Civi\Setup::instance()->createController()->getCtrl();
         $ctrl->setUrls([
-          'ctrl' => admin_url('options-general.php?page=civicrm-install'),
+          'ctrl' => menu_page_url('civicrm-install', FALSE),
           'res' => CIVICRM_PLUGIN_URL . 'civicrm/' . strtr($setupPath, DIRECTORY_SEPARATOR, '/') . '/res/',
           'jquery.js' => CIVICRM_PLUGIN_URL . 'civicrm/bower_components/jquery/dist/jquery.min.js',
           'font-awesome.css' => CIVICRM_PLUGIN_URL . 'civicrm/bower_components/font-awesome/css/font-awesome.min.css',
@@ -221,28 +259,73 @@ class CiviCRM_For_WordPress_Admin {
 
   }
 
+  // ---------------------------------------------------------------------------
+  // Pre-flight check
+  // ---------------------------------------------------------------------------
+
   /**
-   * Check that the PHP version is supported. If not, raise a fatal error with
-   * a pointed message.
+   * Show an admin notice when the PHP version isn't sufficient.
    *
-   * One should check this before bootstrapping CiviCRM - after we start the
-   * class-loader, the PHP-compatibility errors will become more ugly.
+   * @since 5.40
+   */
+  public function show_php_warning() {
+
+    // Check user permissions.
+    if (!current_user_can('manage_options')) {
+      return;
+    }
+
+    // Get current screen.
+    $screen = get_current_screen();
+
+    // Bail if it's not what we expect.
+    if (!($screen instanceof WP_Screen)) {
+      return;
+    }
+
+    // Bail if we are on our error page.
+    if ($screen->id == 'toplevel_page_CiviCRM') {
+      return;
+    }
+
+    $message = sprintf(
+      __('%1$sCiviCRM needs your attention.%2$s Please visit the %3$sInformation Page%4$s for details.', 'civicrm'),
+      '<strong>',
+      '</strong>',
+      '<a href="' . menu_page_url('CiviCRM', FALSE) . '">',
+      '</a>'
+    );
+
+    echo '<div id="message" class="notice notice-warning">';
+    echo '<p>' . $message . '</p>';
+    echo '</div>';
+
+  }
+
+  /**
+   * Check that the PHP version is supported.
+   *
+   * If not, show an admin notice and enable the Error Page instead of CiviCRM's
+   * admin UI. This way WordPress is still usable while the issue is sorted out.
+   *
+   * This check is not necessary for fresh installs because we now have the
+   * "Requires PHP:" plugin header. It is, however, necessary for upgrades - but
+   * shouldn't render WordPress unusable.
    *
    * @since 5.18
    * @since 5.33 Moved to this class.
+   *
+   * @return bool True if the PHP version is supported, false otherwise.
    */
   protected function assert_php_support() {
 
     if (version_compare(PHP_VERSION, CIVICRM_WP_PHP_MINIMUM) < 0) {
-      echo '<p>';
-      echo sprintf(
-        __('CiviCRM requires PHP version %1$s or greater. You are running PHP version %2$s', 'civicrm'),
-        CIVICRM_WP_PHP_MINIMUM,
-        PHP_VERSION
-      );
-      echo '<p>';
-      exit();
+      add_action('admin_notices', [$this, 'show_php_warning']);
+      $this->error_flag = 'php-version';
+      return FALSE;
     }
+
+    return TRUE;
 
   }
 
@@ -259,126 +342,116 @@ class CiviCRM_For_WordPress_Admin {
    */
   public function initialize() {
 
-    static $initialized = FALSE;
-    static $failure = FALSE;
+    static $initialized = NULL;
 
-    if ($failure) {
+    if (!is_null($initialized)) {
+      return $initialized;
+    }
+
+    /*
+     * CiviCRM must not be initialized if it's not installed. It's okay to
+     * return early because the admin notice will be displayed if, for some
+     * reason, the initial redirect on install hasn't occured.
+     */
+    if (!CIVICRM_INSTALLED) {
+      $this->error_flag = 'settings-missing';
+      $initialized = FALSE;
       return FALSE;
     }
 
-    if (!$initialized) {
+    // Check PHP version in case of upgrade.
+    if (!$this->assert_php_support()) {
+      $initialized = FALSE;
+      return FALSE;
+    }
 
-      $this->assert_php_support();
+    /*
+     * Checks from this point on are for cases where the install has become
+     * corrupted in some way. We are trying to fail as gracefully as we can.
+     * Since CIVICRM_INSTALLED is set based on the presence of the settings
+     * file, we now know it is there.
+     */
 
-      // Check for settings.
-      if (!CIVICRM_INSTALLED) {
-        $error = FALSE;
-      }
-      elseif (file_exists(CIVICRM_SETTINGS_PATH)) {
-        $error = include_once CIVICRM_SETTINGS_PATH;
-      }
+    // Include settings file - returns int(1) on success.
+    $error = include_once CIVICRM_SETTINGS_PATH;
 
-      // Autoload.
-      require_once CIVICRM_PLUGIN_DIR . 'civicrm/CRM/Core/ClassLoader.php';
-      CRM_Core_ClassLoader::singleton()->register();
+    /*
+     * Bail if the settings file returns something other than int(1).
+     * When this happens, we should show an admin page with troubleshooting
+     * instructions rather than dying and leaving WordPress unusable.
+     *
+     * Requires a page similar to "civicrm.page.options.php", which we can
+     * show instead of "invoking" CiviCRM itself. In order to do that, this
+     * method *must* have been called before "add_menu_items()" so that an
+     * alternative "add_menu_page()" call can be made. Usefully, this already
+     * happens because "register_hooks_clean_urls()" is called first.
+     *
+     * However, it looks like there may be little that can be done to mitigate
+     * path errors - e.g. when $civicrm_root is not set correctly - because
+     * including "civicrm.settings.php" will throw a fatal error if $civicrm_root
+     * is wrong.
+     */
+    if ($error == FALSE) {
+      $this->error_flag = 'settings-include';
+      $initialized = FALSE;
+      return;
+    }
 
-      // Get ready for problems.
-      $installLink    = admin_url('options-general.php?page=civicrm-install');
-      $docLinkInstall = "https://docs.civicrm.org/installation/en/latest/wordpress/";
-      $docLinkTrouble = "https://docs.civicrm.org/sysadmin/en/latest/troubleshooting/";
-      $forumLink      = "https://civicrm.stackexchange.com/";
+    // Initialize the Class Loader.
+    require_once CIVICRM_PLUGIN_DIR . 'civicrm/CRM/Core/ClassLoader.php';
+    CRM_Core_ClassLoader::singleton()->register();
 
-      // Construct message.
-      $errorMsgAdd = sprintf(
-        __('Please review the <a href="%s">WordPress Installation Guide</a> and the <a href="%s">Trouble-shooting page</a> for assistance. If you still need help installing, you can often find solutions to your issue by searching for the error message in the <a href="%s">installation support section of the community forum</a>.', 'civicrm'),
-        $docLinkInstall,
-        $docLinkTrouble,
-        $forumLink
+    // Access global defined in "civicrm.settings.php".
+    global $civicrm_root;
+
+    // Bail if the config file isn't found.
+    if (!file_exists($civicrm_root . 'CRM/Core/Config.php')) {
+      $this->error_flag = 'config-missing';
+      $initialized = FALSE;
+      return;
+    }
+
+    // Include config file - returns int(1) on success.
+    $error = include_once 'CRM/Core/Config.php';
+
+    // Bail if the config file returns something other than int(1).
+    if ($error == FALSE) {
+      $this->error_flag = 'config-include';
+      $initialized = FALSE;
+      return FALSE;
+    }
+
+    // Initialize the system by creating a config object.
+    $config = CRM_Core_Config::singleton();
+
+    // Sync the logged-in WordPress user with CiviCRM.
+    global $current_user;
+    if ($current_user) {
+
+      // Sync procedure sets session values for logged in users.
+      require_once 'CRM/Core/BAO/UFMatch.php';
+      CRM_Core_BAO_UFMatch::synchronize(
+        // User object.
+        $current_user,
+        // Do not update.
+        FALSE,
+        // CMS.
+        'WordPress',
+        $this->civi->users->get_civicrm_contact_type('Individual')
       );
-
-      // Does install message get used?
-      $installMessage = sprintf(
-        __('Click <a href="%s">here</a> for fresh install.', 'civicrm'),
-        $installLink
-      );
-
-      if ($error == FALSE) {
-        wp_redirect(admin_url('options-general.php?page=civicrm-install'));
-        exit;
-      }
-
-      // Access global defined in civicrm.settings.php.
-      global $civicrm_root;
-
-      // This does pretty much all of the CiviCRM initialization.
-      if (!file_exists($civicrm_root . 'CRM/Core/Config.php')) {
-        $error = FALSE;
-      }
-      else {
-        $error = include_once 'CRM/Core/Config.php';
-      }
-
-      // Have we got it?
-      if ($error == FALSE) {
-
-        // Set static flag.
-        $failure = TRUE;
-
-        // FIX ME - why?
-        wp_die(
-          "<strong><p class='error'>" .
-          sprintf(
-            __('Oops! - The path for including CiviCRM code files is not set properly. Most likely there is an error in the <em>civicrm_root</em> setting in your CiviCRM settings file (%s).', 'civicrm'),
-            CIVICRM_SETTINGS_PATH
-          ) .
-          "</p><p class='error'> &raquo; " .
-          sprintf(
-            __('civicrm_root is currently set to: <em>%s</em>.', 'civicrm'),
-            $civicrm_root
-          ) .
-          "</p><p class='error'>" . $errorMsgAdd . "</p></strong>"
-        );
-
-        // Won't reach here!
-        return FALSE;
-
-      }
-
-      // Set static flag.
-      $initialized = TRUE;
-
-      // Initialize the system by creating a config object.
-      $config = CRM_Core_Config::singleton();
-
-      // Sync the logged-in WordPress user with CiviCRM.
-      global $current_user;
-      if ($current_user) {
-
-        // Sync procedure sets session values for logged in users.
-        require_once 'CRM/Core/BAO/UFMatch.php';
-        CRM_Core_BAO_UFMatch::synchronize(
-          // User object.
-          $current_user,
-          // Do not update.
-          FALSE,
-          // CMS.
-          'WordPress',
-          $this->civi->users->get_civicrm_contact_type('Individual')
-        );
-
-      }
-
-      /**
-       * Broadcast that CiviCRM is now initialized.
-       *
-       * @since 4.4
-       */
-      do_action('civicrm_initialized');
 
     }
 
-    // Success!
-    return TRUE;
+    /**
+     * Broadcast that CiviCRM is now initialized.
+     *
+     * @since 4.4
+     */
+    do_action('civicrm_initialized');
+
+    // Success! Set and return static flag.
+    $initialized = TRUE;
+    return $initialized;
 
   }
 
@@ -526,10 +599,13 @@ class CiviCRM_For_WordPress_Admin {
      */
     $position = apply_filters('civicrm_menu_item_position', '3.904981');
 
-    // Check for settings file.
-    if (CIVICRM_INSTALLED) {
+    // Try and initialize CiviCRM.
+    $success = $this->initialize();
 
-      // Add top level menu item.
+    // If all went well.
+    if ($success) {
+
+      // Add the CiviCRM top level menu item.
       $this->menu_page = add_menu_page(
         __('CiviCRM', 'civicrm'),
         __('CiviCRM', 'civicrm'),
@@ -546,25 +622,106 @@ class CiviCRM_For_WordPress_Admin {
     }
     else {
 
-      // Add top level menu item.
-      $this->menu_page = add_menu_page(
-        __('CiviCRM Installer', 'civicrm'),
-        __('CiviCRM Installer', 'civicrm'),
-        'manage_options',
-        'civicrm-install',
-        [$this, 'run_installer'],
-        $civilogo,
-        $position
-      );
-
       /*
-      // Add scripts and styles like this.
-      add_action('admin_print_scripts-' . $this->menu_page, [$this, 'admin_installer_js']);
-      add_action('admin_print_styles-' . $this->menu_page, [$this, 'admin_installer_css']);
-      add_action('admin_head-' . $this->menu_page, [$this, 'admin_installer_head'], 50);
+       * Are we here because this is a fresh install or because something is broken?
+       *
+       * Let's inspect the "error_flag" property for help with the decision. Where
+       * the settings file is missing, there's not a lot we can do, so assume it's
+       * a fresh install.
+       *
+       * However, we may be able to detect signs of installs where CiviCRM has been
+       * installed but "civicrm.settings.php" can't be found.
+       *
+       * @see self::detect_existing_install()
        */
+      if ($this->error_flag === 'settings-missing') {
+
+        // Add top level menu item.
+        $this->menu_page = add_menu_page(
+          __('CiviCRM Installer', 'civicrm'),
+          __('CiviCRM Installer', 'civicrm'),
+          'manage_options',
+          'civicrm-install',
+          [$this, 'run_installer'],
+          $civilogo,
+          $position
+        );
+
+        /*
+        // Add scripts and styles like this.
+        add_action('admin_print_scripts-' . $this->menu_page, [$this, 'admin_installer_js']);
+        add_action('admin_print_styles-' . $this->menu_page, [$this, 'admin_installer_css']);
+        add_action('admin_head-' . $this->menu_page, [$this, 'admin_installer_head'], 50);
+         */
+
+      }
+      else {
+
+        // Hand over to our Error Page to provide feedback.
+        $this->page_error_init($civilogo, $position);
+
+      }
 
     }
+
+  }
+
+  /**
+   * Try and detect signs of the existence of CiviCRM.
+   *
+   * It's possible that CiviCRM has been installed but that something is broken
+   * with the current install. This method looks for tell-tale signs.
+   *
+   * This is not used as yet, but is included as-is to be completed later.
+   *
+   * @since 5.40
+   *
+   * @return bool $existing_install True if there are signs of an existing install.
+   */
+  public function detect_existing_install() {
+
+    // Assume there's no evidence.
+    $existing_install = FALSE;
+
+    // This option is created on activation.
+    $existing_option = FALSE;
+    if ('fjwlws' != get_option('civicrm_activation_in_progress', 'fjwlws')) {
+      $existing_option = TRUE;
+    }
+
+    // Look for a directory in the standard location.
+    $existing_uploads_dir = FALSE;
+    $upload_dir = wp_upload_dir();
+    if (is_dir($upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'civicrm')) {
+      $existing_uploads_dir = TRUE;
+    }
+
+    // Look for a file in the legacy location.
+    $existing_legacy_file = FALSE;
+    if (file_exists(CIVICRM_PLUGIN_DIR . 'civicrm.settings.php')) {
+      $existing_legacy_file = TRUE;
+    }
+
+    return $existing_install;
+
+  }
+
+  /**
+   * Show Error Information page.
+   *
+   * In situations where something has gone wrong with the CiviCRM installation,
+   * show a page which will help people troubleshoot the problem.
+   *
+   * @since 5.40
+   *
+   * @param str $logo The CiviCRM logo.
+   * @param str $position The default menu position expressed as a float.
+   */
+  public function page_error_init($logo, $position) {
+
+    // Include and init Error Page.
+    include_once CIVICRM_PLUGIN_DIR . 'includes/admin-pages/civicrm.page.error.php';
+    $this->page_error = new CiviCRM_For_WordPress_Admin_Page_Error($logo, $position);
 
   }
 
