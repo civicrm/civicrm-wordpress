@@ -74,7 +74,10 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
    */
   public function register_hooks() {
 
-    // Bail if the current WordPress User cannot add Contacts.
+    /*
+     * Bail if the current WordPress User cannot add Contacts.
+     * Usefully, this also returns FALSE if CiviCRM fails to initialize.
+     */
     if (!$this->civi->users->check_civicrm_permission('add_contacts')) {
       return;
     }

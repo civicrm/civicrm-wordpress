@@ -311,8 +311,10 @@ class CiviCRM_For_WordPress {
 
     // Change option so this action never fires again.
     update_option('civicrm_activation_in_progress', 'false');
+
+    // Try and redirect to the Installer page.
     if (!is_multisite() && !isset($_GET['activate-multi']) && !CIVICRM_INSTALLED) {
-      wp_redirect(admin_url('options-general.php?page=civicrm-install'));
+      wp_redirect(admin_url('admin.php?page=civicrm-install'));
       exit;
     }
   }
@@ -1073,6 +1075,10 @@ class CiviCRM_For_WordPress {
    * @since 4.4
    */
   public function wp_head() {
+
+    if (!$this->initialize()) {
+      return;
+    }
 
     /*
      * CRM-11823
