@@ -753,7 +753,7 @@ class CiviCRM_For_WordPress_Shortcodes {
           $args['action'] = 'preview';
         }
 
-        switch($action) {
+        switch ($action) {
           case 'transact':
             $args['q'] = 'civicrm/contribute/transact';
             break;
