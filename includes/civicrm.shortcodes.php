@@ -752,7 +752,22 @@ class CiviCRM_For_WordPress_Shortcodes {
         if ($mode == 'preview' || $mode == 'test') {
           $args['action'] = 'preview';
         }
-        $args['q'] = 'civicrm/contribute/transact';
+
+        switch($action) {
+          case 'transact':
+            $args['q'] = 'civicrm/contribute/transact';
+            break;
+
+          case 'setup':
+            $args['q'] = 'civicrm/contribute/campaign';
+            $args['action'] = 'add';
+            $args['component'] = 'contribute';
+            break;
+
+          default:
+            $args['q'] = 'civicrm/contribute/transact';
+            break;
+        }
         break;
 
       case 'pcp':
