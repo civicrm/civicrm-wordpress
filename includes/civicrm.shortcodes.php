@@ -831,6 +831,10 @@ class CiviCRM_For_WordPress_Shortcodes {
         elseif ($mode == 'search') {
           $args['q'] = 'civicrm/profile';
         }
+        elseif ($mode == 'map') {
+          $args['q'] = 'civicrm/profile/map';
+          $args['map'] = 1;
+        }
         else {
           $args['q'] = 'civicrm/profile/create';
         }
