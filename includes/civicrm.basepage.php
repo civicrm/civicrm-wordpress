@@ -522,9 +522,6 @@ class CiviCRM_For_WordPress_Basepage {
    */
   public function basepage_render() {
 
-    // We no longer need this filter, so remove it.
-    remove_filter('the_content', [$this, 'basepage_render']);
-
     // Hand back our base page markup.
     return $this->basepage_markup;
 
