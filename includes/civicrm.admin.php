@@ -863,4 +863,42 @@ class CiviCRM_For_WordPress_Admin {
 
   }
 
+  /**
+   * Gets a suggested CiviCRM Contact ID via the "Unsupervised" Dedupe Rule.
+   *
+   * @since 5.43
+   *
+   * @param array $contact The array of CiviCRM Contact data.
+   * @param string $contact_type The Contact Type.
+   * @return integer|bool $contact_id The suggested Contact ID, or false on failure.
+   */
+  public function get_by_dedupe_unsupervised($contact, $contact_type = 'Individual') {
+
+    if (empty($contact)) {
+      return FALSE;
+    }
+
+    if (!$this->civi->initialize()) {
+      return FALSE;
+    }
+
+    // Get the Dedupe params.
+    $dedupe_params = CRM_Dedupe_Finder::formatParams($contact, $contact_type);
+    $dedupe_params['check_permission'] = FALSE;
+
+    // Use Dedupe Rules to find possible Contact IDs.
+    $contact_ids = CRM_Dedupe_Finder::dupesByParams($dedupe_params, $contact_type, 'Unsupervised');
+
+    // Return the suggested Contact ID if present.
+    $contact_id = 0;
+    if (!empty($contact_ids)) {
+      $contact_ids = array_reverse($contact_ids);
+      $contact_id = (int) array_pop($contact_ids);
+    }
+
+    // --<
+    return $contact_id;
+
+  }
+
 }

@@ -473,14 +473,26 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
       wp_send_json($data);
     }
 
-    // Build params to create Contact.
-    $params = [
-      'version' => 3,
-      'contact_type' => 'Individual',
+    // Build params to check for an existing Contact.
+    $contact = [
       'first_name' => $data['first_name'],
       'last_name' => $data['last_name'],
       'email' => $data['email'],
     ];
+
+    // Bail if there is an existing Contact.
+    $existing_id = civi_wp()->admin->get_by_dedupe_unsupervised($contact);
+    if ($existing_id !== FALSE && $existing_id !== 0) {
+      $open = '<a href="' . $this->civi->admin->get_admin_link('civicrm/contact/view', 'reset=1&cid=' . $existing_id) . '">';
+      $data['notice'] = sprintf(__('There seems to be %1$san existing Contact%2$s with these details.', 'civicrm'), $open, '</a>');
+      wp_send_json($data);
+    }
+
+    // Build params to create Contact.
+    $params = [
+      'version' => 3,
+      'contact_type' => 'Individual',
+    ] + $contact;
 
     // Call the API.
     $result = civicrm_api('Contact', 'create', $params);
