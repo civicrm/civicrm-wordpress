@@ -454,6 +454,9 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
         'CMSdbPass'          => DB_PASSWORD,
         'CMSdbHost'          => DB_HOST,
         'CMSdbName'          => DB_NAME,
+        // These two are only filled in when using the newer civicrm-setup.
+        'dbSSL' => '',
+        'CMSdbSSL' => '',
         'siteKey'            => preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(37))),
         'credKeys'           => 'aes-cbc:hkdf-sha256:' . preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(37))),
         'signKeys'           => 'jwt-hs256:hkdf-sha256:' . preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(37))),
