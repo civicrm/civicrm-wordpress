@@ -692,7 +692,7 @@ class CiviCRM_For_WordPress {
     // Store context.
     $this->civicrm_in_wordpress_set();
 
-    // When embedded via wpBasePage or AJAX call.
+    // When the CiviCRM query var is detected.
     if ($this->civicrm_in_wordpress()) {
 
       /*
@@ -718,19 +718,10 @@ class CiviCRM_For_WordPress {
 
       }
 
-      // Set context.
-      $this->civicrm_context_set('basepage');
-
-      // If we get here, we must be in a "wpBasePage" context.
-      $this->basepage->register_hooks();
-      return;
-
     }
 
-    // Set context.
-    $this->civicrm_context_set('shortcode');
-
-    // That leaves us with handling shortcodes, should they exist.
+    // Let the classes decide how to handle other requests.
+    $this->basepage->register_hooks();
     $this->shortcodes->register_hooks();
 
   }

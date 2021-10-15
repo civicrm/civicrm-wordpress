@@ -90,6 +90,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
 
     // Add AJAX handlers.
     add_action('wp_ajax_civicrm_basepage', [$this, 'ajax_save_basepage']);
+    add_action('wp_ajax_civicrm_shortcode', [$this, 'ajax_save_shortcode']);
     add_action('wp_ajax_civicrm_email_sync', [$this, 'ajax_save_email_sync']);
     add_action('wp_ajax_civicrm_clear_caches', [$this, 'ajax_clear_caches']);
 
@@ -311,6 +312,17 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       $data
     );
 
+    // Create "Shortcode Display Mode" metabox.
+    add_meta_box(
+      'civicrm_options_shortcode',
+      __('Shortcode Display Mode', 'civicrm'),
+      [$this, 'meta_box_options_shortcode_render'],
+      $screen_id,
+      'normal',
+      'core',
+      $data
+    );
+
     // Create "Email Sync" metabox.
     add_meta_box(
       'civicrm_options_email',
@@ -328,7 +340,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       __('Clear Caches', 'civicrm'),
       [$this, 'meta_box_options_cache_render'],
       $screen_id,
-      'normal',
+      'side',
       'core',
       $data
     );
@@ -433,6 +445,54 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
 
     // Include template file.
     include CIVICRM_PLUGIN_DIR . 'assets/templates/metaboxes/metabox.options.basepage.php';
+
+  }
+
+  /**
+   * Render "Shortcode" meta box.
+   *
+   * @since 5.44
+   *
+   * @param mixed $unused Unused param.
+   * @param array $metabox Array containing id, title, callback, and args elements.
+   */
+  public function meta_box_options_shortcode_render($unused = NULL, $metabox) {
+
+    if (!$this->civi->initialize()) {
+      return;
+    }
+
+    // Get the Shortcode Mode setting.
+    $shortcode_mode = $this->civi->admin->get_shortcode_mode();
+
+    // Set selected attributes.
+    $selected_legacy = $shortcode_mode === 'legacy' ? 'selected="selected"' : '';
+    $selected_modern = $shortcode_mode === 'modern' ? 'selected="selected"' : '';
+
+    // Set AJAX submit button options.
+    $options_ajax = [
+      'style' => 'float: right;',
+      'data-security' => esc_attr(wp_create_nonce('civicrm_shortcode')),
+      'disabled' => NULL,
+    ];
+
+    // Set POST submit button options.
+    $options_post = [
+      'style' => 'float: right;',
+    ];
+
+    /**
+     * Filters the Shortcode POST submit button attributes.
+     *
+     * @since 5.44
+     *
+     * @param array $options_post The existing button attributes.
+     * @return array $options_post The modified button attributes.
+     */
+    $options_post = apply_filters('civicrm/metabox/shortcode/submit/options', $options_post);
+
+    // Include template file.
+    include CIVICRM_PLUGIN_DIR . 'assets/templates/metaboxes/metabox.options.shortcode.php';
 
   }
 
@@ -601,6 +661,12 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       $this->form_save_basepage();
       $this->form_redirect();
     }
+    elseif (!empty($_POST['civicrm_shortcode_post_submit'])) {
+      // Save Shortcode Mode.
+      $this->form_nonce_check();
+      $this->form_save_shortcode();
+      $this->form_redirect();
+    }
     elseif (!empty($_POST['civicrm_email_post_submit'])) {
       // Save Email Sync.
       $this->form_nonce_check();
@@ -639,6 +705,24 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     civicrm_api3('Setting', 'create', [
       'wpBasePage' => $post->post_name,
     ]);
+
+  }
+
+  /**
+   * Save the CiviCRM Shortcode Mode Setting.
+   *
+   * @since 5.44
+   */
+  public function form_save_shortcode() {
+
+    // Bail if there is no valid chosen value.
+    $chosen = isset($_POST['shortcode_mode']) ? trim($_POST['shortcode_mode']) : 0;
+    if ($chosen === 0 || !in_array($chosen, $this->civi->admin->get_shortcode_modes())) {
+      return;
+    }
+
+    // Save the setting.
+    update_option('shortcode_mode', $chosen);
 
   }
 
@@ -770,6 +854,50 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       'section' => 'basepage',
       'result' => $basepage->ID,
       'message' => __('It appears that your Base Page has been set. Looking good.', 'civicrm'),
+      'saved' => TRUE,
+    ];
+
+    // Return the data.
+    wp_send_json($data);
+
+  }
+
+  /**
+   * Save the CiviCRM Shortcode Mode Setting.
+   *
+   * @since 5.44
+   */
+  public function ajax_save_shortcode() {
+
+    // Default response.
+    $data = [
+      'section' => 'shortcode',
+      'message' => __('Could not save the selected setting.', 'civicrm'),
+      'saved' => FALSE,
+    ];
+
+    // Since this is an AJAX request, check security.
+    $result = check_ajax_referer('civicrm_shortcode', FALSE, FALSE);
+    if ($result === FALSE) {
+      $data['notice'] = __('Authentication failed. Could not save the selected setting.', 'civicrm');
+      wp_send_json($data);
+    }
+
+    // Bail if there is no valid chosen value.
+    $chosen = isset($_POST['value']) ? trim($_POST['value']) : 0;
+    if ($chosen === 0 || !in_array($chosen, $this->civi->admin->get_shortcode_modes())) {
+      $data['notice'] = __('Unrecognised parameter. Could not save the selected setting.', 'civicrm');
+      wp_send_json($data);
+    }
+
+    // Set the Shortcode Mode setting.
+    $this->civi->admin->set_shortcode_mode($chosen);
+
+    // Data response.
+    $data = [
+      'section' => 'shortcode',
+      'result' => $chosen,
+      'message' => __('Setting saved.', 'civicrm'),
       'saved' => TRUE,
     ];
 

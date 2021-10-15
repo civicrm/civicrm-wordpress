@@ -28,6 +28,10 @@
 do_action('civicrm/metabox/email_sync/pre');
 
 ?>
+<div class="email_notice notice notice-error inline" style="background-color: #f7f7f7; display: none;">
+  <p></p>
+</div>
+
 <p><?php _e('When a WordPress User updates their Email, CiviCRM will automatically update the Primary Email of their linked Contact record. This setting lets you choose whether the reverse update should happen - i.e. if the Primary Email of a Contact that has a linked WordPress User is updated, do you want CiviCRM to update the WordPress User Email?', 'civicrm'); ?></p>
 
 <label for="sync_email" class="screen-reader-text"><?php _e('Sync Emails', 'civicrm'); ?></label>

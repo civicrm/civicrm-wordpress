@@ -82,8 +82,8 @@ class CiviCRM_For_WordPress_Shortcodes {
     // Register the CiviCRM shortcode.
     add_shortcode('civicrm', [$this, 'render_single']);
 
-    // Add CiviCRM core resources when a shortcode is detected in the post content.
-    add_action('wp', [$this, 'prerender'], 10, 1);
+    // Pre-render CiviCRM content when one or more Shortcodes are detected.
+    add_action('wp', [$this, 'prerender'], 20, 1);
 
   }
 
@@ -105,6 +105,11 @@ class CiviCRM_For_WordPress_Shortcodes {
 
     // Bail if this is a 404.
     if (is_404()) {
+      return;
+    }
+
+    // Bail if this is a Favicon request.
+    if (is_favicon()) {
       return;
     }
 
@@ -147,6 +152,14 @@ class CiviCRM_For_WordPress_Shortcodes {
 
     // Reset loop.
     rewind_posts();
+
+    // Bail if there are no Shortcodes.
+    if ($shortcodes_present === 0) {
+      return;
+    }
+
+    // Set context.
+    $this->civi->civicrm_context_set('shortcode');
 
     // Did we get any?
     if ($shortcodes_present) {
@@ -298,45 +311,11 @@ class CiviCRM_For_WordPress_Shortcodes {
     // Preprocess shortcode attributes.
     $args = $this->preprocess_atts($atts);
 
-    // Sanity check for improperly constructed shortcode.
-    if ($args === FALSE) {
-      return '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
-    }
+    // Check for pathless Shortcode.
+    if (empty($args['q'])) {
 
-    // If the shortcode has a path (`q`), fetch content by invoking the civicrm route
-    if (!empty($args['q'])) {
-      // invoke() requires environment variables to be set.
-      foreach ($args as $key => $value) {
-        if ($value !== NULL) {
-          set_query_var($key, $value);
-          $_REQUEST[$key] = $_GET[$key] = $value;
-        }
-      }
+      $content = '<p>' . __('This Shortcode could not be handled. It could be malformed or used incorrectly.', 'civicrm') . '</p>';
 
-      // Kick out if not CiviCRM.
-      if (!$this->civi->initialize()) {
-        return '';
-      }
-
-      // Check permission.
-      $argdata = $this->civi->get_request_args();
-      if (!$this->civi->users->check_permission($argdata['args'])) {
-        return $this->civi->users->get_permission_denied();
-      }
-
-      // CMW: why do we need this? Nothing that follows uses it.
-      require_once ABSPATH . WPINC . '/pluggable.php';
-
-      // Start buffering.
-      ob_start();
-      // Now, instead of echoing, shortcode output ends up in buffer.
-      $this->civi->invoke();
-      // Save the output and flush the buffer.
-      $content = ob_get_clean();
-    }
-    // If there is no path, rely on civicrm_shortcode_get_markup to provide the markup.
-    else {
-      $content = '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
       /**
        * Get the markup for "pathless" Shortcodes.
        *
@@ -348,16 +327,59 @@ class CiviCRM_For_WordPress_Shortcodes {
        *
        * @since 5.37
        *
-       * @param str $markup The default markup for an improperly constructed shortcode.
+       * @param str $content The default markup for an improperly constructed shortcode.
        * @param array $atts The shortcode attributes array.
        * @param array $args The shortcode arguments array.
        * @param str Context flag - value is either 'single' or 'multiple'.
        * @return str The modified shortcode markup.
        */
-      $content = apply_filters('civicrm_shortcode_get_markup', $content, $atts, $args, 'single');
+      return apply_filters('civicrm_shortcode_get_markup', $content, $atts, $args, 'single');
+
     }
 
+    // If there are *actual* CiviCRM query vars, let them take priority.
+    if (!$this->civi->civicrm_in_wordpress()) {
+
+      // Get the Shortcode Mode setting.
+      $shortcode_mode = $this->civi->admin->get_shortcode_mode();
+
+      /** This filter is documented in includes/civicrm.basepage.php */
+      $basepage_mode = (bool) apply_filters('civicrm_force_basepage_mode', FALSE, $post);
+
+      // Skip unless in "legacy mode" or "Base Page mode" is forced.
+      if ($shortcode_mode !== 'legacy' || !$basepage_mode) {
+
+        // invoke() requires environment variables to be set.
+        foreach ($args as $key => $value) {
+          if ($value !== NULL) {
+            set_query_var($key, $value);
+            $_REQUEST[$key] = $_GET[$key] = $value;
+          }
+        }
+
+      }
+
+    }
+
+    if (!$this->civi->initialize()) {
+      return '';
+    }
+
+    // Check permission.
+    $argdata = $this->civi->get_request_args();
+    if (!$this->civi->users->check_permission($argdata['args'])) {
+      return $this->civi->users->get_permission_denied();;
+    }
+
+    // Start buffering.
+    ob_start();
+    // Now, instead of echoing, Shortcode output ends up in buffer.
+    $this->civi->invoke();
+    // Save the output and flush the buffer.
+    $content = ob_get_clean();
+
     return $content;
+
   }
 
   /**
@@ -378,14 +400,10 @@ class CiviCRM_For_WordPress_Shortcodes {
     // Pre-process shortcode and retrieve args.
     $args = $this->preprocess_atts($atts);
 
-    // Sanity check for improperly constructed shortcode.
-    if ($args === FALSE) {
-      return '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
-    }
-
-    // Get pathless markup from filter callback
+    // Get pathless markup from filter callback.
     if (empty($args['q'])) {
-      $markup = '<p>' . __('Do not know how to handle this shortcode.', 'civicrm') . '</p>';
+      $markup = '<p>' . __('The Shortcode could not be handled. It could be malformed or used incorrectly.', 'civicrm') . '</p>';
+      /** This filter is documented in includes/civicrm-shortcodes.php */
       return apply_filters('civicrm_shortcode_get_markup', $markup, $atts, $args, 'multiple');
     }
 
@@ -863,9 +881,7 @@ class CiviCRM_For_WordPress_Shortcodes {
      * @param array $shortcode_atts Shortcode attributes.
      * @return array $args Modified shortcode arguments.
      */
-    $args = apply_filters('civicrm_shortcode_preprocess_atts', $args, $shortcode_atts);
-
-    return $args;
+    return apply_filters('civicrm_shortcode_preprocess_atts', $args, $shortcode_atts);
 
   }
 
@@ -946,23 +962,20 @@ class CiviCRM_For_WordPress_Shortcodes {
 
           case 'info':
           default:
-            $data['title'] = $civi_entity['title'];
+            $data['title'] = '';
+            if (!empty($civi_entity['title'])) {
+              $data['title'] = $civi_entity['title'];
+            }
             break;
         }
 
         // Set text, if present.
         $data['text'] = '';
-        if (isset($civi_entity['summary'])) {
+        if (!empty($civi_entity['summary'])) {
           $data['text'] = $civi_entity['summary'];
         }
-        if (
-          // Summary is not present or is empty.
-          (!isset($civi_entity['summary']) || empty($civi_entity['summary']))
-          &&
-          // We do have a description.
-          isset($civi_entity['description']) && !empty($civi_entity['description'])
-        ) {
-          // Override with description.
+        // Override with "description" if "summary" is empty.
+        if (empty($civi_entity['summary']) && !empty($civi_entity['description'])) {
           $data['text'] = $civi_entity['description'];
         }
 
