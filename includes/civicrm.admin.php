@@ -901,4 +901,39 @@ class CiviCRM_For_WordPress_Admin {
 
   }
 
+  /**
+   * Gets the CiviCRM Shortcode Mode.
+   *
+   * Defaults to "legacy" to preserve existing behaviour.
+   *
+   * @since 5.44
+   *
+   * @return string $shortcode_mode The Shortcode Mode: either 'legacy' or 'modern'.
+   */
+  public function get_shortcode_mode() {
+    return get_option('civicrm_shortcode_mode', 'legacy');
+  }
+
+  /**
+   * Sets the CiviCRM Shortcode Mode.
+   *
+   * @since 5.44
+   *
+   * @param string $shortcode_mode The Shortcode Mode: either 'legacy' or 'modern'.
+   */
+  public function set_shortcode_mode($shortcode_mode) {
+    update_option('civicrm_shortcode_mode', $shortcode_mode);
+  }
+
+  /**
+   * Gets the array of CiviCRM Shortcode Modes.
+   *
+   * @since 5.44
+   *
+   * @return array $shortcode_modes The array of Shortcode Modes.
+   */
+  public function get_shortcode_modes() {
+    return ['legacy', 'modern'];
+  }
+
 }

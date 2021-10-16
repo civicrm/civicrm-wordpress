@@ -165,11 +165,14 @@
 
       // Assign properties.
       me.basepage_submit = $('#civicrm_basepage_submit');
+      me.shortcode_submit = $('#civicrm_shortcode_submit');
       me.email_submit = $('#civicrm_email_submit');
       me.cache_submit = $('#civicrm_cache_submit');
       me.basepage_select = $('#page_id');
+      me.shortcode_select = $('#shortcode_mode');
       me.email_select = $('#sync_email');
       me.basepage_selected = me.basepage_select.val();
+      me.shortcode_selected = me.shortcode_select.val();
       me.email_selected = me.email_select.val();
 
       // Set status of Base Page submit button.
@@ -177,6 +180,10 @@
       if (me.basepage_select !== '') {
         me.basepage_submit.val(text);
       }
+
+      // Set status of Shortcode Mode submit button.
+      me.shortcode_submit.val(text);
+      me.shortcode_submit.prop('disabled', true);
 
       // Set status of Email Sync submit button.
       me.email_submit.val(text);
@@ -224,7 +231,29 @@
       });
 
       /**
-       * Add an onchange event listener to the "Basepage" section select.
+       * Add an onchange event listener to the "Shortcode Mode" section select.
+       *
+       * @param {Object} event The event object.
+       */
+      me.shortcode_select.on('change', function(event) {
+
+        var text;
+
+        // Enable/disable submit button.
+        if (me.shortcode_select.val() == me.shortcode_selected) {
+          text = CiviCRM_Options_Settings.get_localisation('saved');
+          me.shortcode_submit.val(text);
+          me.shortcode_submit.prop('disabled', true);
+        } else {
+          text = CiviCRM_Options_Settings.get_localisation('update');
+          me.shortcode_submit.val(text);
+          me.shortcode_submit.prop('disabled', false);
+        }
+
+      });
+
+      /**
+       * Add an onchange event listener to the "Email Sync" section select.
        *
        * @param {Object} event The event object.
        */
@@ -270,6 +299,34 @@
 
         // Submit setting to server.
         me.send('civicrm_basepage', value, ajax_nonce);
+
+      });
+
+      /**
+       * Add a click event listener to the "Shortcode Mode" section submit button.
+       *
+       * @param {Object} event The event object.
+       */
+      me.shortcode_submit.on('click', function(event) {
+
+        // Define vars.
+        var value = me.shortcode_select.val(),
+            ajax_nonce = me.shortcode_submit.data('security'),
+            saving = CiviCRM_Options_Settings.get_localisation('saving');
+
+        // Prevent form submission.
+        if (event.preventDefault) {
+          event.preventDefault();
+        }
+
+        // Modify button and select, then show spinner.
+        me.shortcode_submit.val(saving);
+        me.shortcode_submit.prop('disabled', true);
+        me.shortcode_select.prop('disabled', true);
+        $(this).next('.spinner').css('visibility', 'visible');
+
+        // Submit setting to server.
+        me.send('civicrm_shortcode', value, ajax_nonce);
 
       });
 
@@ -414,6 +471,15 @@
           }
           me.basepage_selected = data.result;
 
+        } else if (data.section == 'shortcode') {
+
+          // Shortcode Mode section.
+          me.shortcode_submit.val(saved);
+          me.shortcode_submit.next('.spinner').css('visibility', 'hidden');
+          me.shortcode_select.val(data.result);
+          me.shortcode_selected = data.result;
+          me.shortcode_select.prop('disabled', false);
+
         } else if (data.section == 'email_sync') {
 
           // Email Sync section.
@@ -449,6 +515,30 @@
           $('.basepage_notice p').html(data.notice);
           $('.basepage_feedback').html(data.message);
           me.basepage_selected = data.result;
+
+        } else if (data.section == 'shortcode') {
+
+          // Shortcode Mode section.
+          me.shortcode_submit.val(update);
+          me.shortcode_submit.next('.spinner').css('visibility', 'hidden');
+          me.shortcode_select.val(data.result);
+          me.shortcode_select.prop('disabled', false);
+          $('.shortcode_notice').show();
+          $('.shortcode_notice p').html(data.notice);
+          $('.shortcode_feedback').html(data.message);
+          me.shortcode_selected = data.result;
+
+        } else if (data.section == 'email_sync') {
+
+          // Email Sync section.
+          me.email_submit.val(update);
+          me.email_submit.next('.spinner').css('visibility', 'hidden');
+          me.email_select.val(data.result);
+          me.email_select.prop('disabled', false);
+          $('.email_notice').show();
+          $('.email_notice p').html(data.notice);
+          $('.email_feedback').html(data.message);
+          me.email_selected = data.result;
 
         } else if (data.section == 'clear_caches') {
 
