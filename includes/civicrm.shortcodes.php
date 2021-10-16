@@ -676,32 +676,45 @@ class CiviCRM_For_WordPress_Shortcodes {
   }
 
   /**
-   * Detect and return CiviCRM shortcodes in post content.
+   * Detect and return CiviCRM Shortcodes in post content.
    *
    * @since 4.6
+   * @since 5.44 Made recursive.
    *
    * @param str $content The content to parse.
-   * @return array $shortcodes Array of shortcodes.
+   * @return array $shortcodes Array of Shortcodes.
    */
   private function get_for_post($content) {
 
     // Init return array.
     $shortcodes = [];
 
-    // Attempt to discover all instances of the shortcode.
+    // Attempt to discover all instances of the Shortcode.
     $pattern = get_shortcode_regex();
 
     if (
       preg_match_all('/' . $pattern . '/s', $content, $matches)
       && array_key_exists(2, $matches)
-      && in_array('civicrm', $matches[2])
     ) {
 
-      // Get keys for our shortcode.
+      // Get keys for our Shortcode.
       $keys = array_keys($matches[2], 'civicrm');
 
-      foreach ($keys as $key) {
-        $shortcodes[] = $matches[0][$key];
+      // Add found Shortcodes at this level.
+      if (!empty($keys)) {
+        foreach ($keys as $key) {
+          $shortcodes[] = $matches[0][$key];
+        }
+      }
+
+      // Recurse when nested Shortcodes are found.
+      if (!empty($matches[5])) {
+        foreach ($matches[5] as $match) {
+          if (!empty($match)) {
+            $shortcodes_deeper = $this->get_for_post($match);
+            $shortcodes = array_merge($shortcodes, $shortcodes_deeper);
+          }
+        }
       }
 
     }
