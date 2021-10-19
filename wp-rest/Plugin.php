@@ -2,7 +2,7 @@
 /**
  * Main plugin class.
  *
- * @since 0.1
+ * @since 5.25
  */
 
 namespace CiviCRM_WP_REST;
@@ -14,7 +14,7 @@ class Plugin {
   /**
    * Constructor.
    *
-   * @since 0.1
+   * @since 5.25
    */
   public function __construct() {
 
@@ -27,7 +27,7 @@ class Plugin {
   /**
    * Register hooks.
    *
-   * @since 1.0
+   * @since 5.25
    */
   protected function register_hooks() {
 
@@ -42,10 +42,11 @@ class Plugin {
   /**
    * Bootstrap CiviCRM when hitting a the 'civicrm' namespace.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param mixed $result
-   * @param WP_REST_Server $server REST server instance
-   * @param WP_REST_Request $request The request
+   * @param WP_REST_Server $server REST server instance.
+   * @param WP_REST_Request $request The request.
    * @return mixed $result
    */
   public function bootstrap_civi($result, $server, $request) {
@@ -61,7 +62,7 @@ class Plugin {
 
         $logged_in_wp_user = $this->do_user_login($request);
 
-        // return error
+        // Return error.
         if (is_wp_error($logged_in_wp_user)) {
           return $logged_in_wp_user;
         }
@@ -76,25 +77,26 @@ class Plugin {
   /**
    * Setup objects.
    *
-   * @since 0.1
+   * @since 5.25
    */
   private function setup_objects() {
 
     /**
       * Filter to replace the mailing tracking URLs.
       *
-      * @since 0.1
+      * @since 5.25
+      *
       * @param bool $replace_mailing_tracking_urls
       */
     $replace_mailing_tracking_urls = apply_filters('civi_wp_rest/plugin/replace_mailing_tracking_urls', FALSE);
 
-    // keep CIVICRM_WP_REST_REPLACE_MAILING_TRACKING for backwards compatibility
+    // Keep CIVICRM_WP_REST_REPLACE_MAILING_TRACKING for backwards compatibility.
     if (
       $replace_mailing_tracking_urls
       || (defined('CIVICRM_WP_REST_REPLACE_MAILING_TRACKING')
       && CIVICRM_WP_REST_REPLACE_MAILING_TRACKING)
     ) {
-      // register mailing hooks
+      // Register mailing hooks.
       $mailing_hooks = (new Mailing_Hooks)->register_hooks();
 
     }
@@ -104,60 +106,60 @@ class Plugin {
   /**
    * Registers Rest API routes.
    *
-   * @since 0.1
+   * @since 5.25
    */
   public function register_rest_routes() {
 
-    // rest endpoint
+    // Rest endpoint.
     $rest_controller = new Controller\Rest();
     $rest_controller->register_routes();
 
-    // url controller
+    // URL controller.
     $url_controller = new Controller\Url();
     $url_controller->register_routes();
 
-    // open controller
+    // Open controller.
     $open_controller = new Controller\Open();
     $open_controller->register_routes();
 
-    // authorizenet controller
+    // AuthorizeNet controller.
     $authorizeIPN_controller = new Controller\AuthorizeIPN();
     $authorizeIPN_controller->register_routes();
 
-    // paypal controller
+    // PayPal controller.
     $paypalIPN_controller = new Controller\PayPalIPN();
     $paypalIPN_controller->register_routes();
 
-    // pxpay controller
+    // PxPay controller.
     $paypalIPN_controller = new Controller\PxIPN();
     $paypalIPN_controller->register_routes();
 
-    // civiconnect controller
+    // CiviConnect controller.
     $cxn_controller = new Controller\Cxn();
     $cxn_controller->register_routes();
 
-    // widget controller
+    // Widget controller.
     $widget_controller = new Controller\Widget();
     $widget_controller->register_routes();
 
-    // soap controller
+    // Soap controller.
     $soap_controller = new Controller\Soap();
     $soap_controller->register_routes();
 
     /**
      * Opportunity to add more rest routes.
      *
-     * @since 0.1
+     * @since 5.25
      */
     do_action('civi_wp_rest/plugin/rest_routes_registered');
 
   }
 
   /**
-   * Sets the timezone to the users timezone when
-   * calling the civicrm/v3/rest endpoint.
+   * Sets the timezone to the user's timezone when calling the civicrm/v3/rest endpoint.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Request $request The request
    */
   private function maybe_set_user_timezone($request) {
@@ -171,7 +173,7 @@ class Plugin {
       'user_timezone' => get_option('timezone_string', FALSE),
     ];
 
-    // filter timezones
+    // Filter timezones.
     add_filter('civi_wp_rest/plugin/timezones', function() use ($timezones) {
 
       return $timezones;
@@ -182,7 +184,7 @@ class Plugin {
       return;
     }
 
-    /**
+    /*
      * CRM-12523
      * CRM-18062
      * CRM-19115
@@ -193,13 +195,14 @@ class Plugin {
   }
 
   /**
-   * Resets the timezone to the original WP
-   * timezone after calling the civicrm/v3/rest endpoint.
+   * Resets the timezone to the original WordPress timezone after calling the
+   * civicrm/v3/rest endpoint.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param mixed $result
-   * @param WP_REST_Server $server REST server instance
-   * @param WP_REST_Request $request The request
+   * @param WP_REST_Server $server REST server instance.
+   * @param WP_REST_Request $request The request.
    * @return mixed $result
    */
   public function maybe_reset_wp_timezone($result, $server, $request) {
@@ -214,7 +217,7 @@ class Plugin {
       return $result;
     }
 
-    // reset wp timezone
+    // Reset WordPress timezone.
     date_default_timezone_set($timezones['wp_timezone']);
 
     return $result;
@@ -222,20 +225,20 @@ class Plugin {
   }
 
   /**
-   * Performs the necessary checks and
-   * data retrieval to login a WordPress user.
+   * Performs the necessary checks and data retrieval to login a WordPress user.
    *
-   * @since 0.1
-   * @param \WP_REST_Request $request The request
-   * @return \WP_User|\WP_Error|void $logged_in_wp_user The logged in WordPress user object, \Wp_Error, or nothing
+   * @since 5.25
+   *
+   * @param \WP_REST_Request $request The request.
+   * @return \WP_User|\WP_Error|void $logged_in_wp_user The logged in WordPress user object, \Wp_Error, or nothing.
    */
   public function do_user_login($request) {
 
     /**
-     * Filter and opportunity to bypass
-     * the default user login.
+     * Filter and opportunity to bypass the default user login.
      *
-     * @since 0.1
+     * @since 5.25
+     *
      * @param bool $login
      */
     $logged_in = apply_filters('civi_wp_rest/plugin/do_user_login', FALSE, $request);
@@ -244,7 +247,7 @@ class Plugin {
       return;
     }
 
-    // default login based on contact's api_key
+    // Default login based on Contact's api_key.
     if (!(new Controller\Rest)->is_valid_api_key($request)) {
       return new \WP_Error(
         'civicrm_rest_api_error',
@@ -272,9 +275,10 @@ class Plugin {
   /**
    * Get WordPress user data.
    *
-   * @since 0.1
-   * @param int $contact_id The contact id
-   * @return WP_User|WP_Error $user The WordPress user data or WP_Error object
+   * @since 5.25
+   *
+   * @param int $contact_id The Contact ID.
+   * @return WP_User|WP_Error $user The WordPress user data or WP_Error object.
    */
   public function get_wp_user(int $contact_id) {
 
@@ -296,7 +300,7 @@ class Plugin {
 
     }
 
-    // filter uf_match
+    // Filter uf_match.
     add_filter('civi_wp_rest/plugin/uf_match', function() use ($uf_match) {
 
       return !empty($uf_match) ? $uf_match : NULL;
@@ -308,20 +312,21 @@ class Plugin {
   }
 
   /**
-   * Logs in the WordPress user, and
-   * syncs it with it's CiviCRM contact.
+   * Logs in the WordPress user, and syncs it with it's CiviCRM Contact.
    *
-   * @since 0.1
-   * @param \WP_User $wp_user The WordPress user object
-   * @param \WP_REST_Request|NULL $request The request object or NULL
-   * @return \WP_User|void $wp_user The logged in WordPress user object or nothing
+   * @since 5.25
+   *
+   * @param \WP_User $wp_user The WordPress user object.
+   * @param \WP_REST_Request|NULL $request The request object or NULL.
+   * @return \WP_User|void $wp_user The logged in WordPress user object or nothing.
    */
   public function login_wp_user(\WP_User $wp_user, $request = NULL) {
 
     /**
      * Filter the user about to be logged in.
      *
-     * @since 0.1
+     * @since 5.25
+     *
      * @param \WP_User $user The WordPress user object
      * @param \WP_REST_Request|NULL $request The request object or NULL
      */
@@ -340,12 +345,11 @@ class Plugin {
   }
 
   /**
-   * Sets the necessary user
-   * session variables for CiviCRM.
+   * Sets the necessary user session variables for CiviCRM.
    *
-   * @since 0.1
-   * @param \WP_User $wp_user The WordPress user
-   * @return void
+   * @since 5.25
+   *
+   * @param \WP_User $wp_user The WordPress user.
    */
   public function set_civi_user_session($wp_user): void {
 
@@ -370,8 +374,9 @@ class Plugin {
   /**
    * Retrieves the CiviCRM domain_id.
    *
-   * @since 0.1
-   * @return int $domain_id The domain id
+   * @since 5.25
+   *
+   * @return int $domain_id The Domain ID.
    */
   public function get_civi_domain_id(): int {
 
