@@ -2,7 +2,7 @@
 /**
  * Url controller class.
  *
- * @since 0.1
+ * @since 5.25
  */
 
 namespace CiviCRM_WP_REST\Controller;
@@ -12,14 +12,14 @@ class Url extends Base {
   /**
    * @var string
    * The base route.
-   * @since 0.1
+   * @since 5.25
    */
   protected $rest_base = 'url';
 
   /**
    * Registers routes.
    *
-   * @since 0.1
+   * @since 5.25
    */
   public function register_routes() {
 
@@ -38,25 +38,29 @@ class Url extends Base {
   /**
    * Get items.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Request $request
    */
   public function get_item($request) {
 
     /**
-     * Filter formatted api params.
+     * Filter formatted API params.
      *
-     * @since 0.1
+     * @since 5.25
+     *
      * @param array $params
      * @param WP_REST_Request $request
      */
     $params = apply_filters('civi_wp_rest/controller/url/params', $this->get_formatted_params($request), $request);
 
-    // track url
+    // Track URL.
     $url = \CRM_Mailing_Event_BAO_TrackableURLOpen::track($params['queue_id'], $params['url_id']);
 
     /**
-     * Filter url.
+     * Filter URL.
+     *
+     * @since 5.25
      *
      * @param string $url
      * @param array $params
@@ -72,9 +76,10 @@ class Url extends Base {
   }
 
   /**
-   * Get formatted api params.
+   * Get formatted API params.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Resquest $request
    * @return array $params
    */
@@ -101,28 +106,25 @@ class Url extends Base {
   }
 
   /**
-   * Parses the url.
+   * Parses the URL.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param string $url
    * @param array $params
    * @return string $url
    */
   protected function parse_url($url, $params) {
 
-    // CRM-18320 - Fix encoded ampersands
+    // CRM-18320 - Fix encoded ampersands.
     $url = str_replace('&amp;', '&', $url);
 
-    // CRM-7103 - Look for additional query variables and append them
+    // CRM-7103 - Look for additional query variables and append them.
     if (isset($params['query']) && strpos($url, '?')) {
-
       $url .= '&' . $params['query'];
-
     }
     elseif (isset($params['query'])) {
-
       $url .= '?' . $params['query'];
-
     }
 
     if (strpos($url, 'mailto')) {
@@ -136,7 +138,8 @@ class Url extends Base {
   /**
    * Do redirect.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param string $url
    */
   protected function do_redirect($url) {
@@ -150,7 +153,8 @@ class Url extends Base {
   /**
    * Item schema.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return array $schema
    */
   public function get_item_schema() {
@@ -179,7 +183,8 @@ class Url extends Base {
   /**
    * Item arguments.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return array $arguments
    */
   public function get_item_args() {

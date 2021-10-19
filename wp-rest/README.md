@@ -1,8 +1,8 @@
-# CiviCRM WP REST API Wrapper
+# REST API integration for CiviCRM
 
-This is a WordPress plugin that aims to expose CiviCRM's [extern](https://github.com/civicrm/civicrm-core/tree/master/extern) scripts as WordPress REST endpoints.
+This code exposes CiviCRM's [extern](https://github.com/civicrm/civicrm-core/tree/master/extern) scripts as WordPress REST endpoints.
 
-This plugin requires:
+### Requirements
 
 -   PHP 7.2+
 -   WordPress 4.7+

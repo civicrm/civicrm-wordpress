@@ -4,7 +4,7 @@
  *
  * CiviConnect endpoint, replacement for CiviCRM's 'extern/cxn.php'.
  *
- * @since 0.1
+ * @since 5.25
  */
 
 namespace CiviCRM_WP_REST\Controller;
@@ -14,14 +14,14 @@ class Cxn extends Base {
   /**
    * @var string
    * The base route.
-   * @since 0.1
+   * @since 5.25
    */
   protected $rest_base = 'cxn';
 
   /**
    * Registers routes.
    *
-   * @since 0.1
+   * @since 5.25
    */
   public function register_routes() {
 
@@ -38,7 +38,8 @@ class Cxn extends Base {
   /**
    * Get items.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Request $request
    */
   public function get_item($request) {
@@ -46,7 +47,8 @@ class Cxn extends Base {
     /**
      * Filter request params.
      *
-     * @since 0.1
+     * @since 5.25
+     *
      * @param array $params
      * @param WP_REST_Request $request
      */
@@ -57,6 +59,8 @@ class Cxn extends Base {
 
     /**
      * Filter connection server object.
+     *
+     * @since 5.25
      *
      * @param Civi\Cxn\Rpc\ApiServer $cxn
      * @param array $params
@@ -83,9 +87,7 @@ class Cxn extends Base {
       return $this->civi_rest_error($e->getMessage());
     }
 
-    /**
-     * Bypass WP and send request from Cxn.
-     */
+    // Bypass WordPress and send request from Cxn.
     add_filter('rest_pre_serve_request', function($served, $response, $request, $server) use ($result) {
 
       // Civi\Cxn\Rpc\Message->send()
@@ -102,7 +104,8 @@ class Cxn extends Base {
   /**
    * Item schema.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return array $schema
    */
   public function get_item_schema() {}
@@ -110,7 +113,8 @@ class Cxn extends Base {
   /**
    * Item arguments.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return array $arguments
    */
   public function get_item_args() {}

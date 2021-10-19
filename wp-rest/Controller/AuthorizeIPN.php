@@ -6,7 +6,7 @@
  *
  * @see https://docs.civicrm.org/sysadmin/en/latest/setup/payment-processors/authorize-net/#shell-script-testing-method
  *
- * @since 0.1
+ * @since 5.25
  */
 
 namespace CiviCRM_WP_REST\Controller;
@@ -16,14 +16,14 @@ class AuthorizeIPN extends Base {
   /**
    * @var string
    * The base route.
-   * @since 0.1
+   * @since 5.25
    */
   protected $rest_base = 'authorizeIPN';
 
   /**
    * Registers routes.
    *
-   * @since 0.1
+   * @since 5.25
    */
   public function register_routes() {
 
@@ -40,7 +40,8 @@ class AuthorizeIPN extends Base {
   /**
    * Get items.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Request $request
    */
   public function get_item($request) {
@@ -48,7 +49,8 @@ class AuthorizeIPN extends Base {
     /**
      * Filter request params.
      *
-     * @since 0.1
+     * @since 5.25
+     *
      * @param array $params
      * @param WP_REST_Request $request
      */
@@ -61,6 +63,8 @@ class AuthorizeIPN extends Base {
 
     /**
      * Filter AuthorizeIPN object.
+     *
+     * @since 5.25
      *
      * @param CRM_Core_Payment_AuthorizeNetIPN $authorize_IPN
      * @param array $params
@@ -97,7 +101,8 @@ class AuthorizeIPN extends Base {
    *
    * Needed because the instance is being filtered through 'civi_wp_rest/controller/authorizeIPN/instance'.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param CRM_Core_Payment_AuthorizeNetIPN|CRM_Core_Payment_BaseIPN $object
    * @return bool
    */
@@ -110,7 +115,8 @@ class AuthorizeIPN extends Base {
   /**
    * Item schema.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return array $schema
    */
   public function get_item_schema() {}
@@ -118,7 +124,8 @@ class AuthorizeIPN extends Base {
   /**
    * Item arguments.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return array $arguments
    */
   public function get_item_args() {}
