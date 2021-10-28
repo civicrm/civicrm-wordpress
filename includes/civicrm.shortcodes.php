@@ -628,7 +628,12 @@ class CiviCRM_For_WordPress_Shortcodes {
    * @param int $post_id The numeric ID of the WordPress post.
    * @return string $title The overridden title.
    */
-  public function get_title($title, $post_id) {
+  public function get_title($title, $post_id = 0) {
+
+    // Bail if there is no Post ID.
+    if (empty($post_id)) {
+      return $title;
+    }
 
     // Is this the post?
     if (!array_key_exists($post_id, $this->shortcode_markup)) {
