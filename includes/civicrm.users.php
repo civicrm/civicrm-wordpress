@@ -47,7 +47,7 @@ class CiviCRM_For_WordPress_Users {
     $this->civi = civi_wp();
 
     // Always listen for activation action.
-    add_action('civicrm_activation', [$this, 'activate']);
+    add_action('civicrm_activate', [$this, 'activate']);
 
   }
 
@@ -59,7 +59,7 @@ class CiviCRM_For_WordPress_Users {
   public function activate() {
 
     /*
-     * Assign minimum capabilities for all WordPress roles and create
+     * Assign minimum capabilities to all WordPress roles and create
      * 'anonymous_user' role.
      */
     $this->set_wp_user_capabilities();
@@ -86,14 +86,22 @@ class CiviCRM_For_WordPress_Users {
     add_action('profile_update', [$this, 'update_user']);
 
     // Delete ufMatch record when a WordPress user is deleted.
-    add_action('deleted_user', [$this, 'delete_user_ufmatch'], 10, 1);
+    add_action('deleted_user', [$this, 'delete_user_ufmatch']);
 
   }
 
   /**
    * Check permissions.
    *
-   * Authentication function used by basepage_register_hooks()
+   * This method only denies permission when the CiviCRM path that is requested
+   * begins with "civicrm/admin". Its intention seems to be to exclude admin
+   * requests from display on the front-end.
+   *
+   * Used internally by:
+   *
+   * - CiviCRM_For_WordPress_Basepage::basepage_handler()
+   * - CiviCRM_For_WordPress_Shortcodes::render_single()
+   * - civicrm_check_permission()
    *
    * @since 4.6
    *
@@ -113,7 +121,7 @@ class CiviCRM_For_WordPress_Users {
 
     require_once 'CRM/Utils/Array.php';
 
-    // All profile and file urls, as well as user dashboard and tell-a-friend are valid.
+    // All profile and file URLs, as well as user dashboard and tell-a-friend are valid.
     $arg1 = CRM_Utils_Array::value(1, $args);
     $invalidPaths = ['admin'];
     if (in_array($arg1, $invalidPaths)) {
@@ -195,8 +203,8 @@ class CiviCRM_For_WordPress_Users {
    */
   public function sync_user($user = FALSE) {
 
-    // Sanity check
-    if ($user === FALSE || !is_a($user, 'WP_User')) {
+    // Sanity check.
+    if ($user === FALSE || !($user instanceof WP_User)) {
       return;
     }
 
@@ -258,11 +266,6 @@ class CiviCRM_For_WordPress_Users {
    */
   public function set_wp_user_capabilities() {
 
-    global $wp_roles;
-    if (!isset($wp_roles)) {
-      $wp_roles = new WP_Roles();
-    }
-
     // Define minimum capabilities (CiviCRM permissions).
     $default_min_capabilities = [
       'access_civimail_subscribe_unsubscribe_pages' => 1,
@@ -284,11 +287,11 @@ class CiviCRM_For_WordPress_Users {
      * @since 4.6
      *
      * @param array $default_min_capabilities The minimum capabilities.
-     * @return array $default_min_capabilities The modified capabilities.
      */
     $min_capabilities = apply_filters('civicrm_min_capabilities', $default_min_capabilities);
 
     // Assign the minimum capabilities to all WordPress roles.
+    $wp_roles = wp_roles();
     foreach ($wp_roles->role_names as $role => $name) {
       $roleObj = $wp_roles->get_role($role);
       foreach ($min_capabilities as $capability_name => $capability_value) {
@@ -298,11 +301,7 @@ class CiviCRM_For_WordPress_Users {
 
     // Add the 'anonymous_user' role with minimum capabilities.
     if (!in_array('anonymous_user', $wp_roles->roles)) {
-      add_role(
-        'anonymous_user',
-        __('Anonymous User', 'civicrm'),
-        $min_capabilities
-      );
+      add_role('anonymous_user', __('Anonymous User', 'civicrm'), $min_capabilities);
     }
 
   }
@@ -319,11 +318,7 @@ class CiviCRM_For_WordPress_Users {
    */
   public function set_access_capabilities() {
 
-    // Test for existing global
-    global $wp_roles;
-    if (!isset($wp_roles)) {
-      $wp_roles = new WP_Roles();
-    }
+    $wp_roles = wp_roles();
 
     /**
      * Filter the default roles with access to CiviCRM.
@@ -334,7 +329,6 @@ class CiviCRM_For_WordPress_Users {
      * @since 4.6
      *
      * @param array The default roles with access to CiviCRM.
-     * @return array The modified roles with access to CiviCRM.
      */
     $roles = apply_filters('civicrm_access_roles', ['super admin', 'administrator']);
 
