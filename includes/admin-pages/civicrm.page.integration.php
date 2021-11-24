@@ -106,7 +106,6 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
      * @since 5.37
      *
      * @param str The default access capability.
-     * @return str The modified access capability.
      */
     return apply_filters('civicrm/admin/integration/cap', 'manage_options');
 
@@ -193,6 +192,10 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
      * Allow meta boxes to be added to this screen.
      *
      * The Screen ID to use is: "civicrm_page_cwps_settings".
+     *
+     * Used internally by:
+     *
+     * - self::meta_boxes_integration_add()
      *
      * @since 5.34
      *
@@ -295,7 +298,7 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
    */
-  public function meta_box_integration_wordpress_render($unused = NULL, $metabox) {
+  public function meta_box_integration_wordpress_render($unused, $metabox) {
 
     // First check our transient for the data.
     $plugins = get_site_transient('civicrm_plugins_by_tag');
@@ -345,7 +348,7 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
    */
-  public function meta_box_integration_git_render($unused = NULL, $metabox) {
+  public function meta_box_integration_git_render($unused, $metabox) {
 
     // First check our transient for the data.
     $plugins = get_site_transient('civicrm_plugins_by_repo');
@@ -393,7 +396,7 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
    */
-  public function meta_box_integration_ext_render($unused = NULL, $metabox) {
+  public function meta_box_integration_ext_render($unused, $metabox) {
 
     if (!$this->civi->initialize()) {
       return;
