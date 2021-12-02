@@ -71,6 +71,9 @@ class CiviCRM_For_WordPress_Compat {
     // Support Clean URLs when Polylang is active.
     add_action('civicrm_after_rewrite_rules', [$this, 'rewrite_rules_polylang'], 10, 2);
 
+    // Prevent AIOSEO from stomping on CiviCRM Shortcodes.
+    add_filter('aioseo_conflicting_shortcodes', [$this, 'aioseo_resolve_conflict']);
+
   }
 
   /**
@@ -145,6 +148,21 @@ class CiviCRM_For_WordPress_Compat {
       flush_rewrite_rules();
     }
 
+  }
+
+  /**
+   * Fixes AIOSEO's attempt to modify Shortcodes.
+   *
+   * @see https://civicrm.stackexchange.com/questions/40765/wp-all-in-one-seo-plugin-conflict
+   *
+   * @since 5.45
+   *
+   * @param array $conflicting_shortcodes The existing AIOSEO Conflicting Shortcodes array.
+   * @return array $conflicting_shortcodes The modified AIOSEO Conflicting Shortcodes array.
+   */
+  public function aioseo_resolve_conflict($conflicting_shortcodes) {
+    $conflicting_shortcodes['CiviCRM'] = 'civicrm';
+    return $conflicting_shortcodes;
   }
 
 }
