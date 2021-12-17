@@ -274,6 +274,19 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
      */
     private function install() {
 
+      # identify destination
+
+      if ($plugin_path = $this->getOption('destination', FALSE)) {
+        $plugin_path = ABSPATH . $plugin_path;
+      }
+      else {
+        $plugin_path = WP_PLUGIN_DIR . '/civicrm';
+      }
+
+      global $crmPath;
+      $crmPath = "$plugin_path/civicrm";
+      $crm_files_present = is_dir($crmPath);
+
       # validate
 
       if (!$dbuser = $this->getOption('dbuser', FALSE)) {
@@ -295,19 +308,6 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
       if ($lang = $this->getOption('lang', FALSE) and !$langtarfile = $this->getOption('langtarfile', FALSE)) {
         return WP_CLI::error('CiviCRM language tarfile not specified.');
       }
-
-      # begin install
-
-      if ($plugin_path = $this->getOption('destination', FALSE)) {
-        $plugin_path = ABSPATH . $plugin_path;
-      }
-      else {
-        $plugin_path = WP_PLUGIN_DIR . '/civicrm';
-      }
-
-      global $crmPath;
-      $crmPath = "$plugin_path/civicrm";
-      $crm_files_present = is_dir($crmPath);
 
       # extract the archive
       if ($this->getOption('tarfile', FALSE)) {
