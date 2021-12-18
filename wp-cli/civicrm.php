@@ -305,8 +305,12 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
         return WP_CLI::error('CiviCRM database name not specified.');
       }
 
-      if ($lang = $this->getOption('lang', FALSE) and !$langtarfile = $this->getOption('langtarfile', FALSE)) {
-        return WP_CLI::error('CiviCRM language tarfile not specified.');
+      if ($lang = $this->getOption('lang', FALSE)) {
+        $moPath = "$crmPath/l10n/$lang/LC_MESSAGES/civicrm.mo";
+
+        if (!($langtarfile = $this->getOption('langtarfile', FALSE)) && !file_exists($moPath)) {
+          return WP_CLI::error("Failed to find data for language ($lang). Please download valid language data with --langtarfile=<path/to/tarfile>.");
+        }
       }
 
       # extract the archive
@@ -357,10 +361,14 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
       }
       require_once $civicrm_installer_helper;
 
-      if ('' != $lang) {
+      if ($this->getOption('langtarfile', FALSE)) {
         if (!$this->untar($plugin_path, 'langtarfile')) {
-          return WP_CLI::error('No language tarfile specified, use --langtarfile=path/to/tarfile');
+          return WP_CLI::error('Error downloading langtarfile');
         }
+      }
+
+      if (!empty($lang) && !file_exists($moPath)) {
+        return WP_CLI::error("Failed to find data for language ($lang). Please download valid language data with --langtarfile=<path/to/tarfile>.");
       }
 
       # create files dirs
