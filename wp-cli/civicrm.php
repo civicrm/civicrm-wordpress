@@ -379,6 +379,15 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
       $setup = \Civi\Setup::instance();
       $setup->getModel()->db = ['server' => $dbhost, 'username' => $dbuser, 'password' => $dbpass, 'database' => $dbname];
       $setup->getModel()->lang = (empty($lang) ? 'en_US' : $lang);
+      if ($base_url = $this->getOption('site_url', FALSE)) {
+        $ssl = $this->getOption('ssl', FALSE);
+        $protocol = ('on' == $ssl ? 'https' : 'http');
+        $base_url = $protocol . '://' . $base_url;
+        if (substr($base_url, -1) != '/') {
+          $base_url .= '/';
+        }
+        $setup->getModel()->cmsBaseUrl = $base_url;
+      }
 
       // Check system requirements
       $reqs = $setup->checkRequirements();
