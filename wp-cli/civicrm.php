@@ -371,6 +371,7 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
       }
 
       // Initialize civicrm-setup
+      @WP_CLI::run_command(['plugin', 'activate', 'civicrm'], []);
       require_once $classLoaderPath;
       CRM_Core_ClassLoader::singleton()->register();
       \Civi\Setup::assertProtocolCompatibility(1.0);
@@ -396,7 +397,6 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
       WP_CLI::success('CiviCRM data files initialized successfully.');
       $setup->installDatabase();
       WP_CLI::success('CiviCRM database loaded successfully.');
-      @WP_CLI::run_command(['plugin', 'activate', 'civicrm'], []);
       WP_CLI::success('CiviCRM installed.');
     }
 
