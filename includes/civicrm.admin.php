@@ -89,6 +89,9 @@ class CiviCRM_For_WordPress_Admin {
     // Include class files and instantiate.
     $this->include_files();
     $this->setup_objects();
+    
+    // Always check setting for path to "wp-load.php".
+    add_action('civicrm_initialized', [$this, 'add_wpload_setting']);
 
     // Filter Heartbeat on CiviCRM admin pages as late as is practical.
     add_filter('heartbeat_settings', [$this, 'heartbeat'], 1000, 1);
@@ -739,8 +742,6 @@ class CiviCRM_For_WordPress_Admin {
     // Add resources for back end.
     $this->civi->add_core_resources(FALSE);
 
-    // Check setting for path to wp-load.php.
-    $this->add_wpload_setting();
 
   }
 
