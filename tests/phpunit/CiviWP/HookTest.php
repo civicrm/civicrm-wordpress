@@ -19,7 +19,7 @@ namespace CiviWP {
         'foo' => 123,
       );
       $this->assertNotEquals($arg2['foo'], 456);
-      $this->assertNotEquals($arg2['hook_was_called'], 1);
+      $this->assertFalse(isset($arg2['hook_was_called']));
       \CRM_Utils_Hook::singleton()
         ->invoke(
           2,
