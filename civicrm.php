@@ -58,7 +58,7 @@ define('CIVICRM_PLUGIN_VERSION', '4.7');
 
 // Store reference to this file.
 if (!defined('CIVICRM_PLUGIN_FILE')) {
-  define('CIVICRM_PLUGIN_FILE', __FILE__);
+  define('CIVICRM_PLUGIN_FILE', __FILE__ . '');
 }
 
 // Store URL to this plugin's directory.
