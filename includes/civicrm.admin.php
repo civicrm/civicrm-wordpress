@@ -89,7 +89,7 @@ class CiviCRM_For_WordPress_Admin {
     // Include class files and instantiate.
     $this->include_files();
     $this->setup_objects();
-    
+
     // Always check setting for path to "wp-load.php".
     add_action('civicrm_initialized', [$this, 'add_wpload_setting']);
 
