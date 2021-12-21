@@ -742,7 +742,6 @@ class CiviCRM_For_WordPress_Admin {
     // Add resources for back end.
     $this->civi->add_core_resources(FALSE);
 
-
   }
 
   /**
