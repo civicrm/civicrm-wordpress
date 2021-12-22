@@ -786,13 +786,15 @@ class CiviCRM_For_WordPress_Admin {
 
     // If we don't have one, create it.
     if (is_null($setting)) {
-      CRM_Core_BAO_Setting::setItem($path, 'CiviCRM Preferences', 'wpLoadPhp');
+      //CRM_Core_BAO_Setting::setItem($path, 'CiviCRM Preferences', 'wpLoadPhp');
+      Civi::settings()->set('wpLoadPhp', $path);
     }
 
     // Is it different to the one we've stored?
     if ($setting !== $path) {
       // Yes - set new path (this could be because we've changed server or location)
-      CRM_Core_BAO_Setting::setItem($path, 'CiviCRM Preferences', 'wpLoadPhp');
+      //CRM_Core_BAO_Setting::setItem($path, 'CiviCRM Preferences', 'wpLoadPhp');
+      Civi::settings()->set('wpLoadPhp', $path);
     }
 
   }
