@@ -273,6 +273,9 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
      * Implementation of command 'install'
      */
     private function install() {
+      if ('on' === $this->getOption('ssl', FALSE)) {
+        $_SERVER['HTTPS'] = 'on';
+      }
 
       # identify destination
 
