@@ -297,25 +297,12 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
      * @since 4.5
      */
     private function install() {
-
-      // Validate.
-      if (!$dbuser = $this->getOption('dbuser', FALSE)) {
-        return WP_CLI::error('CiviCRM database username not specified.');
-      }
-      if (!$dbpass = $this->getOption('dbpass', FALSE)) {
-        return WP_CLI::error('CiviCRM database password not specified.');
-      }
-      if (!$dbhost = $this->getOption('dbhost', FALSE)) {
-        return WP_CLI::error('CiviCRM database host not specified.');
-      }
-      if (!$dbname = $this->getOption('dbname', FALSE)) {
-        return WP_CLI::error('CiviCRM database name not specified.');
-      }
-      if ($lang = $this->getOption('lang', FALSE) && !$langtarfile = $this->getOption('langtarfile', FALSE)) {
-        return WP_CLI::error('CiviCRM language tarfile not specified.');
+      if ('on' === $this->getOption('ssl', FALSE)) {
+        $_SERVER['HTTPS'] = 'on';
       }
 
-      // Begin install.
+      // Identify destination.
+
       if ($plugin_path = $this->getOption('destination', FALSE)) {
         $plugin_path = ABSPATH . $plugin_path;
       }
@@ -326,6 +313,32 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
       global $crmPath;
       $crmPath = "$plugin_path/civicrm";
       $crm_files_present = is_dir($crmPath);
+
+      // Validate.
+
+      if (!$dbuser = $this->getOption('dbuser', FALSE)) {
+        return WP_CLI::error('CiviCRM database username not specified.');
+      }
+
+      if (!$dbpass = $this->getOption('dbpass', FALSE)) {
+        return WP_CLI::error('CiviCRM database password not specified.');
+      }
+
+      if (!$dbhost = $this->getOption('dbhost', FALSE)) {
+        return WP_CLI::error('CiviCRM database host not specified.');
+      }
+
+      if (!$dbname = $this->getOption('dbname', FALSE)) {
+        return WP_CLI::error('CiviCRM database name not specified.');
+      }
+
+      if ($lang = $this->getOption('lang', FALSE)) {
+        $moPath = "$crmPath/l10n/$lang/LC_MESSAGES/civicrm.mo";
+
+        if (!($langtarfile = $this->getOption('langtarfile', FALSE)) && !file_exists($moPath)) {
+          return WP_CLI::error("Failed to find data for language ($lang). Please download valid language data with --langtarfile=<path/to/tarfile>.");
+        }
+      }
 
       // Extract the archive.
       if ($this->getOption('tarfile', FALSE)) {
@@ -368,150 +381,66 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
         WP_CLI::success('Using installer files found on the site.');
       }
       else {
-        // We must've just unpacked the archive because it wasn't there before.
+        // We must've just unpacked the archive because it wasn't there
+        // before.
         WP_CLI::success('Archive unpacked.');
       }
 
-      require_once $civicrm_installer_helper;
-
-      if ('' != $lang) {
+      if ($this->getOption('langtarfile', FALSE)) {
         if (!$this->untar($plugin_path, 'langtarfile')) {
-          return WP_CLI::error('No language tarfile specified, use "--langtarfile=path/to/tarfile".');
+          return WP_CLI::error('Error downloading langtarfile');
         }
       }
 
-      // Create files dirs.
-      $upload_dir = wp_upload_dir();
-      $settings_dir = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR;
-      civicrm_setup($upload_dir['basedir'] . DIRECTORY_SEPARATOR);
-      WP_CLI::launch("chmod -R 0755 " . escapeshellarg($settings_dir));
-
-      // Now we've got some files in place, require PEAR DB and check db setup.
-      $dsn = "mysql://{$dbuser}:{$dbpass}@{$dbhost}/{$dbname}?new_link=true";
-      $dsn_nodb = "mysql://{$dbuser}:{$dbpass}@{$dbhost}";
-
-      if (!defined('DB_DSN_MODE')) {
-        define('DB_DSN_MODE', 'auto');
+      if (!empty($lang) && !file_exists($moPath)) {
+        return WP_CLI::error("Failed to find data for language ($lang). Please download valid language data with --langtarfile=<path/to/tarfile>.");
       }
 
-      include_once "$crmPath/vendor/pear/db/DB.php";
-
-      $db = DB::connect($dsn);
-      if (DB::iserror($db)) {
-        $db = DB::connect($dsn_nodb);
-        if (DB::iserror($db)) {
-          return WP_CLI::error('Unable to connect to database. Please re-check credentials.');
-        }
-        $db->query("CREATE DATABASE $dbname");
-        if (DB::iserror($db)) {
-          return WP_CLI::error('CiviCRM database was not found. Failed to create one.');
-        }
-        $db->disconnect();
-      }
-
-      // Install database.
-      global $sqlPath;
-
-      // Setup database with CiviCRM structure and data.
-      WP_CLI::line('Loading CiviCRM database structure...');
-      civicrm_source($dsn, $sqlPath . '/civicrm.mysql');
-      WP_CLI::line('Loading CiviCRM database with required data...');
-
-      // Testing the translated sql files availability.
-      $data_file = $sqlPath . '/civicrm_data.mysql';
-      $acl_file  = $sqlPath . '/civicrm_acl.mysql';
-
-      if ('' != $lang) {
-        if (file_exists($sqlPath . '/civicrm_data.' . $lang . '.mysql')
-          && file_exists($sqlPath . '/civicrm_acl.' . $lang . '.mysql')
-          && '' != $lang
-        ) {
-          $data_file = $sqlPath . '/civicrm_data.' . $lang . '.mysql';
-          $acl_file = $sqlPath . '/civicrm_acl.' . $lang . '.mysql';
-        }
-        else {
-          WP_CLI::warning(sprintf('No SQL files could be retrieved for "%s" using default language.', $lang));
-        }
-      }
-
-      civicrm_source($dsn, $data_file);
-      civicrm_source($dsn, $acl_file);
-
-      WP_CLI::success('CiviCRM database loaded successfully.');
-
-      // Generate "civicrm.settings.php" file.
-      global $tplPath;
-      if (!file_exists($tplPath . 'civicrm.settings.php.template')) {
-        return WP_CLI::error('Could not find CiviCRM settings template and therefore could not create settings file.');
-      }
-
-      WP_CLI::line('Generating CiviCRM settings file...');
-
-      if ($base_url = $this->getOption('site_url', FALSE)) {
-        $ssl      = $this->getOption('ssl', FALSE);
-        $protocol = ('on' == $ssl ? 'https' : 'http');
-      }
-
-      $base_url = !$base_url ? get_bloginfo('url') : $protocol . '://' . $base_url;
-      if (substr($base_url, -1) != '/') {
-        $base_url .= '/';
-      }
-      $params = [
-        'crmRoot'            => $crmPath . '/',
-        'templateCompileDir' => "{$settings_dir}templates_c",
-        'frontEnd'           => 0,
-        'cms'                => 'WordPress',
-        'baseURL'            => $base_url,
-        'dbUser'             => $dbuser,
-        'dbPass'             => $dbpass,
-        'dbHost'             => $dbhost,
-        'dbName'             => $dbname,
-        'CMSdbUser'          => DB_USER,
-        'CMSdbPass'          => DB_PASSWORD,
-        'CMSdbHost'          => DB_HOST,
-        'CMSdbName'          => DB_NAME,
-        // These two are only filled in when using the newer civicrm-setup.
-        'dbSSL' => '',
-        'CMSdbSSL' => '',
-        'siteKey'            => preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(37))),
-        'credKeys'           => 'aes-cbc:hkdf-sha256:' . preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(37))),
-        'signKeys'           => 'jwt-hs256:hkdf-sha256:' . preg_replace(';[^a-zA-Z0-9];', '', base64_encode(random_bytes(37))),
-      ];
-
-      $str = file_get_contents($tplPath . 'civicrm.settings.php.template');
-      foreach ($params as $key => $value) {
-        $str = str_replace('%%' . $key . '%%', $value, $str);
-      }
-
-      $str = trim($str);
-
-      $config_file = "{$settings_dir}civicrm.settings.php";
-      civicrm_write_file($config_file, $str);
-      WP_CLI::launch("chmod 0644 $config_file");
-      WP_CLI::success(sprintf('Settings file generated: %s', $config_file));
-
-      // Activate plugin.
+      // Initialize civicrm-setup
       @WP_CLI::run_command(['plugin', 'activate', 'civicrm'], []);
-
-      // Bootstrap the plugin.
-      $civicrm = civi_wp();
-      $civicrm->include_files();
-      $civicrm->setup_objects();
-      $civicrm->enable_translation();
-
-      // Add the "wpLoadPhp" setting.
-      $civicrm->admin->add_wpload_setting();
-
-      // Add Base Page and "wpBasePage" setting.
-      $basepage = $civicrm->basepage->create_wp_basepage();
-      if (!$basepage) {
-        return WP_CLI::error('Could not create the Base Page.');
+      require_once $classLoaderPath;
+      CRM_Core_ClassLoader::singleton()->register();
+      \Civi\Setup::assertProtocolCompatibility(1.0);
+      \Civi\Setup::init(['cms' => 'WordPress', 'srcPath' => $crmPath]);
+      $setup = \Civi\Setup::instance();
+      $setup->getModel()->db = ['server' => $dbhost, 'username' => $dbuser, 'password' => $dbpass, 'database' => $dbname];
+      $setup->getModel()->lang = (empty($lang) ? 'en_US' : $lang);
+      if ($base_url = $this->getOption('site_url', FALSE)) {
+        $ssl = $this->getOption('ssl', FALSE);
+        $protocol = ('on' == $ssl ? 'https' : 'http');
+        $base_url = $protocol . '://' . $base_url;
+        if (substr($base_url, -1) != '/') {
+          $base_url .= '/';
+        }
+        $setup->getModel()->cmsBaseUrl = $base_url;
       }
-      WP_CLI::success('Base Page created successfully.');
 
-      // Now we're done.
+      // Check system requirements
+      $reqs = $setup->checkRequirements();
+      array_map('WP_CLI::print_value', $this->formatRequirements(array_merge($reqs->getErrors(), $reqs->getWarnings())));
+      if ($reqs->getErrors()) {
+        WP_CLI::error(sprintf("Cannot install. Please check requirements and resolve errors.", count($reqs->getErrors()), count($reqs->getWarnings())));
+      }
+
+      $installed = $setup->checkInstalled();
+      if ($installed->isSettingInstalled() || $installed->isDatabaseInstalled()) {
+        WP_CLI::error("Cannot install. CiviCRM has already been installed.");
+      }
+
+      // Go time
+      $setup->installFiles();
+      WP_CLI::success('CiviCRM data files initialized successfully.');
+      $setup->installDatabase();
+      WP_CLI::success('CiviCRM database loaded successfully.');
       WP_CLI::success('CiviCRM installed.');
+    }
 
+    private function formatRequirements(array $messages): array {
+      $formatted = [];
+      foreach ($messages as $message) {
+        $formatted[] = sprintf("[%s] %s: %s", $message['severity'], $message['section'], $message['message']);
+      }
+      return array_unique($formatted);
     }
 
     /**
@@ -1159,10 +1088,10 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
         // To suppress HTML output with source code.
         ob_start();
         $upgrade->run();
-        // Capture the required message.
+        # capture the required message.
         $result = $template->get_template_vars('message');
         ob_end_clean();
-        WP_CLI::line(sprintf('Upgrade outputs: "%s"', $result));
+        WP_CLI::line('Upgrade outputs: ' . "\"$result\"");
 
       }
 
@@ -1336,7 +1265,6 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
       $upload_dir      = wp_upload_dir();
       $tpl_path     = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . 'civicrm' . DIRECTORY_SEPARATOR . 'templates_c';
       $legacy_tpl_path = $plugins_dir_root . '/files/civicrm/templates_c';
-
       if (is_dir($legacy_tpl_path)) {
         $owner = posix_getpwuid(fileowner($legacy_tpl_path));
         if (isset($owner['name'])) {
@@ -1349,7 +1277,6 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
           return $owner['name'];
         }
       }
-
       return '';
 
     }
