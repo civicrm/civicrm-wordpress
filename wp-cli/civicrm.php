@@ -47,6 +47,11 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
      * ===============
      * Run the CiviMember UpdateMembershipRecord cron (civicrm member-records).
      *
+     * wp civicrm pipe <connection-flags>
+     * ==================
+     * Start a Civi::pipe session (JSON-RPC 2.0)
+     * See https://docs.civicrm.org/dev/en/latest/framework/pipe#flags
+     *
      * wp civicrm process-mail-queue
      * ===============
      * Process pending CiviMail mailing jobs.
@@ -122,6 +127,7 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
         'disable-debug'      => 'disableDebug',
         'install'            => 'install',
         'member-records'     => 'memberRecords',
+        'pipe'               => 'pipe',
         'process-mail-queue' => 'processMailQueue',
         'rest'               => 'rest',
         'restore'            => 'restore',
@@ -457,6 +463,20 @@ if (!defined('CIVICRM_WPCLI_LOADED')) {
 
       }
 
+    }
+
+    private function pipe() {
+      civicrm_initialize();
+      if (!is_callable(['Civi', 'pipe'])) {
+        return WP_CLI::error('This version of CiviCRM does not include Civi::pipe() support.');
+      }
+
+      if (!empty($this->args[1])) {
+        Civi::pipe($this->args[1]);
+      }
+      else {
+        Civi::pipe();
+      }
     }
 
     /**
