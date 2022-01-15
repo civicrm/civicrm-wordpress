@@ -769,7 +769,7 @@ class CiviCRM_For_WordPress_Admin {
    * network.
    *
    * To get the path to wp-load.php, use:
-   * $path = CRM_Core_BAO_Setting::getItem('CiviCRM Preferences', 'wpLoadPhp');
+   * $path = Civi::settings()->get('wpLoadPhp');
    *
    * @since 4.6.3
    * @since 5.33 Moved to this class.
@@ -784,21 +784,22 @@ class CiviCRM_For_WordPress_Admin {
       return;
     }
 
+    if (version_compare(CRM_Core_BAO_Domain::getDomain()->version, '4.7.0', '<')) {
+      return;
+    }
+
     // Get path to wp-load.php.
     $path = ABSPATH . 'wp-load.php';
 
     // Get the setting, if it exists.
-    $setting = civicrm_api3('Setting', 'getvalue', [
-      'name' => 'wpLoadPhp',
-      'group' => 'CiviCRM Preferences',
-    ]);
+    $setting = Civi::settings()->get('wpLoadPhp');
 
     /*
      * If we don't have a setting, create it. Also set it if it's different to
      * what's stored. This could be because we've changed server or location.
      */
     if (empty($setting) || $setting !== $path) {
-      CRM_Core_BAO_Setting::setItem($path, 'CiviCRM Preferences', 'wpLoadPhp');
+      Civi::settings()->set('wpLoadPhp', $path);
     }
 
   }

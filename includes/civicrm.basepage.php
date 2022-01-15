@@ -151,6 +151,10 @@ class CiviCRM_For_WordPress_Basepage {
       return FALSE;
     }
 
+    if (version_compare(CRM_Core_BAO_Domain::getDomain()->version, '4.7.0', '<')) {
+      return FALSE;
+    }
+
     // Bail if we already have a Base Page setting.
     $config = CRM_Core_Config::singleton();
     if (!empty($config->wpBasePage)) {
