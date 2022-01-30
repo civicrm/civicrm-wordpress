@@ -2,7 +2,7 @@
 /**
  * Rest controller class.
  *
- * @since 0.1
+ * @since 5.25
  */
 
 namespace CiviCRM_WP_REST\Controller;
@@ -12,14 +12,14 @@ class Rest extends Base {
   /**
    * @var string
    * The base route.
-   * @since 0.1
+   * @since 5.25
    */
   protected $rest_base = 'rest';
 
   /**
    * Registers routes.
    *
-   * @since 0.1
+   * @since 5.25
    */
   public function register_routes() {
 
@@ -38,26 +38,25 @@ class Rest extends Base {
   /**
    * Check get permission.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Request $request
    * @return bool
    */
   public function permissions_check($request) {
 
     /**
-     * Opportunity to bypass CiviCRM's
-     * authentication ('api_key' and 'site_key'),
-     * return 'true' or 'false' to grant
-     * or deny access to this endpoint.
+     * Opportunity to bypass CiviCRM's authentication ('api_key' and 'site_key').
      *
-     * To deny and throw an error, return either
-     * a string, an array, or a \WP_Error.
+     * Return 'true' or 'false' to grant or deny access to this endpoint.
      *
-     * NOTE: if you use your won authentication,
-     * you still must log in the user in order
-     * to respect/apply CiviCRM ACLs.
+     * To deny and throw an error, return either a string, an array, or a \WP_Error.
      *
-     * @since 0.1
+     * NOTE: if you use your own authentication, you still must log in the user
+     * in order to respect/apply CiviCRM ACLs.
+     *
+     * @since 5.25
+     *
      * @param null|bool|string|array|\WP_Error $grant_auth Grant, deny, or error
      * @param \WP_REST_Request $request The request
      */
@@ -106,15 +105,17 @@ class Rest extends Base {
   /**
    * Get items.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Request $request
    */
   public function get_items($request) {
 
     /**
-     * Filter formatted api params.
+     * Filter formatted API params.
      *
-     * @since 0.1
+     * @since 5.25
+     *
      * @param array $params
      * @param WP_REST_Request $request
      */
@@ -132,15 +133,16 @@ class Rest extends Base {
     }
 
     /**
-     * Filter civi api result.
+     * Filter CiviCRM API result.
      *
-     * @since 0.1
+     * @since 5.25
+     *
      * @param array $items
      * @param WP_REST_Request $request
      */
     $data = apply_filters('civi_wp_rest/controller/rest/api_result', $items, $params, $request);
 
-    // only collections of items, ie any action but 'getsingle'
+    // Only collections of items, ie any action but 'getsingle'.
     if (isset($data['values'])) {
 
       $data['values'] = array_reduce($items['values'] ?? $items, function($items, $item) use ($request) {
@@ -157,13 +159,14 @@ class Rest extends Base {
 
     $response = rest_ensure_response($data);
 
-    // check wheather we need to serve xml or json
+    // Check whether we need to serve xml or json.
     if (!in_array('json', array_keys($request->get_params()))) {
 
       /**
-       * Adds our response holding Civi data before dispatching.
+       * Adds our response holding CiviCRM data before dispatching.
        *
-       * @since 0.1
+       * @since 5.25
+       *
        * @param WP_HTTP_Response $result Result to send to client
        * @param WP_REST_Server $server The REST server
        * @param WP_REST_Request $request The request
@@ -190,9 +193,10 @@ class Rest extends Base {
   }
 
   /**
-   * Get formatted api params.
+   * Get formatted API params.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Resquest $request
    * @return array $params
    */
@@ -218,7 +222,7 @@ class Rest extends Base {
 
     }
 
-    // ensure check permissions is enabled
+    // Ensure check permissions is enabled.
     $params['check_permissions'] = TRUE;
 
     return [$entity, $action, $params];
@@ -228,7 +232,8 @@ class Rest extends Base {
   /**
    * Matches the item data to the schema.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param object $item
    * @param WP_REST_Request $request
    */
@@ -241,7 +246,8 @@ class Rest extends Base {
   /**
    * Serves XML response.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param bool $served Whether the request has already been served
    * @param WP_REST_Response $result
    * @param WP_REST_Request $request
@@ -249,10 +255,10 @@ class Rest extends Base {
    */
   public function serve_xml_response($served, $result, $request, $server) {
 
-    // get xml from response
+    // Get XML from response.
     $xml = $this->get_xml_formatted_data($result->get_data());
 
-    // set content type header
+    // Set content type header.
     $server->send_header('Content-Type', 'text/xml');
 
     echo $xml;
@@ -264,38 +270,39 @@ class Rest extends Base {
   /**
    * Formats CiviCRM API result to XML.
    *
-   * @since 0.1
-   * @param array $data The CiviCRM api result
-   * @return string $xml The formatted xml
+   * @since 5.25
+   *
+   * @param array $data The CiviCRM API result.
+   * @return string $xml The formatted XML.
    */
   protected function get_xml_formatted_data(array $data) {
 
-    // xml document
+    // XML document.
     $xml = new \DOMDocument();
 
-    // result set element <ResultSet>
+    // Result set element <ResultSet>.
     $result_set = $xml->createElement('ResultSet');
 
-    // xmlns:xsi attribute
+    // The xmlns:xsi attribute.
     $result_set->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
 
-    // count attribute
+    // Count attributes.
     if (isset($data['count'])) {
       $result_set->setAttribute('count', $data['count']);
     }
 
-    // build result from result => values
+    // Build result from result => values.
     if (isset($data['values'])) {
 
       array_map(function($item) use ($result_set, $xml) {
 
-        // result element <Result>
+        // Result element <Result>.
         $result = $xml->createElement('Result');
 
-        // format item
+        // Format item.
         $result = $this->get_xml_formatted_item($item, $result, $xml);
 
-        // append result to result set
+        // Append result to result set.
         $result_set->appendChild($result);
 
       }, $data['values']);
@@ -303,18 +310,18 @@ class Rest extends Base {
     }
     else {
 
-      // result element <Result>
+      // Result element <Result>.
       $result = $xml->createElement('Result');
 
-      // format item
+      // Format item.
       $result = $this->get_xml_formatted_item($data, $result, $xml);
 
-      // append result to result set
+      // Append result to result set.
       $result_set->appendChild($result);
 
     }
 
-    // append result set
+    // Append result set.
     $xml->appendChild($result_set);
 
     return $xml->saveXML();
@@ -322,32 +329,36 @@ class Rest extends Base {
   }
 
   /**
-   * Formats a single api result to xml.
+   * Formats a single API result to XML.
    *
-   * @since 0.1
-   * @param array $item The single api result
-   * @param \DOMElement $parent The parent element to append to
-   * @param \DOMDocument $doc The document
-   * @return \DOMElement $parent The parent element
+   * @since 5.25
+   *
+   * @param array $item The single API result.
+   * @param \DOMElement $parent The parent element to append to.
+   * @param \DOMDocument $doc The document.
+   * @return \DOMElement $parent The parent element.
    */
   public function get_xml_formatted_item(array $item, \DOMElement $parent, \DOMDocument $doc) {
 
-    // build field => values
+    // Build field => values.
     array_map(function($field, $value) use ($parent, $doc) {
 
-      // entity field element
+      // Entity field element.
       $element = $doc->createElement($field);
 
-      // handle array values
+      // Handle array values.
       if (is_array($value)) {
 
         array_map(function($key, $val) use ($element, $doc) {
 
-          // child element, append underscore '_' otherwise createElement
-          // will throw an Invalid character exception as elements cannot start with a number
+          /*
+           * Child element - append underscore '_' otherwise createElement will
+           * throw an Invalid character exception as elements cannot start with
+           * a number.
+           */
           $child = $doc->createElement('_' . $key, $val);
 
-          // append child
+          // Append child.
           $element->appendChild($child);
 
         }, array_keys($value), $value);
@@ -355,12 +366,12 @@ class Rest extends Base {
       }
       else {
 
-        // assign value
+        // Assign value.
         $element->nodeValue = $value;
 
       }
 
-      // append element
+      // Append element.
       $parent->appendChild($element);
 
     }, array_keys($item), $item);
@@ -372,7 +383,8 @@ class Rest extends Base {
   /**
    * Item schema.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return array $schema
    */
   public function get_item_schema() {
@@ -404,7 +416,8 @@ class Rest extends Base {
   /**
    * Item arguments.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return array $arguments
    */
   public function get_item_args() {
@@ -452,7 +465,8 @@ class Rest extends Base {
   /**
    * Checks if string is a valid json.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param string $param
    * @return bool
    */
@@ -471,7 +485,8 @@ class Rest extends Base {
   /**
    * Validates the site key.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return bool $is_valid_site_key
    */
   public function is_valid_site_key() {
@@ -483,7 +498,8 @@ class Rest extends Base {
   /**
    * Validates the api key.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Resquest $request
    * @return bool $is_valid_api_key
    */

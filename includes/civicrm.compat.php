@@ -82,7 +82,7 @@ class CiviCRM_For_WordPress_Compat {
    * @since 5.24
    *
    * @param bool $flush_rewrite_rules True if rules flushed, false otherwise.
-   * @param WP_Post $basepage The Basepage post object.
+   * @param WP_Post $basepage The Base Page post object.
    */
   public function rewrite_rules_polylang($flush_rewrite_rules, $basepage) {
 
@@ -95,12 +95,12 @@ class CiviCRM_For_WordPress_Compat {
      * Collect all rewrite rules into an array.
      *
      * Because the array of specific Post IDs is added *after* the array of
-     * paths for the Basepage ID, those specific rewrite rules will "win" over
-     * the more general Basepage rules.
+     * paths for the Base Page ID, those specific rewrite rules will "win" over
+     * the more general Base Page rules.
      */
     $collected_rewrites = [];
 
-    // Support prefixes for a single Basepage.
+    // Support prefixes for a single Base Page.
     $basepage_url = get_permalink($basepage->ID);
     $basepage_raw_url = PLL()->links_model->remove_language_from_link($basepage_url);
     $language_slugs = pll_languages_list();
@@ -116,7 +116,7 @@ class CiviCRM_For_WordPress_Compat {
       }
     };
 
-    // Support prefixes for Basepages in multiple languages.
+    // Support prefixes for Base Pages in multiple languages.
     foreach ($language_slugs as $slug) {
       $post_id = pll_get_post($basepage->ID, $slug);
       if (empty($post_id)) {

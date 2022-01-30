@@ -2,7 +2,7 @@
 /**
  * Autoloader class.
  *
- * @since 0.1
+ * @since 5.25
  */
 
 namespace CiviCRM_WP_REST;
@@ -12,28 +12,28 @@ class Autoloader {
   /**
    * @var string
    * Instance.
-   * @since 0.1
+   * @since 5.25
    */
   private static $instance = NULL;
 
   /**
    * @var string
    * Namespace.
-   * @since 0.1
+   * @since 5.25
    */
   private $namespace = 'CiviCRM_WP_REST';
 
   /**
    * @var array
    * Autoloader directory sources.
-   * @since 0.1
+   * @since 5.25
    */
   private static $source_directories = [];
 
   /**
    * Constructor.
    *
-   * @since 0.1
+   * @since 5.25
    */
   private function __construct() {
 
@@ -44,7 +44,7 @@ class Autoloader {
   /**
    * Creates an instance of this class.
    *
-   * @since 0.1
+   * @since 5.25
    */
   private static function instance() {
 
@@ -57,12 +57,13 @@ class Autoloader {
   /**
    * Adds a directory source.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param string $source_path The source path
    */
   public static function add_source(string $source_path) {
 
-    // make sure we have an instance
+    // Make sure we have an instance.
     self::instance();
 
     if (!is_readable(trailingslashit($source_path))) {
@@ -76,8 +77,9 @@ class Autoloader {
   /**
    * Registers the autoloader.
    *
-   * @since 0.1
-   * @return bool Wehather the autoloader has been registered or not
+   * @since 5.25
+   *
+   * @return bool Wehather the autoloader has been registered or not.
    */
   private function register_autoloader() {
 
@@ -88,8 +90,9 @@ class Autoloader {
   /**
    * Loads the classes.
    *
-   * @since 0.1
-   * @param string $class_name The class name to load
+   * @since 5.25
+   *
+   * @param string $class_name The class name to load.
    */
   private function autoload($class_name) {
 
@@ -99,7 +102,7 @@ class Autoloader {
       return;
     }
 
-    // remove namespace and join class path
+    // Remove namespace and join class path.
     $class_path = str_replace('_', '-', implode(DIRECTORY_SEPARATOR, array_slice($parts, 1)));
 
     array_map(function($source_path) use ($class_path) {

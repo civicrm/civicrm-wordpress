@@ -2,7 +2,7 @@
 /**
  * Base controller class.
  *
- * @since 0.1
+ * @since 5.25
  */
 
 namespace CiviCRM_WP_REST\Controller;
@@ -14,14 +14,15 @@ abstract class Base extends \WP_REST_Controller implements Endpoint_Interface {
   /**
    * @var string
    * Route namespace.
-   * @since 0.1
+   * @since 5.25
    */
   protected $namespace = 'civicrm/v3';
 
   /**
    * Gets the endpoint namespace.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return string $namespace
    */
   public function get_namespace() {
@@ -33,7 +34,8 @@ abstract class Base extends \WP_REST_Controller implements Endpoint_Interface {
   /**
    * Gets the rest base route.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return string $rest_base
    */
   public function get_rest_base() {
@@ -45,7 +47,8 @@ abstract class Base extends \WP_REST_Controller implements Endpoint_Interface {
   /**
    * Retrieves the endpoint ie. '/civicrm/v3/rest'.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return string $rest_base
    */
   public function get_endpoint() {
@@ -57,7 +60,8 @@ abstract class Base extends \WP_REST_Controller implements Endpoint_Interface {
   /**
    * Checks whether the requested route is equal to this endpoint.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Request $request
    * @return bool $is_current_endpoint True if it's equal, false otherwise
    */
@@ -70,7 +74,8 @@ abstract class Base extends \WP_REST_Controller implements Endpoint_Interface {
   /**
    * Authorization status code.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return int $status
    */
   protected function authorization_status_code() {
@@ -88,7 +93,8 @@ abstract class Base extends \WP_REST_Controller implements Endpoint_Interface {
   /**
    * Wrapper for WP_Error.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param string|\CiviCRM_API3_Exception|\WP_Error $error
    * @param mixed $data Error data
    * @return WP_Error $error

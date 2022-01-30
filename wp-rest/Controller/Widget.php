@@ -4,7 +4,7 @@
  *
  * Widget endpoint, replacement for CiviCRM's 'extern/widget.php'
  *
- * @since 0.1
+ * @since 5.25
  */
 
 namespace CiviCRM_WP_REST\Controller;
@@ -14,14 +14,14 @@ class Widget extends Base {
   /**
    * @var string
    * The base route.
-   * @since 0.1
+   * @since 5.25
    */
   protected $rest_base = 'widget';
 
   /**
    * Registers routes.
    *
-   * @since 0.1
+   * @since 5.25
    */
   public function register_routes() {
 
@@ -40,7 +40,8 @@ class Widget extends Base {
   /**
    * Get item.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Request $request
    */
   public function get_item($request) {
@@ -48,7 +49,8 @@ class Widget extends Base {
     /**
      * Filter mandatory params.
      *
-     * @since 0.1
+     * @since 5.25
+     *
      * @param array $params
      * @param WP_REST_Request $request
      */
@@ -71,7 +73,8 @@ class Widget extends Base {
     /**
      * Adds our response data before dispatching.
      *
-     * @since 0.1
+     * @since 5.25
+     *
      * @param WP_HTTP_Response $result Result to send to client
      * @param WP_REST_Server $server The REST server
      * @param WP_REST_Request $request The request
@@ -91,7 +94,8 @@ class Widget extends Base {
   /**
    * Get mandatory params from request.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Resquest $request
    * @return array $params The widget params
    */
@@ -110,7 +114,8 @@ class Widget extends Base {
   /**
    * Serve jsondata response.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param bool $served Whether the request has already been served
    * @param WP_REST_Response $result
    * @param WP_REST_Request $request
@@ -133,7 +138,8 @@ class Widget extends Base {
   /**
    * Item schema.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return array $schema
    */
   public function get_item_schema() {
@@ -167,7 +173,8 @@ class Widget extends Base {
   /**
    * Item arguments.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return array $arguments
    */
   public function get_item_args() {

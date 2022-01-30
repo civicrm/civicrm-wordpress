@@ -5,7 +5,7 @@ This is the development repository for the *CiviCRM* plugin for *WordPress*. Wha
 
 [https://civicrm.org/download](https://civicrm.org/download)
 
-### Contribute ###
+### Contribute
 
 If you want to contribute to the development of this plugin, please bear the following in mind:
 
@@ -14,7 +14,17 @@ If you want to contribute to the development of this plugin, please bear the fol
 
 ----
 
-### About CiviCRM ###
+### WordPress REST API integration
+
+Please refer to the [REST API Documentation](/wp-rest/README.md) for details.
+
+### WP-CLI integration
+
+Please refer to the [WP-CLI Documentation](/wp-cli/README.md) for details.
+
+----
+
+### About CiviCRM
 
 CiviCRM is web-based, open source, Constituent Relationship Management (CRM) software geared toward meeting the needs of non-profit and other civic-sector organizations.
 

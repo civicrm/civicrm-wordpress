@@ -4,7 +4,7 @@
  *
  * PayPal IPN endpoint, replacement for CiviCRM's 'extern/ipn.php'.
  *
- * @since 0.1
+ * @since 5.25
  */
 
 namespace CiviCRM_WP_REST\Controller;
@@ -14,14 +14,14 @@ class PayPalIPN extends Base {
   /**
    * @var string
    * The base route.
-   * @since 0.1
+   * @since 5.25
    */
   protected $rest_base = 'ipn';
 
   /**
    * Registers routes.
    *
-   * @since 0.1
+   * @since 5.25
    */
   public function register_routes() {
 
@@ -38,7 +38,8 @@ class PayPalIPN extends Base {
   /**
    * Get items.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param WP_REST_Request $request
    */
   public function get_item($request) {
@@ -46,7 +47,8 @@ class PayPalIPN extends Base {
     /**
      * Filter request params.
      *
-     * @since 0.1
+     * @since 5.25
+     *
      * @param array $params
      * @param WP_REST_Request $request
      */
@@ -54,26 +56,28 @@ class PayPalIPN extends Base {
 
     if ($request->get_method() == 'GET') {
 
-      // paypal standard
+      // PayPal Standard.
       $paypal_IPN = new \CRM_Core_Payment_PayPalIPN($params);
 
-      // log notification
+      // Log notification.
       \Civi::log()->alert('payment_notification processor_name=PayPal_Standard', $params);
 
     }
 
     else {
 
-      // paypal pro
+      // PayPal Pro.
       $paypal_IPN = new \CRM_Core_Payment_PayPalProIPN($params);
 
-      // log notification
+      // Log notification.
       \Civi::log()->alert('payment_notification processor_name=PayPal', $params);
 
     }
 
     /**
      * Filter PayPalIPN object.
+     *
+     * @since 5.25
      *
      * @param CRM_Core_Payment_PayPalIPN|CRM_Core_Payment_PayPalProIPN $paypal_IPN
      * @param array $params
@@ -110,7 +114,8 @@ class PayPalIPN extends Base {
    *
    * Needed because the instance is being filtered through 'civi_wp_rest/controller/ipn/instance'.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @param CRM_Core_Payment_BaseIPN|CRM_Core_Payment_PayPalProIPN|CRM_Core_Payment_PayPalIPN $object
    * @return bool
    */
@@ -123,7 +128,8 @@ class PayPalIPN extends Base {
   /**
    * Item schema.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return array $schema
    */
   public function get_item_schema() {}
@@ -131,7 +137,8 @@ class PayPalIPN extends Base {
   /**
    * Item arguments.
    *
-   * @since 0.1
+   * @since 5.25
+   *
    * @return array $arguments
    */
   public function get_item_args() {}

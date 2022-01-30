@@ -83,7 +83,6 @@ class CiviCRM_For_WordPress_Admin_Page_Error {
      * @since 5.40
      *
      * @param str The default access capability.
-     * @return str The modified access capability.
      */
     return apply_filters('civicrm/admin/error/cap', 'manage_options');
 
@@ -169,6 +168,10 @@ class CiviCRM_For_WordPress_Admin_Page_Error {
      * Allow meta boxes to be added to this screen.
      *
      * The Screen ID to use is: "civicrm_page_civi_error".
+     *
+     * Used internally by:
+     *
+     * - self::meta_boxes_error_add()
      *
      * @since 5.40
      *
@@ -283,7 +286,7 @@ class CiviCRM_For_WordPress_Admin_Page_Error {
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
    */
-  public function meta_box_error_help_render($unused = NULL, $metabox) {
+  public function meta_box_error_help_render($unused, $metabox) {
 
     // Include template file.
     include CIVICRM_PLUGIN_DIR . 'assets/templates/metaboxes/metabox.error.help.php';
@@ -298,7 +301,7 @@ class CiviCRM_For_WordPress_Admin_Page_Error {
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
    */
-  public function meta_box_error_php_render($unused = NULL, $metabox) {
+  public function meta_box_error_php_render($unused, $metabox) {
 
     global $civicrm_root;
 
@@ -315,7 +318,7 @@ class CiviCRM_For_WordPress_Admin_Page_Error {
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
    */
-  public function meta_box_error_path_render($unused = NULL, $metabox) {
+  public function meta_box_error_path_render($unused, $metabox) {
 
     global $civicrm_root;
 

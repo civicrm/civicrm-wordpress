@@ -109,7 +109,6 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
      * @since 5.37
      *
      * @param str The default access capability.
-     * @return str The modified access capability.
      */
     return apply_filters('civicrm/admin/settings/cap', 'manage_options');
 
@@ -228,6 +227,10 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
      * Allow meta boxes to be added to this screen.
      *
      * The Screen ID to use is: "civicrm_page_cwps_settings".
+     *
+     * Used internally by:
+     *
+     * - self::meta_boxes_options_add()
      *
      * @since 5.34
      *
@@ -370,7 +373,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
    */
-  public function meta_box_options_basepage_render($unused = NULL, $metabox) {
+  public function meta_box_options_basepage_render($unused, $metabox) {
 
     // Get the setting.
     $basepage_slug = civicrm_api3('Setting', 'getvalue', [
@@ -439,7 +442,6 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
      * @since 5.34
      *
      * @param array $options_post The existing button attributes.
-     * @return array $options_post The modified button attributes.
      */
     $options_post = apply_filters('civicrm/metabox/basepage/submit/options', $options_post);
 
@@ -456,7 +458,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
    */
-  public function meta_box_options_shortcode_render($unused = NULL, $metabox) {
+  public function meta_box_options_shortcode_render($unused, $metabox) {
 
     if (!$this->civi->initialize()) {
       return;
@@ -487,7 +489,6 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
      * @since 5.44
      *
      * @param array $options_post The existing button attributes.
-     * @return array $options_post The modified button attributes.
      */
     $options_post = apply_filters('civicrm/metabox/shortcode/submit/options', $options_post);
 
@@ -504,7 +505,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
    */
-  public function meta_box_options_email_render($unused = NULL, $metabox) {
+  public function meta_box_options_email_render($unused, $metabox) {
 
     if (!$this->civi->initialize()) {
       return;
@@ -538,7 +539,6 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
      * @since 5.34
      *
      * @param array $options_post The existing button attributes.
-     * @return array $options_post The modified button attributes.
      */
     $options_post = apply_filters('civicrm/metabox/email_sync/submit/options', $options_post);
 
@@ -555,7 +555,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
    */
-  public function meta_box_options_cache_render($unused = NULL, $metabox) {
+  public function meta_box_options_cache_render($unused, $metabox) {
 
     // Set submit button options.
     $options = [
@@ -576,7 +576,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
    */
-  public function meta_box_options_links_render($unused = NULL, $metabox) {
+  public function meta_box_options_links_render($unused, $metabox) {
 
     if (!$this->civi->initialize()) {
       return;
@@ -608,7 +608,6 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
      * @since 5.34
      *
      * @param array $admin_links The default array of admin links.
-     * @return array $admin_links The modified array of admin links.
      */
     $admin_links = apply_filters('civicrm/metabox/links/admin', $admin_links);
 
@@ -635,7 +634,6 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
      * @since 5.34
      *
      * @param array $maintenance_links The default array of admin links.
-     * @return array $maintenance_links The modified array of admin links.
      */
     $maintenance_links = apply_filters('civicrm/metabox/links/maintenance', $maintenance_links);
 
@@ -683,7 +681,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
   }
 
   /**
-   * Save the CiviCRM Basepage Setting.
+   * Save the CiviCRM Base Page Setting.
    *
    * @since 5.34
    */
@@ -784,7 +782,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
   // ---------------------------------------------------------------------------
 
   /**
-   * Save the CiviCRM Basepage Setting.
+   * Save the CiviCRM Base Page Setting.
    *
    * @since 5.34
    */

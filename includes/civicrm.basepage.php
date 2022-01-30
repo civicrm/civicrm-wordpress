@@ -52,13 +52,13 @@ class CiviCRM_For_WordPress_Basepage {
     // Always listen for deactivation action.
     add_action('civicrm_deactivation', [$this, 'deactivate']);
 
-    // Always check if the basepage needs to be created.
+    // Always check if the Base Page needs to be created.
     add_action('civicrm_instance_loaded', [$this, 'maybe_create_basepage']);
 
   }
 
   /**
-   * Register hooks to handle CiviCRM in a WordPress wpBasePage context.
+   * Register hooks to handle CiviCRM in a WordPress Base Page context.
    *
    * @since 4.6
    */
@@ -69,22 +69,22 @@ class CiviCRM_For_WordPress_Basepage {
       return;
     }
 
-    // Cache CiviCRM base page markup.
+    // Cache CiviCRM Base Page markup.
     add_action('wp', [$this, 'basepage_handler'], 10, 1);
 
   }
 
   /**
-   * Trigger the process whereby the WordPress basepage is created.
+   * Triggers the process whereby the WordPress Base Page is created.
    *
-   * Sets a one-time-only option to flag that we need to create a basepage -
+   * Sets a one-time-only option to flag that we need to create a Base Page -
    * it will not update the option once it has been set to another value nor
    * create a new option with the same name.
    *
-   * As a result of doing this, we know that a basepage needs to be created, but
-   * the moment to do so is once CiviCRM has been successfully installed.
+   * As a result of doing this, we know that a Base Page needs to be created,
+   * but the moment to do so is once CiviCRM has been successfully installed.
    *
-   * @see do_basepage_creation()
+   * @see self::maybe_create_basepage()
    *
    * @since 5.6
    */
@@ -108,11 +108,11 @@ class CiviCRM_For_WordPress_Basepage {
   }
 
   /**
-   * Register the hook to create the WordPress basepage, if necessary.
+   * Auto-creates the WordPress Base Page if necessary.
    *
-   * Changes the one-time-only option so that the basepage can only be created
+   * Changes the one-time-only option so that the Base Page can only be created
    * once. Thereafter, we're on our own until there's a 'delete_post' callback
-   * to prevent the basepage from being deleted.
+   * to prevent the Base Page from being deleted.
    *
    * @since 5.6
    */
@@ -128,12 +128,7 @@ class CiviCRM_For_WordPress_Basepage {
       return;
     }
 
-    // Bail if not WordPress admin.
-    if (!is_admin()) {
-      return;
-    }
-
-    // Create basepage.
+    // Create the Base Page.
     add_action('wp_loaded', [$this, 'create_wp_basepage']);
 
     // Change option so the callback above never runs again.
@@ -142,71 +137,68 @@ class CiviCRM_For_WordPress_Basepage {
   }
 
   /**
-   * Create WordPress basepage and save setting.
+   * Creates the WordPress Base Page and saves the CiviCRM "wpBasePage" setting.
    *
    * @since 4.6
    * @since 5.6 Relocated from CiviCRM_For_WordPress to here.
+   * @since 5.44 Returns success or failure.
+   *
+   * @return bool TRUE if successful, FALSE otherwise.
    */
   public function create_wp_basepage() {
 
     if (!$this->civi->initialize()) {
-      return;
+      return FALSE;
     }
 
-    $config = CRM_Core_Config::singleton();
+    if (version_compare(CRM_Core_BAO_Domain::getDomain()->version, '4.7.0', '<')) {
+      return FALSE;
+    }
 
-    // Bail if we already have a basepage setting.
+    // Bail if we already have a Base Page setting.
+    $config = CRM_Core_Config::singleton();
     if (!empty($config->wpBasePage)) {
-      return;
+      return TRUE;
     }
 
     /**
-     * Filter the default page slug.
+     * Filter the default Base Page slug.
      *
      * @since 4.6
      *
-     * @param str The default basepage slug.
-     * @return str The modified basepage slug.
+     * @param str The default Base Page slug.
      */
     $slug = apply_filters('civicrm_basepage_slug', 'civicrm');
 
-    // Get existing page with that slug.
+    // Get existing Page with that slug.
     $page = get_page_by_path($slug);
 
-    // Does it exist?
-    if ($page) {
-
-      // We already have a basepage.
+    // Get the ID if the Base Page already exists.
+    $result = 0;
+    if ($page instanceof WP_Post) {
       $result = $page->ID;
-
     }
-    else {
 
-      // Create the basepage.
+    // Create the Base Page if it's missing.
+    if ($result === 0) {
       $result = $this->create_basepage($slug);
-
     }
 
-    // Were we successful?
+    // Save the Page slug as the setting if we have one.
     if ($result !== 0 && !is_wp_error($result)) {
-
-      // Get the post object.
       $post = get_post($result);
-
-      $params = [
-        'version' => 3,
+      civicrm_api3('Setting', 'create', [
         'wpBasePage' => $post->post_name,
-      ];
-
-      // Save the setting.
-      civicrm_api3('setting', 'create', $params);
-
+      ]);
+      return TRUE;
     }
+
+    return FALSE;
 
   }
 
   /**
-   * Create a WordPress page to act as the CiviCRM base page.
+   * Create a WordPress page to act as the CiviCRM Base Page.
    *
    * @since 4.6
    * @since 5.6 Relocated from CiviCRM_For_WordPress to here.
@@ -219,16 +211,40 @@ class CiviCRM_For_WordPress_Basepage {
     // If multisite, switch to main site.
     if (is_multisite() && !is_main_site()) {
 
-      // Store this site.
-      $original_site = get_current_blog_id();
+      /**
+       * Allow plugins to override the switch to the main site.
+       *
+       * This filter changes the default behaviour on WordPress Multisite so
+       * that the Base Page *is* created on every site on which CiviCRM is
+       * activated. This is a more sensible and inclusive default, since the
+       * absence of the Base Page on a sub-site often leads to confusion.
+       *
+       * To restore the previous functionality, return boolean TRUE.
+       *
+       * The previous functionality may be the desired behaviour when the
+       * WordPress Multisite instance in question is one where sub-sites aren't
+       * truly "separate" e.g. sites built on frameworks such as "Commons in
+       * a Box" or "MultilingualPress".
+       *
+       * @since 5.44
+       *
+       * @param bool False by default prevents the switch to the main site.
+       */
+      $switch = apply_filters('civicrm/basepage/main_site_only', FALSE);
 
-      // Switch.
-      global $current_site;
-      switch_to_blog($current_site->blog_id);
+      if ($switch !== FALSE) {
+
+        // Store this site.
+        $original_site = get_current_blog_id();
+
+        // Switch to main site.
+        switch_to_blog(get_main_site_id());
+
+      }
 
     }
 
-    // Define basepage.
+    // Define Base Page.
     $page = [
       'post_status' => 'publish',
       'post_type' => 'page',
@@ -248,12 +264,11 @@ class CiviCRM_For_WordPress_Basepage {
     ];
 
     /**
-     * Filter the default page title.
+     * Filter the default Base Page title.
      *
      * @since 4.6
      *
-     * @param str The default base page title.
-     * @return str The modified base page title.
+     * @param str The default Base Page title.
      */
     $page['post_title'] = apply_filters('civicrm_basepage_title', __('CiviCRM', 'civicrm'));
 
@@ -261,12 +276,12 @@ class CiviCRM_For_WordPress_Basepage {
     $content = __('Do not delete this page. Page content is generated by CiviCRM.', 'civicrm');
 
     /**
-     * Filter the default page content.
+     * Filter the default Base Page content.
      *
      * @since 4.6
      *
-     * @param str $content The default base page content.
-     * @return str $content The modified base page content.
+     * @param str $content The default Base Page content.
+     * @return str $content The modified Base Page content.
      */
     $page['post_content'] = apply_filters('civicrm_basepage_content', $content);
 
@@ -286,7 +301,7 @@ class CiviCRM_For_WordPress_Basepage {
   }
 
   /**
-   * Build CiviCRM base page content.
+   * Build CiviCRM Base Page content.
    *
    * Callback method for 'wp' hook, always called from WordPress front-end.
    *
@@ -350,7 +365,6 @@ class CiviCRM_For_WordPress_Basepage {
          *
          * @param bool By default "Base Page mode" should not be triggered.
          * @param WP_Post $post The current WordPress Post object.
-         * @return bool Whether or not to force "Base Page mode" - FALSE by default.
          */
         $basepage_mode = (bool) apply_filters('civicrm_force_basepage_mode', FALSE, $post);
 
@@ -362,7 +376,7 @@ class CiviCRM_For_WordPress_Basepage {
 
           // Start buffering.
           ob_start();
-          // Now, instead of echoing, base page output ends up in buffer.
+          // Now, instead of echoing, Base Page output ends up in buffer.
           $this->civi->invoke();
           // Save the output and flush the buffer.
           $this->basepage_markup = ob_get_clean();
@@ -433,7 +447,7 @@ class CiviCRM_For_WordPress_Basepage {
     // Add compatibility with Yoast SEO plugin's Open Graph title.
     add_filter('wpseo_opengraph_title', [$this, 'wpseo_page_title'], 100, 1);
 
-    // Don't let the Yoast SEO plugin parse the basepage title.
+    // Don't let the Yoast SEO plugin parse the Base Page title.
     if (class_exists('WPSEO_Frontend')) {
       $frontend = WPSEO_Frontend::get_instance();
       remove_filter('pre_get_document_title', [$frontend, 'title'], 15);
@@ -460,11 +474,11 @@ class CiviCRM_For_WordPress_Basepage {
 
     }
 
-    // Flag that we have parsed the base page.
+    // Flag that we have parsed the Base Page.
     $this->basepage_parsed = TRUE;
 
     /**
-     * Broadcast that the base page is parsed.
+     * Broadcast that the Base Page is parsed.
      *
      * @since 4.4
      */
@@ -473,7 +487,7 @@ class CiviCRM_For_WordPress_Basepage {
   }
 
   /**
-   * Get CiviCRM basepage title for <title> element.
+   * Get CiviCRM Base Page title for <title> element.
    *
    * Callback method for 'wp_title' hook, called at the end of function wp_title.
    *
@@ -518,7 +532,7 @@ class CiviCRM_For_WordPress_Basepage {
   }
 
   /**
-   * Get CiviCRM basepage title for <title> element.
+   * Get CiviCRM Base Page title for <title> element.
    *
    * Callback method for 'document_title_parts' hook. This filter was introduced
    * in WordPress 3.8 but it depends on whether the theme has implemented that
@@ -542,7 +556,7 @@ class CiviCRM_For_WordPress_Basepage {
   }
 
   /**
-   * Get CiviCRM base page title for Open Graph elements.
+   * Get CiviCRM Base Page title for Open Graph elements.
    *
    * Callback method for 'wpseo_opengraph_title' hook, to provide compatibility
    * with the WordPress SEO plugin.
@@ -554,30 +568,30 @@ class CiviCRM_For_WordPress_Basepage {
    */
   public function wpseo_page_title($post_title) {
 
-    // Hand back our base page title.
+    // Hand back our Base Page title.
     return $this->basepage_title;
 
   }
 
   /**
-   * Get CiviCRM base page content.
+   * Get CiviCRM Base Page content.
    *
    * Callback method for 'the_content' hook, always called from WordPress
    * front-end.
    *
    * @since 4.6
    *
-   * @return str $basepage_markup The base page markup.
+   * @return str $basepage_markup The Base Page markup.
    */
   public function basepage_render() {
 
-    // Hand back our base page markup.
+    // Hand back our Base Page markup.
     return $this->basepage_markup;
 
   }
 
   /**
-   * Provide the canonical URL for a page accessed through a basepage.
+   * Provide the canonical URL for a page accessed through a Base Page.
    *
    * WordPress will default to saying the canonical URL is the URL of the base
    * page itself, but we need to indicate that in this case, the whole thing
@@ -630,14 +644,14 @@ class CiviCRM_For_WordPress_Basepage {
 
     /*
      * We should, however, build the URL the way that CiviCRM expects it to be
-     * (rather than through some other funny base page).
+     * (rather than through some other funny Base Page).
      */
     return CRM_Utils_System::url($path, $query);
 
   }
 
   /**
-   * Get CiviCRM base page template.
+   * Get CiviCRM Base Page template.
    *
    * Callback method for 'template_include' hook, always called from WordPress
    * front-end.
@@ -663,7 +677,7 @@ class CiviCRM_For_WordPress_Basepage {
     }
 
     /**
-     * Allow base page template to be overridden.
+     * Allow Base Page template to be overridden.
      *
      * In most cases, the logic will not progress beyond here. Shortcodes in
      * posts and pages will have a template set, so we leave them alone unless
@@ -672,11 +686,10 @@ class CiviCRM_For_WordPress_Basepage {
      * @since 4.6
      *
      * @param string $template_name The provided template name.
-     * @return string The overridden template name.
      */
     $basepage_template = apply_filters('civicrm_basepage_template', $template_name);
 
-    // Find the base page template.
+    // Find the Base Page template.
     $page_template = locate_template([$basepage_template]);
 
     // If not homepage and template is found.
@@ -687,20 +700,19 @@ class CiviCRM_For_WordPress_Basepage {
     /**
      * Override the template, but allow plugins to amend.
      *
-     * This filter handles the scenario where no basepage has been set, in
+     * This filter handles the scenario where no Base Page has been set, in
      * which case CiviCRM will try to load its content in the site's homepage.
      * Many themes, however, do not have a call to "the_content()" on the
      * homepage - it is often used as a gateway page to display widgets,
      * archives and so forth.
      *
      * Be aware that if the homepage is set to show latest posts, then this
-     * template override will not have the desired effect. A basepage *must*
+     * template override will not have the desired effect. A Base Page *must*
      * be set if this is the case.
      *
      * @since 4.6
      *
      * @param string The template name (set to the default page template).
-     * @return string The overridden template name.
      */
     $home_template_name = apply_filters('civicrm_basepage_home_template', 'page.php');
 
@@ -718,10 +730,10 @@ class CiviCRM_For_WordPress_Basepage {
   }
 
   /**
-   * Add classes to body element when on basepage.
+   * Add classes to body element when on Base Page.
    *
    * This allows selectors to be written for particular CiviCRM "pages" despite
-   * them all being rendered on the one WordPress basepage.
+   * them all being rendered on the one WordPress Base Page.
    *
    * @since 4.7.18
    *

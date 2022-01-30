@@ -213,7 +213,7 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
    */
-  public function meta_box_render($unused = NULL, $metabox) {
+  public function meta_box_render($unused, $metabox) {
 
     if (!$this->civi->initialize()) {
       return;
@@ -295,7 +295,7 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
   }
 
   /**
-   * Save the CiviCRM Basepage Setting.
+   * Save the CiviCRM Base Page Setting.
    *
    * @since 5.34
    */

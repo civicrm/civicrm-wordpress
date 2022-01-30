@@ -2,7 +2,7 @@
 /**
  * CiviCRM Mailing_Hooks class.
  *
- * @since 0.1
+ * @since 5.25
  */
 
 namespace CiviCRM_WP_REST\Civi;
@@ -12,28 +12,28 @@ class Mailing_Hooks {
   /**
    * @var string
    * Mailing Url endpoint.
-   * @since 0.1
+   * @since 5.25
    */
   public $url_endpoint;
 
   /**
    * @var string
    * Mailing Open endpoint.
-   * @since 0.1
+   * @since 5.25
    */
   public $open_endpoint;
 
   /**
    * @var array
    * The parsed WordPress REST url.
-   * @since 1.0
+   * @since 5.25
    */
   public $parsed_rest_url;
 
   /**
    * Constructor.
    *
-   * @since 0.1
+   * @since 5.25
    */
   public function __construct() {
 
@@ -48,7 +48,7 @@ class Mailing_Hooks {
   /**
    * Register hooks.
    *
-   * @since 0.1
+   * @since 5.25
    */
   public function register_hooks() {
 
@@ -59,11 +59,10 @@ class Mailing_Hooks {
   }
 
   /**
-   * Replaces the open, and click
-   * tracking URLs for a mailing (CiviMail)
-   * with thier REST counterparts.
+   * Replaces the "open" and "click tracking" URLs for a CiviMail Mailing with
+   * their REST counterparts.
    *
-   * @uses 'civicrm_alterExternUrl' filter
+   * @uses 'civicrm_alterExternUrl' filter.
    *
    * @param \GuzzleHttp\Psr7\Uri $url
    * @param string|NULL $path
@@ -91,15 +90,17 @@ class Mailing_Hooks {
   }
 
   /**
-   * Filters the mailing html and replaces calls to 'extern/url.php' and
-   * 'extern/open.php' with their REST counterparts 'civicrm/v3/url' and 'civicrm/v3/open'.
+   * Filters the mailing HTML and replaces calls to 'extern/url.php' and
+   * 'extern/open.php' with their REST counterparts 'civicrm/v3/url' and
+   * 'civicrm/v3/open'.
    *
    * @uses 'civicrm_alterMailParams'
    *
-   * @since 0.1
-   * @param array &$params Mail params
-   * @param string $context The Context
-   * @return array $params The filtered Mail params
+   * @since 5.25
+   *
+   * @param array &$params Mail params.
+   * @param string $context The Context.
+   * @return array $params The filtered Mail params.
    */
   public function do_mailing_urls(&$params, $context) {
 
@@ -124,11 +125,12 @@ class Mailing_Hooks {
   }
 
   /**
-   * Replace html mailing tracking urls.
+   * Replace HTML mailing tracking urls.
    *
-   * @since 0.1
-   * @param string $content The mailing content
-   * @return string $content The mailing content
+   * @since 5.25
+   *
+   * @param string $content The mailing content.
+   * @return string $content The mailing content.
    */
   public function replace_html_mailing_tracking_urls(string $content) {
 
@@ -139,7 +141,7 @@ class Mailing_Hooks {
       $href = pq($element)->attr('href');
       $src = pq($element)->attr('src');
 
-      // replace extern/url
+      // Replace extern/url.
       if (strpos($href, 'civicrm/extern/url.php')) {
 
         $query_string = strstr($href, '?');
@@ -147,7 +149,7 @@ class Mailing_Hooks {
 
       }
 
-      // replace extern/open
+      // Replace extern/open.
       if (strpos($src, 'civicrm/extern/open.php')) {
 
         $query_string = strstr($src, '?');
@@ -164,18 +166,19 @@ class Mailing_Hooks {
   }
 
   /**
-   * Replace text mailing tracking urls.
+   * Replace text mailing tracking URLs.
    *
-   * @since 0.1
-   * @param string $content The mailing content
-   * @return string $content The mailing content
+   * @since 5.25
+   *
+   * @param string $content The mailing content.
+   * @return string $content The mailing content.
    */
   public function replace_text_mailing_tracking_urls(string $content) {
 
-    // replace extern url
+    // Replace extern URL.
     $content = preg_replace('/http.*civicrm\/extern\/url\.php/i', $this->url_endpoint, $content);
 
-    // replace open url
+    // Replace open URL.
     $content = preg_replace('/http.*civicrm\/extern\/open\.php/i', $this->open_endpoint, $content);
 
     return $content;
@@ -183,12 +186,12 @@ class Mailing_Hooks {
   }
 
   /**
-   * Checks whether for a given mail
-   * content (text or html) the tracking URLs
-   * are alterable/need to be altered.
+   * Checks whether for a given mail content (text or HTML) the tracking URLs
+   * are alterable or need to be altered.
    *
-   * @since 0.1
-   * @param string $content The mail content (text or  html)
+   * @since 5.25
+   *
+   * @param string $content The mail content: text or HTML.
    * @return bool $is_alterable
    */
   public function is_mail_tracking_url_alterable($content) {
