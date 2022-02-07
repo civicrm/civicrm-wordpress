@@ -36,6 +36,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Set version here: changing it forces Javascript and CSS to reload.
+// Note we should change this to reflect 5.x branch
 define('CIVICRM_PLUGIN_VERSION', '4.7');
 
 // Store reference to this file.
