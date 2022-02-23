@@ -597,16 +597,27 @@ class CiviCRM_For_WordPress_Admin {
 
     $civilogo = file_get_contents(CIVICRM_PLUGIN_DIR . 'assets/images/civilogo.svg.b64');
 
+    global $wp_version;
+    if (version_compare($wp_version, '5.9.9999', '>')) {
+      $menu_position = 3;
+    }
+    else {
+      $menu_position = '3.904981';
+    }
+
     /**
      * Filter the position of the CiviCRM menu item.
      *
-     * Currently set to 3.9 + some random digits to reduce risk of conflict.
+     * As per the code above, the position was previously set to '3.904981' to
+     * reduce risk of conflicts. The position is now conditionally set depending
+     * on the version of WordPress.
      *
      * @since 4.4
+     * @since 5.47 Conditionally set because WordPress 6.0 enforces integers.
      *
-     * @param str The default menu position expressed as a float.
+     * @param str|int $menu_position The default menu position.
      */
-    $position = apply_filters('civicrm_menu_item_position', '3.904981');
+    $position = apply_filters('civicrm_menu_item_position', $menu_position);
 
     // Try and initialize CiviCRM.
     $success = $this->initialize();
