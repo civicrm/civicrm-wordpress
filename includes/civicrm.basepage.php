@@ -322,7 +322,7 @@ class CiviCRM_For_WordPress_Basepage {
     }
 
     // Bail if this is a Favicon request.
-    if (is_favicon()) {
+    if (function_exists('is_favicon') && is_favicon()) {
       return;
     }
 
