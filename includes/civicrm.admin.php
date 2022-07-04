@@ -403,7 +403,7 @@ class CiviCRM_For_WordPress_Admin {
     if ($error == FALSE) {
       $this->error_flag = 'settings-include';
       $initialized = FALSE;
-      return;
+      return FALSE;
     }
 
     // Initialize the Class Loader.
@@ -417,7 +417,7 @@ class CiviCRM_For_WordPress_Admin {
     if (!file_exists($civicrm_root . 'CRM/Core/Config.php')) {
       $this->error_flag = 'config-missing';
       $initialized = FALSE;
-      return;
+      return FALSE;
     }
 
     // Include config file - returns int(1) on success.
