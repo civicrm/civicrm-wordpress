@@ -167,10 +167,12 @@
       me.basepage_submit = $('#civicrm_basepage_submit');
       me.shortcode_submit = $('#civicrm_shortcode_submit');
       me.email_submit = $('#civicrm_email_submit');
+      me.permissions_submit = $('#civicrm_permissions_submit');
       me.cache_submit = $('#civicrm_cache_submit');
       me.basepage_select = $('#page_id');
       me.shortcode_select = $('#shortcode_mode');
       me.email_select = $('#sync_email');
+      me.permissions_select = $('#permissions_role');
       me.basepage_selected = me.basepage_select.val();
       me.shortcode_selected = me.shortcode_select.val();
       me.email_selected = me.email_select.val();
@@ -359,6 +361,34 @@
       });
 
       /**
+       * Add a click event listener to the "Permissions and Capabilities" section submit button.
+       *
+       * @param {Object} event The event object.
+       */
+      me.permissions_submit.on('click', function(event) {
+
+        // Define vars.
+        var value = me.permissions_select.val(),
+            ajax_nonce = me.permissions_submit.data('security'),
+            refreshing = CiviCRM_Options_Settings.get_localisation('refreshing');
+
+        // Prevent form submission.
+        if (event.preventDefault) {
+          event.preventDefault();
+        }
+
+        // Modify button and select, then show spinner.
+        me.permissions_submit.val(refreshing);
+        me.permissions_submit.prop('disabled', true);
+        me.permissions_select.prop('disabled', true);
+        $(this).next('.spinner').css('visibility', 'visible');
+
+        // Submit request to server.
+        me.send('civicrm_refresh_permissions', value, ajax_nonce);
+
+      });
+
+      /**
        * Add a click event listener to the "Clear Caches" section submit button.
        *
        * @param {Object} event The event object.
@@ -453,6 +483,7 @@
       var saved = CiviCRM_Options_Settings.get_localisation('saved'),
           update = CiviCRM_Options_Settings.get_localisation('update'),
           clearing = CiviCRM_Options_Settings.get_localisation('clearing'),
+          refresh = CiviCRM_Options_Settings.get_localisation('refresh'),
           cache = CiviCRM_Options_Settings.get_localisation('cache');
 
       if (data.saved) {
@@ -488,6 +519,17 @@
           me.email_select.val(data.result);
           me.email_selected = data.result;
           me.email_select.prop('disabled', false);
+
+        } else if (data.section == 'refresh_permissions') {
+
+          // Permissions and Capabilities section.
+          me.permissions_submit.val(refresh);
+          $('.permissions_error').hide();
+          $('.permissions_success').show();
+          $('.permissions_success p').html(data.notice);
+          me.permissions_select.prop('disabled', false);
+          me.permissions_submit.prop('disabled', false);
+          me.permissions_submit.next('.spinner').css('visibility', 'hidden');
 
         } else if (data.section == 'clear_caches') {
 
@@ -539,6 +581,16 @@
           $('.email_notice p').html(data.notice);
           $('.email_feedback').html(data.message);
           me.email_selected = data.result;
+
+        } else if (data.section == 'refresh_permissions') {
+
+          // Permissions and Capabilities section.
+          me.permissions_submit.val(refresh);
+          me.permissions_submit.next('.spinner').css('visibility', 'hidden');
+          me.permissions_submit.prop('disabled', false);
+          $('.permissions_success').hide();
+          $('.permissions_error').show();
+          $('.permissions_error p').html(data.notice);
 
         } else if (data.section == 'clear_caches') {
 

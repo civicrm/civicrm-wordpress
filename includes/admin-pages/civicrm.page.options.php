@@ -92,6 +92,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     add_action('wp_ajax_civicrm_basepage', [$this, 'ajax_save_basepage']);
     add_action('wp_ajax_civicrm_shortcode', [$this, 'ajax_save_shortcode']);
     add_action('wp_ajax_civicrm_email_sync', [$this, 'ajax_save_email_sync']);
+    add_action('wp_ajax_civicrm_refresh_permissions', [$this, 'ajax_refresh_permissions']);
     add_action('wp_ajax_civicrm_clear_caches', [$this, 'ajax_clear_caches']);
 
   }
@@ -173,9 +174,12 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
         'ajax_url' => admin_url('admin-ajax.php'),
       ],
       'localisation' => [
+        'update' => __('Update', 'civicrm'),
         'saving' => __('Saving...', 'civicrm'),
         'saved' => __('Saved', 'civicrm'),
-        'update' => __('Update', 'civicrm'),
+        'refresh' => __('Refresh', 'civicrm'),
+        'refreshing' => __('Refreshing...', 'civicrm'),
+        'refreshed' => __('Refreshed', 'civicrm'),
         'cache' => __('Clear Caches', 'civicrm'),
         'clearing' => __('Clearing...', 'civicrm'),
         'cleared' => __('Cleared', 'civicrm'),
@@ -342,6 +346,17 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       'civicrm_options_cache',
       __('Clear Caches', 'civicrm'),
       [$this, 'meta_box_options_cache_render'],
+      $screen_id,
+      'side',
+      'core',
+      $data
+    );
+
+    // Create "Permissions and Capabilities" metabox.
+    add_meta_box(
+      'civicrm_options_permissions',
+      __('Permissions and Capabilities', 'civicrm'),
+      [$this, 'meta_box_options_permissions_render'],
       $screen_id,
       'side',
       'core',
@@ -548,6 +563,34 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
   }
 
   /**
+   * Render "Permissions" meta box.
+   *
+   * @since 5.52
+   *
+   * @param mixed $unused Unused param.
+   * @param array $metabox Array containing id, title, callback, and args elements.
+   */
+  public function meta_box_options_permissions_render($unused, $metabox) {
+
+    // Get the custom role.
+    $custom_role = $this->civi->users->has_custom_role();
+
+    // Set selected attributes.
+    $selected_disable = empty($custom_role) ? 'selected="selected"' : '';
+    $selected_enable = !empty($custom_role) ? 'selected="selected"' : '';
+
+    // Set submit button options.
+    $options = [
+      'style' => 'float: right;',
+      'data-security' => esc_attr(wp_create_nonce('civicrm_refresh_permissions')),
+    ];
+
+    // Include template file.
+    include CIVICRM_PLUGIN_DIR . 'assets/templates/metaboxes/metabox.options.permissions.php';
+
+  }
+
+  /**
    * Render "Clear Cache" meta box.
    *
    * @since 5.34
@@ -669,6 +712,12 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       // Save Email Sync.
       $this->form_nonce_check();
       $this->form_save_email_sync();
+      $this->form_redirect();
+    }
+    elseif (!empty($_POST['civicrm_permissions_submit'])) {
+      // Refresh permissions.
+      $this->form_nonce_check();
+      $this->civi->users->refresh_capabilities();
       $this->form_redirect();
     }
     elseif (!empty($_POST['civicrm_cache_submit'])) {
@@ -952,6 +1001,67 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       'section' => 'email_sync',
       'result' => $actual ? 'yes' : 'no',
       'message' => __('Setting saved.', 'civicrm'),
+      'saved' => TRUE,
+    ];
+
+    // Return the data.
+    wp_send_json($data);
+
+  }
+
+  /**
+   * Refresh the CiviCRM permissions.
+   *
+   * @since 5.52
+   */
+  public function ajax_refresh_permissions() {
+
+    // Default response.
+    $data = [
+      'section' => 'refresh_permissions',
+      'notice' => __('Could not refresh the CiviCRM permissions.', 'civicrm'),
+      'saved' => FALSE,
+    ];
+
+    // Since this is an AJAX request, check security.
+    $result = check_ajax_referer('civicrm_refresh_permissions', FALSE, FALSE);
+    if ($result === FALSE) {
+      $data['notice'] = __('Authentication failed. Could not refresh the CiviCRM permissions.', 'civicrm');
+      wp_send_json($data);
+    }
+
+    // Bail if there is no valid chosen value.
+    $chosen = isset($_POST['value']) ? trim($_POST['value']) : 0;
+    if ($chosen === 0 || !in_array($chosen, ['enable', 'disable'])) {
+      $data['notice'] = __('Unrecognised parameter. Could not refresh the CiviCRM permissions.', 'civicrm');
+      wp_send_json($data);
+    }
+
+    // Always refresh the CiviCRM permissions.
+    $this->civi->users->refresh_capabilities();
+
+    // Have we enabled the custom role?
+    if ($chosen === 'enable') {
+      // Create the role if it doesn't exist.
+      if (!$this->civi->users->has_custom_role()) {
+        $this->civi->users->create_custom_role();
+      }
+      // Refresh the custom role's permissions.
+      $this->civi->users->refresh_custom_role_capabilities();
+    }
+
+    // Have we disabled the custom role?
+    if ($chosen === 'disable') {
+      // Delete the role if it exists.
+      if ($this->civi->users->has_custom_role()) {
+        $this->civi->users->delete_custom_role();
+      }
+    }
+
+    // Data response.
+    $data = [
+      'section' => 'refresh_permissions',
+      'notice' => __('CiviCRM permissions refreshed.', 'civicrm'),
       'saved' => TRUE,
     ];
 
