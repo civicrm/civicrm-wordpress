@@ -37,6 +37,14 @@ class CiviCRM_For_WordPress_Users {
   public $civi;
 
   /**
+   * @var string
+   * Custom role name.
+   * @since 5.52
+   * @access private
+   */
+  private $custom_role_name = 'civicrm_admin';
+
+  /**
    * Instance constructor.
    *
    * @since 4.6
@@ -268,16 +276,17 @@ class CiviCRM_For_WordPress_Users {
 
     // Define minimum capabilities (CiviCRM permissions).
     $default_min_capabilities = [
-      'access_civimail_subscribe_unsubscribe_pages' => 1,
       'access_all_custom_data' => 1,
+      'access_civimail_subscribe_unsubscribe_pages' => 1,
       'access_uploaded_files' => 1,
       'make_online_contributions' => 1,
       'profile_create' => 1,
       'profile_edit' => 1,
       'profile_view' => 1,
       'register_for_events' => 1,
-      'view_event_info' => 1,
       'sign_civicrm_petition' => 1,
+      'view_event_info' => 1,
+      'view_my_invoices' => 1,
       'view_public_civimail_content' => 1,
     ];
 
@@ -295,7 +304,9 @@ class CiviCRM_For_WordPress_Users {
     foreach ($wp_roles->role_names as $role => $name) {
       $roleObj = $wp_roles->get_role($role);
       foreach ($min_capabilities as $capability_name => $capability_value) {
-        $roleObj->add_cap($capability_name);
+        if (!$roleObj->has_cap($capability_name)) {
+          $roleObj->add_cap($capability_name);
+        }
       }
     }
 
@@ -309,7 +320,7 @@ class CiviCRM_For_WordPress_Users {
   /**
    * Add CiviCRM access capabilities to WordPress roles.
    *
-   * This is a callback for the 'init' hook in register_hooks().
+   * This is called in register_hooks().
    *
    * The legacy global scope function wp_civicrm_capability() is called by
    * postProcess() in civicrm/CRM/ACL/Form/WordPress/Permissions.php
@@ -382,6 +393,339 @@ class CiviCRM_For_WordPress_Users {
     }
 
     return $ctype;
+
+  }
+
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Refreshes all CiviCRM capabilities.
+   *
+   * @since 5.52
+   */
+  public function refresh_capabilities() {
+
+    // Refresh capabilities assigned at plugin activation.
+    $this->set_wp_user_capabilities();
+
+    // Refresh access capabilities.
+    $this->set_access_capabilities();
+
+    /**
+     * Fires when CiviCRM has refreshed the WordPress capabilities.
+     *
+     * @since 5.52
+     */
+    do_action('civicrm_capabilities_refreshed');
+
+  }
+
+  /**
+   * Applies all CiviCRM capabilities to the custom WordPress role.
+   *
+   * @since 5.52
+   */
+  public function refresh_custom_role_capabilities() {
+
+    // Get the role to apply all CiviCRM permissions to.
+    $custom_role = $this->get_custom_role();
+    if (empty($custom_role)) {
+      return;
+    }
+
+    // Get all CiviCRM capabilities.
+    $capabilities = $this->get_all_civicrm_capabilities();
+
+    // Add the capabilities if not already added.
+    foreach ($capabilities as $capability) {
+      if (!$custom_role->has_cap($capability)) {
+        $custom_role->add_cap($capability);
+      }
+    }
+
+    // Delete capabilities that no longer exist.
+    $this->delete_missing_capabilities($capabilities);
+
+    /**
+     * Fires when CiviCRM has refreshed the WordPress capabilities.
+     *
+     * @since 5.52
+     *
+     * @param array $capabilities The array of CiviCRM permissions converted to WordPress capabilities.
+     * @param WP_Role $custom_role The WordPress role object.
+     */
+    do_action('civicrm_custom_role_capabilities_refreshed', $capabilities, $custom_role);
+
+  }
+
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Gets all CiviCRM permissions converted to WordPress capabilities.
+   *
+   * @since 5.52
+   *
+   * @return array $capabilities The array of capabilities.
+   */
+  public function get_all_civicrm_capabilities() {
+
+    // Init return.
+    $capabilities = [];
+
+    // Bail if no CiviCRM.
+    if (!$this->civi->initialize()) {
+      return $capabilities;
+    }
+
+    // Get all CiviCRM permissions, excluding disabled components and descriptions.
+    $permissions = CRM_Core_Permission::basicPermissions(FALSE, FALSE);
+
+    // Convert to WordPress capabilities.
+    foreach ($permissions as $permission => $title) {
+      $capabilities[] = CRM_Utils_String::munge(strtolower($permission));
+    }
+
+    /**
+     * Filters the complete set of CiviCRM capabilities.
+     *
+     * @since 5.52
+     *
+     * @param array $capabilities The complete set of CiviCRM capabilities.
+     */
+    return apply_filters('civicrm_all_capabilities', $capabilities);
+
+  }
+
+  /**
+   * Deletes CiviCRM capabilities when they no longer exist.
+   *
+   * This can happen when an Extension which had previously added permissions
+   * is disabled or uninstalled, for example.
+   *
+   * Things can get a bit complicated here because capabilities can appear and
+   * disappear (see above) and may have been assigned to other roles while they
+   * were present. Deleting missing capabilities may therefore have unintended
+   * consequences. Use the "civicrm_delete_missing_capabilities" filter if you
+   * are sure that you want to delete missing capabilities.
+   *
+   * @since 5.52
+   *
+   * @param array $capabilities The complete set of CiviCRM capabilities.
+   */
+  public function delete_missing_capabilities($capabilities) {
+
+    /**
+     * Filters whether capabilities should be deleted.
+     *
+     * To enable deletion of capabilities, pass boolean true.
+     *
+     * @since 5.52
+     *
+     * @param bool $allow_delete False (disabled) by default.
+     */
+    $allow_delete = apply_filters('civicrm_delete_missing_capabilities', FALSE);
+    if ($allow_delete === FALSE) {
+      return;
+    }
+
+    // Read the stored CiviCRM permissions array.
+    $stored = $this->get_saved_capabilities();
+
+    // Save and bail if we don't have any stored.
+    if (empty($stored)) {
+      $this->save_capabilities($capabilities);
+      return;
+    }
+
+    // Find the capabilities that are missing in the current CiviCRM data.
+    $not_in_current = array_diff($stored, $capabilities);
+
+    // Get the role to delete CiviCRM permissions from.
+    $custom_role = $this->get_custom_role();
+    if (empty($custom_role)) {
+      return;
+    }
+
+    // Delete the capabilities if not already deleted.
+    foreach ($capabilities as $capability) {
+      if ($custom_role->has_cap($capability)) {
+        $custom_role->remove_cap($capability);
+      }
+    }
+
+    // Overwrite the current permissions array.
+    $this->save_capabilities($capabilities);
+
+  }
+
+  /**
+   * Gets the stored array of CiviCRM permissions formatted as WordPress capabilities.
+   *
+   * @since 5.52
+   *
+   * @return array $capabilities The array of stored capabilities.
+   */
+  public function get_saved_capabilities() {
+
+    // Get capabilities from option.
+    $capabilities = get_option('civicrm_permissions_sync_perms', 'false');
+
+    // If no option exists, cast return as array.
+    if ($capabilities === 'false') {
+      $capabilities = [];
+    }
+
+    return $capabilities;
+
+  }
+
+  /**
+   * Stores the array of CiviCRM permissions formatted as WordPress capabilities.
+   *
+   * @since 5.52
+   *
+   * @param array $capabilities The array of capabilities to store.
+   */
+  public function save_capabilities($capabilities) {
+    update_option('civicrm_permissions_sync_perms', $capabilities);
+  }
+
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Retrieves the config for the custom WordPress role.
+   *
+   * @since 5.52
+   *
+   * @return array $role_data The array of custom role data.
+   */
+  public function get_custom_role_data() {
+
+    // Init default role data.
+    $role_data = [
+      'name' => $this->custom_role_name,
+      'title' => __('CiviCRM Admin', 'civicrm'),
+    ];
+
+    /**
+     * Filters the default CiviCRM custom role data.
+     *
+     * @since 5.52
+     *
+     * @param array $role_data The array of default CiviCRM custom role data.
+     */
+    $role_data = apply_filters('civicrm_custom_role_data', $role_data);
+
+    return $role_data;
+
+  }
+
+  /**
+   * Checks if the custom WordPress role exists.
+   *
+   * @since 5.52
+   *
+   * @return WP_Role|bool $custom_role The custom role if it exists, or false otherwise.
+   */
+  public function has_custom_role() {
+
+    // Return the custom role if it already exists.
+    $custom_role = $this->get_custom_role();
+    if (!empty($custom_role)) {
+      return $custom_role;
+    }
+
+    return FALSE;
+
+  }
+
+  /**
+   * Retrieves the custom WordPress role.
+   *
+   * @since 5.52
+   *
+   * @return WP_Role|bool $custom_role The custom role, or false on failure.
+   */
+  public function get_custom_role() {
+
+    // Get the default role data.
+    $role_data = $this->get_custom_role_data();
+
+    // Return the custom role if it exists.
+    $wp_roles = wp_roles();
+    if ($wp_roles->is_role($role_data['name'])) {
+      $custom_role = $wp_roles->get_role($role_data['name']);
+      return $custom_role;
+    }
+
+    return FALSE;
+
+  }
+
+  /**
+   * Creates the custom WordPress role.
+   *
+   * We need a role to which we add all CiviCRM permissions. This makes all the
+   * CiviCRM capabilities discoverable by other plugins.
+   *
+   * This method creates the role if it doesn't already exist by cloning the
+   * built-in WordPress "administrator" role.
+   *
+   * Note: it's unlikely that you will want to grant this role to any WordPress
+   * users - it is purely present to make capabilities discoverable.
+   *
+   * @since 5.52
+   *
+   * @return WP_Role|bool $custom_role The custom role, or false on failure.
+   */
+  public function create_custom_role() {
+
+    // Return the custom role if it already exists.
+    $custom_role = $this->has_custom_role();
+    if (!empty($custom_role)) {
+      return $custom_role;
+    }
+
+    // Bail if the "administrator" role doesn't exist.
+    $wp_roles = wp_roles();
+    if (!$wp_roles->is_role('administrator')) {
+      return FALSE;
+    }
+
+    // Get the default role data.
+    $role_data = $this->get_custom_role_data();
+
+    // Add new role based on the "administrator" role.
+    $admin = $wp_roles->get_role('administrator');
+    $custom_role = add_role($role_data['name'], $role_data['title'], $admin->capabilities);
+
+    // Return false if something went wrong.
+    if (empty($custom_role)) {
+      return FALSE;
+    }
+
+    return $custom_role;
+
+  }
+
+  /**
+   * Deletes the custom WordPress role.
+   *
+   * @since 5.52
+   */
+  public function delete_custom_role() {
+
+    // Bail if the custom role does not exist.
+    $custom_role = $this->has_custom_role();
+    if (empty($custom_role)) {
+      return;
+    }
+
+    // Get the default role data.
+    $role_data = $this->get_custom_role_data();
+
+    // Okay, remove it.
+    remove_role($role_data['name']);
 
   }
 
