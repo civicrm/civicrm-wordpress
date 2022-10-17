@@ -113,8 +113,27 @@ class CiviCRM_For_WordPress_Shortcodes {
       return;
     }
 
-    // A counter's useful.
-    $shortcodes_present = 0;
+    /**
+     * Filter the Shortcode Components that do not invoke CiviCRM.
+     *
+     * Shortcodes for Components such as Afform do load CiviCRM resources but do
+     * not have a CiviCRM path and are not rendered via the `invoke()` method.
+     * We can allow multiple instances of these Shortcodes in a single page load.
+     *
+     * @since 5.56
+     *
+     * @param array $components The array of Components that do not invoke CiviCRM.
+     */
+    $components = apply_filters('civicrm_no_invoke_shortcode_components', ['afform']);
+
+    // Track the Shortcodes for Components that do and do not invoke CiviCRM.
+    $no_invoke_shortcodes = [];
+    $total_no_invoke_shortcodes = 0;
+    $invoke_shortcodes = [];
+    $total_invoke_shortcodes = 0;
+
+    // Track the total number of CiviCRM Shortcodes.
+    $total_shortcodes = 0;
 
     /*
      * Let's loop through the results.
@@ -137,11 +156,24 @@ class CiviCRM_For_WordPress_Shortcodes {
           // Sanity check.
           if (!empty($shortcodes_array)) {
 
-            // Add it to our property.
+            // Add it to our collection of Shortcodes.
             $this->shortcodes[$post->ID] = $shortcodes_array;
 
             // Bump Shortcode counter.
-            $shortcodes_present += count($this->shortcodes[$post->ID]);
+            $total_shortcodes += count($this->shortcodes[$post->ID]);
+
+            // Check for Components that do not invoke CiviCRM.
+            foreach ($shortcodes_array as $key => $shortcode) {
+              $atts = $this->get_atts($shortcode);
+              if (!empty($atts['component']) && in_array($atts['component'], $components)) {
+                $no_invoke_shortcodes[$post->ID][$key] = $shortcode;
+                $total_no_invoke_shortcodes++;
+              }
+              else {
+                $invoke_shortcodes[$post->ID][$key] = $shortcode;
+                $total_invoke_shortcodes++;
+              }
+            }
 
           }
 
@@ -154,104 +186,123 @@ class CiviCRM_For_WordPress_Shortcodes {
     rewind_posts();
 
     // Bail if there are no Shortcodes.
-    if ($shortcodes_present === 0) {
+    if ($total_shortcodes === 0) {
       return;
     }
 
     // Set context.
     $this->civi->civicrm_context_set('shortcode');
 
-    // Did we get any?
-    if ($shortcodes_present) {
+    // We need CiviCRM initialised prior to parsing Shortcodes.
+    if (!$this->civi->initialize()) {
+      return;
+    }
 
-      // We need CiviCRM initialised prior to parsing Shortcodes.
-      if (!$this->civi->initialize()) {
-        return;
-      }
+    if ($total_invoke_shortcodes === 1) {
 
-      // How should we handle multiple Shortcodes?
-      if ($shortcodes_present > 1) {
+      /*
+       * Since we have only one Shortcode, run the_loop again.
+       * The DB query has already been done, so this has no significant impact.
+       */
+      if (have_posts()) {
+        while (have_posts()) {
 
-        // Add CSS resources for front end.
-        add_action('wp_enqueue_scripts', [$this->civi, 'front_end_css_load'], 100);
+          the_post();
 
-        // Let's add dummy markup.
-        foreach ($this->shortcodes as $post_id => $shortcode_array) {
+          global $post;
 
-          // Set flag if there are multple Shortcodes in this post.
-          $multiple = (count($shortcode_array) > 1) ? 1 : 0;
+          // Is this the post?
+          if (!array_key_exists($post->ID, $invoke_shortcodes)) {
+            continue;
+          }
 
-          foreach ($shortcode_array as $shortcode) {
+          // The Shortcode must be the item in the Shortcodes array.
+          $shortcode = reset($invoke_shortcodes[$post->ID]);
+          $key = key($invoke_shortcodes[$post->ID]);
 
-            // Mimic invoke in multiple Shortcode context.
-            $this->shortcode_markup[$post_id][] = $this->render_multiple($post_id, $shortcode, $multiple);
+          // Check to see if a Shortcode component has been repeated?
+          $atts = $this->get_atts($shortcode);
+
+          // Test for hijacking.
+          if (isset($atts['hijack']) && $atts['hijack'] == '1') {
+            add_filter('civicrm_context', [$this, 'get_context']);
+          }
+
+          // Store corresponding markup.
+          $this->shortcode_markup[$post->ID][$key] = do_shortcode($shortcode);
+
+          // Test for hijacking.
+          if (isset($atts['hijack']) && $atts['hijack'] == '1') {
+
+            // Ditch the filter.
+            remove_filter('civicrm_context', [$this, 'get_context']);
+
+            // Set title.
+            global $civicrm_wp_title;
+            $post->post_title = $civicrm_wp_title;
+
+            // Override page title.
+            add_filter('single_post_title', [$this, 'single_page_title'], 50, 2);
+
+            // Overwrite content.
+            add_filter('the_content', [$this, 'get_content']);
 
           }
 
         }
-
       }
-      else {
 
-        // Add core resources for front end.
-        add_action('wp', [$this->civi, 'front_end_page_load'], 100);
+      // Reset loop.
+      rewind_posts();
 
-        /*
-         * Since we have only one Shortcode, run the_loop again.
-         * The DB query has already been done, so this has no significant impact.
-         */
-        if (have_posts()) {
-          while (have_posts()) {
+    }
 
-            the_post();
+    // How should we handle multiple non-invoking Shortcodes?
+    if ($total_no_invoke_shortcodes > 0) {
 
-            global $post;
+      // Let's render Shortcodes that do not invoke CiviCRM.
+      foreach ($no_invoke_shortcodes as $post_id => $shortcode_array) {
 
-            // Is this the post?
-            if (!array_key_exists($post->ID, $this->shortcodes)) {
-              continue;
-            }
+        // Set flag if there are multiple Shortcodes in this post.
+        $multiple = (count($shortcode_array) > 1) ? 1 : 0;
 
-            // The Shortcode must be the first item in the Shortcodes array.
-            $shortcode = $this->shortcodes[$post->ID][0];
-
-            // Check to see if a Shortcode component has been repeated?
-            $atts = $this->get_atts($shortcode);
-
-            // Test for hijacking.
-            if (isset($atts['hijack']) && $atts['hijack'] == '1') {
-              add_filter('civicrm_context', [$this, 'get_context']);
-            }
-
-            // Store corresponding markup.
-            $this->shortcode_markup[$post->ID][] = do_shortcode($shortcode);
-
-            // Test for hijacking.
-            if (isset($atts['hijack']) && $atts['hijack'] == '1') {
-
-              // Ditch the filter.
-              remove_filter('civicrm_context', [$this, 'get_context']);
-
-              // Set title.
-              global $civicrm_wp_title;
-              $post->post_title = $civicrm_wp_title;
-
-              // Override page title.
-              add_filter('single_post_title', [$this, 'single_page_title'], 50, 2);
-
-              // Overwrite content.
-              add_filter('the_content', [$this, 'get_content']);
-
-            }
-
-          }
+        foreach ($shortcode_array as $key => $shortcode) {
+          // Mimic invoke in multiple Shortcode context.
+          $this->shortcode_markup[$post_id][$key] = $this->render_multiple($post_id, $shortcode, $multiple);
         }
 
-        // Reset loop.
-        rewind_posts();
+      }
+
+    }
+
+    // How should we handle multiple invoking Shortcodes?
+    if ($total_invoke_shortcodes > 1) {
+
+      // Let's add dummy markup for Shortcodes that invoke CiviCRM.
+      foreach ($invoke_shortcodes as $post_id => $shortcode_array) {
+
+        // Set flag if there are multiple Shortcodes in this post.
+        $multiple = (count($shortcode_array) > 1) ? 1 : 0;
+
+        foreach ($shortcode_array as $key => $shortcode) {
+          // Mimic invoke in multiple Shortcode context.
+          $this->shortcode_markup[$post_id][$key] = $this->render_multiple($post_id, $shortcode, $multiple);
+        }
 
       }
 
+    }
+
+    // A single Shortcode and any pathless Shortcodes need CiviCRM resources.
+    if ($total_no_invoke_shortcodes > 0 || $total_shortcodes === 1) {
+      // Add CiviCRM resources for front end.
+      add_action('wp', [$this->civi, 'front_end_page_load'], 100);
+    }
+
+    // Multiple invoking Shortcodes need the CiviCRM CSS file.
+    if ($total_invoke_shortcodes > 1) {
+      // Add CSS resources for front end.
+      add_action('wp_enqueue_scripts', [$this->civi, 'front_end_css_load'], 100);
     }
 
     // Flag that we have parsed Shortcodes.
