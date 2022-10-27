@@ -118,13 +118,14 @@ class CiviCRM_For_WordPress_Compat {
       if (!empty($post_id)) {
         $collected_rewrites[$post_id][] = $regex_path;
       }
+
     };
 
     // Build rewrite rules
     $this->wp_add_rewrite_rules($collected_rewrite, $flush_rewrite_rules);
   }
 
- /**
+  /**
    * Support WPML.
    *
    * @since 5.55.0
@@ -135,10 +136,9 @@ class CiviCRM_For_WordPress_Compat {
   public function rewrite_rules_wpml($flush_rewrite_rules, $basepage) {
 
     // Bail if WPML is not present.
-    if ( !defined( 'ICL_SITEPRESS_VERSION' ) ) {
+    if (!defined('ICL_SITEPRESS_VERSION')) {
       return;
     }
-
 
     /*
      * Collect all rewrite rules into an array.
@@ -167,6 +167,7 @@ class CiviCRM_For_WordPress_Compat {
       if (!empty($post_id)) {
         continue;
       }
+
       $url = get_permalink($post_id);
       $parsed_url = wp_parse_url($url, PHP_URL_PATH);
       $regex_path = substr($parsed_url, 1);
@@ -188,11 +189,12 @@ class CiviCRM_For_WordPress_Compat {
 
     // Get the post slug
     global $post;
-    $post_slug=isset($post->post_name) ? $post->post_name : '';
+    $post_slug = isset($post->post_name) ? $post->post_name : '';
     if (empty($post_slug) && isset($post->post_name)) {
       $post_slug = $post->post_name;
     }
-    $civicrm_slug =  apply_filters('civicrm_basepage_slug', 'civicrm');
+
+    $civicrm_slug = apply_filters('civicrm_basepage_slug', 'civicrm');
 
     // If this is a CiviCRM Page then let's modify the actual path
     if ($post_slug == $civicrm_slug) {
@@ -214,17 +216,19 @@ class CiviCRM_For_WordPress_Compat {
       $query = http_build_query($qs);
 
       // Rebuild CiviCRM links for each language
-      foreach( $languages as &$language ) {
+      foreach($languages as &$language) {
         $url = apply_filters('wpml_permalink', $civicrm_url, $language['language_code']);
+
         if (!empty($query)) {
-          if ($wpml_lang_conf == 3 && strpos($url,'?') !== FALSE) {
-            $language['url'] = $url . '&'.$query;
+          if ($wpml_lang_conf == 3 && strpos($url, '?') !== FALSE) {
+            $language['url'] = $url . '&' . $query;
           } else {
              $language['url'] = $url . '?' . $query;
           }
         }
       }
     }
+
     return $languages;
   }
 
@@ -252,6 +256,7 @@ class CiviCRM_For_WordPress_Compat {
     if ($flush_rewrite_rules) {
       flush_rewrite_rules();
     }
+
   }
 
   /**
@@ -265,13 +270,14 @@ class CiviCRM_For_WordPress_Compat {
    */
   private function wpml_remove_language_from_url($url, $sitepress, $wpml_lang_config) {
     $lang = $this->wpml_get_language_param_for_convert_url($sitepress);
-    if ( $lang ) {
-      if ( $wpml_lang_config == 1) {
-        $url = str_replace('/' . $lang . '/', '/', $url );
-      } elseif ( $wpml_lang_config == 3 ) {
-        $url = str_replace('lang='.$lang, '', $url );
+    if ($lang) {
+      if ($wpml_lang_config == 1) {
+        $url = str_replace('/' . $lang . '/', '/', $url);
+      } elseif ($wpml_lang_config == 3) {
+        $url = str_replace('lang=' . $lang, '', $url);
       }
     }
+
     return $url;
   }
 
@@ -281,13 +287,15 @@ class CiviCRM_For_WordPress_Compat {
    * @param object $sitepress reference to WPML class
    */
   private function wpml_get_language_param_for_convert_url($sitepress) {
-    if ( isset( $_GET['lang'] ) ) {
-      return filter_var( $_GET['lang'], FILTER_SANITIZE_STRING );
+    if (isset($_GET['lang'])) {
+      return filter_var($_GET['lang'], FILTER_SANITIZE_STRING);
    }
-   if ( is_multisite() && isset( $_POST['lang'] ) ) {
-     return filter_var( $_POST['lang'], FILTER_SANITIZE_STRING );
+
+   if (is_multisite() && isset($_POST['lang'])) {
+     return filter_var($_POST['lang'], FILTER_SANITIZE_STRING);
    }
-   if ( is_multisite() && defined( 'SUBDOMAIN_INSTALL' ) && SUBDOMAIN_INSTALL) {
+
+   if (is_multisite() && defined('SUBDOMAIN_INSTALL') && SUBDOMAIN_INSTALL) {
      return $sitepress->get_current_language();
    }
 
