@@ -1358,8 +1358,8 @@ class CiviCRM_For_WordPress {
     if (CRM_Utils_Array::value('HTTP_X_REQUESTED_WITH', $_SERVER) == 'XMLHttpRequest'
         || ($argdata['args'][0] == 'civicrm' && in_array($argdata['args'][1], ['ajax', 'file']))
         || !empty($_REQUEST['snippet'])
-        || strpos($argdata['argString'], 'civicrm/event/ical') === 0 && empty($html)
-        || strpos($argdata['argString'], 'civicrm/contact/imagefile') === 0
+        || strpos($argdata['argString'] ?? '', 'civicrm/event/ical') === 0 && empty($html)
+        || strpos($argdata['argString'] ?? '', 'civicrm/contact/imagefile') === 0
     ) {
       $return = FALSE;
     }
