@@ -470,7 +470,7 @@ class CiviCRM_For_WordPress_Basepage {
       add_action('wp', [$this->civi, 'front_end_page_load'], 100);
 
       // Include this content when Base Page is rendered.
-      add_filter('the_content', [$this, 'basepage_render']);
+      add_filter('the_content', [$this, 'basepage_render'], 21);
 
     }
 
