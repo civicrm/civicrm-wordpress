@@ -4,7 +4,7 @@
  * Description: CiviCRM - Growing and Sustaining Relationships
  * Version: 4.7
  * Requires at least: 4.9
- * Requires PHP:      7.2
+ * Requires PHP:      7.3
  * Author: CiviCRM LLC
  * Author URI: https://civicrm.org/
  * Plugin URI: https://docs.civicrm.org/sysadmin/en/latest/install/wordpress/
@@ -65,7 +65,7 @@ if (!defined('CIVICRM_PLUGIN_DIR')) {
  * @see CiviWP\PhpVersionTest::testConstantMatch()
  */
 if (!defined('CIVICRM_WP_PHP_MINIMUM')) {
-  define('CIVICRM_WP_PHP_MINIMUM', '7.2.0');
+  define('CIVICRM_WP_PHP_MINIMUM', '7.3.0');
 }
 
 /*
