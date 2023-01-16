@@ -48,8 +48,6 @@ This code exposes CiviCRM's [extern](https://github.com/civicrm/civicrm-core/tre
 
 8. `civicrm/v3/widget` - a substition for `civicrm/extern/widget.php`
 
-9. `civicrm/v3/soap` - a substition for `civicrm/extern/soap.php`
-
     **_Note_**: this endpoint has **not been tested**
 
 ### Settings
