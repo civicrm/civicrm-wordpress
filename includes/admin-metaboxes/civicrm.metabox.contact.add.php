@@ -222,7 +222,11 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
     // Check our session for data.
     $session = CRM_Core_Session::singleton();
     $recents = $session->get('quick_add_recents');
-
+    if (!empty($recents) && is_array($recents)) {
+      foreach ($recents as $key => $value) {
+        $recents[$key] = CRM_Utils_String::purifyHtml($value);
+      }
+    }
     // Maybe add a class to the "Recently Added" wrapper.
     $visiblity_class = '';
     if (!empty($recents)) {
@@ -351,7 +355,7 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
 
     // Construct list item containing link to "View Contact" screen.
     $url = $this->civi->admin->get_admin_link('civicrm/contact/view', 'reset=1&cid=' . $contact['id']);
-    $link = '<li><a href="' . $url . '" target="_blank">' . $contact['display_name'] . '</a></li>';
+    $link = CRM_Utils_String::purifyHtml('<li><a href="' . $url . '" target="_blank">' . $contact['display_name'] . '</a></li>');
 
     // Check our session for existing data.
     $session = CRM_Core_Session::singleton();
@@ -514,7 +518,7 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
 
     // Construct list item containing link to "View Contact" screen.
     $url = $this->civi->admin->get_admin_link('civicrm/contact/view', 'reset=1&cid=' . $contact['id']);
-    $link = '<li><a href="' . $url . '" target="_blank">' . $contact['display_name'] . '</a></li>';
+    $link = CRM_Utils_String::purifyHtml('<li><a href="' . $url . '" target="_blank">' . $contact['display_name'] . '</a></li>');
 
     // Check our session for existing data.
     $session = CRM_Core_Session::singleton();
