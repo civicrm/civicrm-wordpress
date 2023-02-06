@@ -142,10 +142,6 @@ class Plugin {
     $widget_controller = new Controller\Widget();
     $widget_controller->register_routes();
 
-    // Soap controller.
-    $soap_controller = new Controller\Soap();
-    $soap_controller->register_routes();
-
     /**
      * Opportunity to add more rest routes.
      *

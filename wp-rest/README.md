@@ -4,7 +4,7 @@ This code exposes CiviCRM's [extern](https://github.com/civicrm/civicrm-core/tre
 
 ### Requirements
 
--   PHP 7.2+
+-   PHP 7.3+
 -   WordPress 4.7+
 -   CiviCRM to be installed and activated.
 
@@ -47,8 +47,6 @@ This code exposes CiviCRM's [extern](https://github.com/civicrm/civicrm-core/tre
     **_Note_**: this endpoint has **not been tested**
 
 8. `civicrm/v3/widget` - a substition for `civicrm/extern/widget.php`
-
-9. `civicrm/v3/soap` - a substition for `civicrm/extern/soap.php`
 
     **_Note_**: this endpoint has **not been tested**
 

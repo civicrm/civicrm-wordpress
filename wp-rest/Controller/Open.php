@@ -47,7 +47,7 @@ class Open extends Base {
     $queue_id = $request->get_param('q');
 
     // Track open.
-    \CRM_Mailing_Event_BAO_Opened::open($queue_id);
+    \CRM_Mailing_Event_BAO_MailingEventOpened::open($queue_id);
 
     // Serve tracker file.
     add_filter('rest_pre_serve_request', [$this, 'serve_tracker_file'], 10, 4);
