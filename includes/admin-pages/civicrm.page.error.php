@@ -66,7 +66,7 @@ class CiviCRM_For_WordPress_Admin_Page_Error {
     $this->add_menu_items($logo, $position);
 
     // Add our meta boxes.
-    add_action('add_meta_boxes', [$this, 'meta_boxes_error_add']);
+    add_action('civicrm/page/error/add_meta_boxes', [$this, 'meta_boxes_error_add']);
 
   }
 
@@ -177,7 +177,7 @@ class CiviCRM_For_WordPress_Admin_Page_Error {
      *
      * @param str $screen_id The ID of the current screen.
      */
-    do_action('add_meta_boxes', $screen->id, NULL);
+    do_action('civicrm/page/error/add_meta_boxes', $screen->id);
 
     // Grab columns.
     $columns = (1 == $screen->get_columns() ? '1' : '2');
