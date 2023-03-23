@@ -20,15 +20,16 @@ namespace CiviWP {
       );
       $this->assertNotEquals($arg2['foo'], 456);
       $this->assertFalse(isset($arg2['hook_was_called']));
+      $null = NULL;
       \CRM_Utils_Hook::singleton()
         ->invoke(
           2,
           $arg1,
           $arg2,
-          \CRM_Utils_Hook::$_nullObject,
-          \CRM_Utils_Hook::$_nullObject,
-          \CRM_Utils_Hook::$_nullObject,
-          \CRM_Utils_Hook::$_nullObject,
+          $null,
+          $null,
+          $null,
+          $null,
           'civicrm_fakeAlterableHook'
         );
 
