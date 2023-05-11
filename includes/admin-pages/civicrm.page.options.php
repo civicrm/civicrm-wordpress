@@ -86,7 +86,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     add_action('admin_menu', [$this, 'add_menu_items'], 9);
 
     // Add our meta boxes.
-    add_action('add_meta_boxes', [$this, 'meta_boxes_options_add']);
+    add_action('civicrm/page/options/add_meta_boxes', [$this, 'meta_boxes_options_add']);
 
     // Add AJAX handlers.
     add_action('wp_ajax_civicrm_basepage', [$this, 'ajax_save_basepage']);
@@ -240,7 +240,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
      *
      * @param str $screen_id The ID of the current screen.
      */
-    do_action('add_meta_boxes', $screen->id, NULL);
+    do_action('civicrm/page/options/add_meta_boxes', $screen->id);
 
     // Get the column CSS class.
     $columns = absint($screen->get_columns());
