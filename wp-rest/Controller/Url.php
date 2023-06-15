@@ -55,7 +55,7 @@ class Url extends Base {
     $params = apply_filters('civi_wp_rest/controller/url/params', $this->get_formatted_params($request), $request);
 
     // Track URL.
-    $url = \CRM_Mailing_Event_BAO_MailingEventClickThrough::track($params['queue_id'], $params['url_id']);
+    $url = \CRM_Mailing_Event_BAO_MailingEventTrackableURLOpen::track($params['queue_id'], $params['url_id']);
 
     /**
      * Filter URL.
