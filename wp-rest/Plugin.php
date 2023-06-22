@@ -35,7 +35,7 @@ class Plugin {
 
     add_filter('rest_pre_dispatch', [$this, 'bootstrap_civi'], 10, 3);
 
-    add_filter('rest_post_dispatch', [$this, 'maybe_reset_wp_timezone'], 10, 3);
+    add_filter('rest_post_dispatch', [$this, 'maybe_reset_php_timezone'], 10, 3);
 
   }
 
@@ -53,7 +53,7 @@ class Plugin {
 
     if (FALSE !== strpos($request->get_route(), 'civicrm')) {
 
-      $this->maybe_set_user_timezone($request);
+      $this->maybe_set_php_timezone($request);
 
       civi_wp()->initialize();
 
@@ -152,31 +152,30 @@ class Plugin {
   }
 
   /**
-   * Sets the timezone to the user's timezone when calling the civicrm/v3/rest endpoint.
+   * Sets the PHP timezone to the timezone of the WordPress site when calling
+   * the civicrm/v3/rest endpoint.
    *
    * @since 5.25
    *
-   * @param WP_REST_Request $request The request
+   * @param WP_REST_Request $request The request.
    */
-  private function maybe_set_user_timezone($request) {
+  private function maybe_set_php_timezone($request) {
 
     if ($request->get_route() != '/civicrm/v3/rest') {
       return;
     }
 
     $timezones = [
-      'wp_timezone' => date_default_timezone_get(),
-      'user_timezone' => get_option('timezone_string', FALSE),
+      'original_timezone' => date_default_timezone_get(),
+      'site_timezone' => $this->get_timezone_string(),
     ];
 
-    // Filter timezones.
+    // Filter timezones - retrieved in `maybe_reset_php_timezone()` below.
     add_filter('civi_wp_rest/plugin/timezones', function() use ($timezones) {
-
       return $timezones;
-
     });
 
-    if (empty($timezones['user_timezone'])) {
+    if (empty($timezones['site_timezone'])) {
       return;
     }
 
@@ -185,13 +184,13 @@ class Plugin {
      * CRM-18062
      * CRM-19115
      */
-    date_default_timezone_set($timezones['user_timezone']);
+    date_default_timezone_set($timezones['site_timezone']);
     \CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
 
   }
 
   /**
-   * Resets the timezone to the original WordPress timezone after calling the
+   * Resets the PHP timezone to the original timezone after calling the
    * civicrm/v3/rest endpoint.
    *
    * @since 5.25
@@ -201,22 +200,79 @@ class Plugin {
    * @param WP_REST_Request $request The request.
    * @return mixed $result
    */
-  public function maybe_reset_wp_timezone($result, $server, $request) {
+  public function maybe_reset_php_timezone($result, $server, $request) {
 
     if ($request->get_route() != '/civicrm/v3/rest') {
       return $result;
     }
 
+    /**
+     * Filters this plugin's timezones.
+     *
+     * This is actually just a neat way to retrieve the values assigned to
+     * the `$timezones` array in `maybe_set_php_timezone()` above.
+     *
+     * @since 5.25
+     *
+     * @param null Passes `null` because return will be populated.
+     */
     $timezones = apply_filters('civi_wp_rest/plugin/timezones', NULL);
 
-    if (empty($timezones['wp_timezone'])) {
+    if (empty($timezones['original_timezone'])) {
       return $result;
     }
 
-    // Reset WordPress timezone.
-    date_default_timezone_set($timezones['wp_timezone']);
+    // Reset original timezone.
+    date_default_timezone_set($timezones['original_timezone']);
 
     return $result;
+
+  }
+
+  /**
+   * Returns the timezone string for the current site.
+   *
+   * If a timezone identifier is used, return that.
+   * If an offset is used, try to build a suitable timezone.
+   * If all else fails, uses UTC.
+   *
+   * @since 5.64
+   *
+   * @return string $tzstring The site timezone string.
+   */
+  private function get_timezone_string() {
+
+    // Return the timezone string when set.
+    $tzstring = get_option('timezone_string');
+    if (!empty($tzstring)) {
+      return $tzstring;
+    }
+
+    /*
+     * Try and build a deprecated (but currently valid) timezone string
+     * from the GMT offset value.
+     *
+     * Note: manual offsets should be discouraged. WordPress works more
+     * reliably when setting an actual timezone (e.g. "Europe/London")
+     * because of support for Daylight Saving changes.
+     *
+     * Note: the IANA timezone database that provides PHP's timezone
+     * support uses (reversed) POSIX style signs.
+     *
+     * @see https://www.php.net/manual/en/timezones.others.php
+     */
+    $offset = get_option('gmt_offset');
+    if (0 != $offset && floor($offset) == $offset) {
+      $offset_string = $offset > 0 ? "-$offset" : '+' . absint($offset);
+      $tzstring = 'Etc/GMT' . $offset_string;
+    }
+
+    // Default to "UTC" if the timezone string is still empty.
+    if (empty($tzstring)) {
+      $tzstring = 'UTC';
+    }
+
+    return $tzstring;
 
   }
 
