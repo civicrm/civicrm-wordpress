@@ -1152,10 +1152,10 @@ class CiviCRM_For_WordPress {
      * WordPress has it's own timezone calculations. CiviCRM relies on the PHP
      * default timezone which WordPress overrides with UTC in wp-settings.php
      */
-    $wpBaseTimezone = date_default_timezone_get();
-    $wpUserTimezone = get_option('timezone_string');
-    if ($wpUserTimezone) {
-      date_default_timezone_set($wpUserTimezone);
+    $original_timezone = date_default_timezone_get();
+    $wp_site_timezone = $this->get_timezone_string();
+    if ($wp_site_timezone) {
+      date_default_timezone_set($wp_site_timezone);
       CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
     }
 
@@ -1198,9 +1198,9 @@ class CiviCRM_For_WordPress {
     // Do the business.
     CRM_Core_Invoke::invoke($argdata['args']);
 
-    // Restore WordPress's timezone.
-    if ($wpBaseTimezone) {
-      date_default_timezone_set($wpBaseTimezone);
+    // Restore original timezone.
+    if ($original_timezone) {
+      date_default_timezone_set($original_timezone);
     }
 
     // Restore WordPress's arrays.
@@ -1212,6 +1212,53 @@ class CiviCRM_For_WordPress {
      * @since 4.4
      */
     do_action('civicrm_invoked');
+
+  }
+
+  /**
+   * Returns the timezone string for the current WordPress site.
+   *
+   * If a timezone identifier is used, return that.
+   * If an offset is used, try to build a suitable timezone.
+   * If all else fails, uses UTC.
+   *
+   * @since 5.64
+   *
+   * @return string $tzstring The site timezone string.
+   */
+  private function get_timezone_string() {
+
+    // Return the timezone string when set.
+    $tzstring = get_option('timezone_string');
+    if (!empty($tzstring)) {
+      return $tzstring;
+    }
+
+    /*
+     * Try and build a deprecated (but currently valid) timezone string
+     * from the GMT offset value.
+     *
+     * Note: manual offsets should be discouraged. WordPress works more
+     * reliably when setting an actual timezone (e.g. "Europe/London")
+     * because of support for Daylight Saving changes.
+     *
+     * Note: the IANA timezone database that provides PHP's timezone
+     * support uses (reversed) POSIX style signs.
+     *
+     * @see https://www.php.net/manual/en/timezones.others.php
+     */
+    $offset = get_option('gmt_offset');
+    if (0 != $offset && floor($offset) == $offset) {
+      $offset_string = $offset > 0 ? "-$offset" : '+' . abs((int) $offset);
+      $tzstring = 'Etc/GMT' . $offset_string;
+    }
+
+    // Default to "UTC" if the timezone string is still empty.
+    if (empty($tzstring)) {
+      $tzstring = 'UTC';
+    }
+
+    return $tzstring;
 
   }
 
