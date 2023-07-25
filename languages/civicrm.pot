@@ -1,169 +1,673 @@
-# Copyright (C) 2020 CiviCRM
-# This file is distributed under the same license as the CiviCRM package.
+# Copyright (C) 2023 CiviCRM LLC
+# This file is distributed under the AGPL3.
 msgid ""
 msgstr ""
 "Project-Id-Version: CiviCRM 4.7\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/civicrm\n"
-"POT-Creation-Date: 2020-11-23 19:33:12+00:00\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2020-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"POT-Creation-Date: 2023-07-25T14:01:10+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.8.1\n"
+"X-Domain: civicrm\n"
 
-#: civicrm.php:268 civicrm.php:364
-msgid "Only one instance of CiviCRM_For_WordPress please"
-msgstr ""
-
-#: civicrm.php:277
-msgid "Please do not serialize CiviCRM_For_WordPress"
-msgstr ""
-
-#: civicrm.php:899
-msgid "Auto-updates are not available for this plugin."
-msgstr ""
-
-#: civicrm.php:1078
-msgid "CiviCRM requires PHP version %1$s or greater. You are running PHP version %2$s"
-msgstr ""
-
-#: civicrm.php:1130
-msgid "Please review the <a href=\"%s\">WordPress Installation Guide</a> and the <a href=\"%s\">Trouble-shooting page</a> for assistance. If you still need help installing, you can often find solutions to your issue by searching for the error message in the <a href=\"%s\">installation support section of the community forum</a>."
-msgstr ""
-
-#: civicrm.php:1138
-msgid "Click <a href=\"%s\">here</a> for fresh install."
-msgstr ""
-
-#: civicrm.php:1168
-msgid "Oops! - The path for including CiviCRM code files is not set properly. Most likely there is an error in the <em>civicrm_root</em> setting in your CiviCRM settings file (%s)."
-msgstr ""
-
-#: civicrm.php:1173
-msgid "civicrm_root is currently set to: <em>%s</em>."
-msgstr ""
-
-#: civicrm.php:1276 civicrm.php:1277 includes/civicrm.basepage.php:283
-#: includes/civicrm.shortcodes.modal.php:99 includes/civicrm.shortcodes.php:500
+#. Plugin Name of the plugin
+#: includes/admin-pages/civicrm.page.error.php:107
+#: includes/civicrm.admin.php:630
+#: includes/civicrm.admin.php:631
+#: includes/civicrm.basepage.php:273
+#: includes/civicrm.shortcodes.modal.php:92
+#: includes/civicrm.shortcodes.php:598
 msgid "CiviCRM"
 msgstr ""
 
-#: civicrm.php:1293 civicrm.php:1294
-msgid "CiviCRM Installer"
+#. Plugin URI of the plugin
+msgid "https://docs.civicrm.org/sysadmin/en/latest/install/wordpress/"
 msgstr ""
 
-#: civicrm.php:1357
+#. Description of the plugin
+msgid "CiviCRM - Growing and Sustaining Relationships"
+msgstr ""
+
+#. Author of the plugin
+msgid "CiviCRM LLC"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://civicrm.org/"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.contact.add.php:40
+msgid "First Name"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.contact.add.php:46
+msgid "Last Name"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.contact.add.php:52
+msgid "Email"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.contact.add.php:58
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:128
+msgid "Add Contact"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.contact.add.php:66
+msgid "Recently Added Contacts"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.error.help.php:22
+msgid "Please review the %1$sWordPress Installation Guide%2$s and the %3$sTroubleshooting page%4$s for assistance. If you still need help, you can often find solutions to your issue by searching for the error message in the %5$sinstallation support section of the community forum%6$s."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.error.path.php:22
+msgid "The path for including CiviCRM code files does appear to be set properly. Most likely there is an error in the %s setting in your CiviCRM settings file."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.error.path.php:26
+msgid "Your CiviCRM settings file location is set to:"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.error.path.php:28
+msgid "%s is currently set to:"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.error.path.php:30
+msgid "Please check that your CiviCRM settings file is where it should be and that %s is set correctly in it. Also check that the CiviCRM code directory is where it should be. If these are both fine, then you will have to look in your logs for more information."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.error.php.php:22
+msgid "CiviCRM requires PHP version %1$s or greater. You are running PHP version %2$s"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.error.php.php:27
+msgid "You will have to upgrade PHP before you can run this version CiviCRM."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.error.php.php:29
+msgid "To continue using CiviCRM without upgrading PHP, you will have to revert both the plugin and the database to a backup of your previous version."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.basepage.php:36
+msgid "CiviCRM needs a WordPress Page to show its content on the public-facing pages of your website."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.basepage.php:38
+#: includes/admin-pages/civicrm.page.options.php:845
+msgid "Please select a Page from the drop-down for CiviCRM to use as its Base Page. If CiviCRM was able to create one automatically, there should be one with the title \"CiviCRM\". If not, please select another suitable WordPress Page."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.basepage.php:40
+#: includes/admin-pages/civicrm.page.options.php:903
+msgid "It appears that your Base Page has been set. Looking good."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.basepage.php:44
+msgid "Choose Base Page"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.basepage.php:48
+#: assets/templates/metaboxes/metabox.options.email.php:44
+#: assets/templates/metaboxes/metabox.options.shortcode.php:44
+#: includes/admin-pages/civicrm.page.options.php:179
+msgid "Saved"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.basepage.php:49
+#: assets/templates/metaboxes/metabox.options.email.php:45
+#: assets/templates/metaboxes/metabox.options.shortcode.php:45
+#: includes/admin-pages/civicrm.page.options.php:177
+msgid "Update"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.cache.php:38
+msgid "You may sometimes find yourself in situations that require the CiviCRM caches to be cleared, e.g. when template files need to be refreshed."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.cache.php:41
+#: includes/admin-pages/civicrm.page.options.php:183
+#: includes/admin-pages/civicrm.page.options.php:347
+msgid "Clear Caches"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.email.php:35
+msgid "When a WordPress User updates their Email, CiviCRM will automatically update the Primary Email of their linked Contact record. This setting lets you choose whether the reverse update should happen - i.e. if the Primary Email of a Contact that has a linked WordPress User is updated, do you want CiviCRM to update the WordPress User Email?"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.email.php:37
+msgid "Sync Emails"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.email.php:39
+msgid "Yes"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.email.php:40
+msgid "No"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.links.php:31
+msgid "Below is a list of shortcuts to some CiviCRM admin pages that are important when you are setting up CiviCRM. When these settings are correctly configured, your CiviCRM installation should be ready for you to customise to your requirements."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.links.php:43
+msgid "Shortcuts to some CiviCRM maintenance tasks."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.permissions.php:38
+msgid "You may need all CiviCRM permissions to be exposed as capabilities in WordPress, e.g. when you want them to be discoverable by other plugins. CiviCRM can do this by creating a role called \"CiviCRM Admin\" that has the complete set of CiviCRM capabilities. If you choose not to create the \"CiviCRM Admin\" role, then refreshing will just rebuild the existing set of capabilities."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.permissions.php:40
+msgid "CiviCRM Admin Role"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.permissions.php:42
+msgid "Enable the CiviCRM Admin role"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.permissions.php:43
+msgid "Do not enable the CiviCRM Admin role"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.permissions.php:47
+msgid "Refresh Permissions"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.shortcode.php:35
+msgid "When a CiviCRM Shortcode is embedded in a Post/Page without \"hijack\" being set, it is shown embedded in the content in \"Shortcode Mode\". If any action is taken via the Shortcode, a query string is appended to the URL and the Post/Page is shown in \"Base Page Mode\" and the title and content are overwritten. Choose to keep this legacy behaviour or move to the new \"Remain in Shortcode Mode\" behaviour."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.shortcode.php:37
+msgid "Display Mode"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.shortcode.php:39
+msgid "Remain in Shortcode Mode"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.options.shortcode.php:40
+msgid "Legacy Base Page Mode"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.ext.php:21
+msgid "Extensions are a bit like plugins because they enhance what CiviCRM can do. You can find, install and manage many of them in CiviCRM."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.ext.php:24
+msgid "Go to your CiviCRM Extensions Page"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.ext.php:29
+msgid "Here are some other places you can find them."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.ext.php:32
+msgid "Search CiviCRM Website for \"Extensions\" that are compatible with WordPress"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.ext.php:33
+msgid "Search CiviCRM GitLab for \"Extensions\" that are compatible with WordPress"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.ext.php:34
+msgid "Search GitHub for \"CiviCRM Extensions\""
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.git.php:21
+msgid "For the more adventurous, here is a list of plugins that are hosted in git repositories around the web. You may need a bit more technical confidence to install and upgrade these plugins."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.git.php:26
+msgid "Search GitHub for CiviCRM &amp; WordPress"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.git.php:44
+#: assets/templates/metaboxes/metabox.repo.wordpress.php:49
+msgid "Could not fetch list of plugins."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.wordpress.php:21
+msgid "The easiest way to extend CiviCRM and integrate it with WordPress is through installing plugins that are hosted in the WordPress Plugin Directory. These can be installed and updated through the normal WordPress admin screens."
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.wordpress.php:26
+msgid "Search the WordPress Plugin Directory for plugins tagged CiviCRM"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.wordpress.php:27
+msgid "Search the WordPress Plugin Directory for references to CiviCRM"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.wordpress.php:38
+msgid "Version %s"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.wordpress.php:39
+msgid "%d+ active installations"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.wordpress.php:40
+msgid "Tested up to WordPress %s"
+msgstr ""
+
+#: assets/templates/metaboxes/metabox.repo.wordpress.php:41
+msgid "Last updated %s ago"
+msgstr ""
+
+#: assets/templates/pages/page.error.php:23
+#: assets/templates/pages/page.integration.php:23
+#: assets/templates/pages/page.options.php:23
+msgid "CiviCRM Logo"
+msgstr ""
+
+#: assets/templates/pages/page.error.php:25
+msgid "CiviCRM Troubleshooting"
+msgstr ""
+
+#: assets/templates/pages/page.error.php:27
+msgid "Something seems to be wrong with your CiviCRM installation. This page will help you try and troubleshoot the problem."
+msgstr ""
+
+#: assets/templates/pages/page.integration.php:25
+#: includes/admin-pages/civicrm.page.integration.php:132
+msgid "Integrating CiviCRM with WordPress"
+msgstr ""
+
+#: assets/templates/pages/page.integration.php:27
+msgid "We have collected some resources to help you make the most of CiviCRM in WordPress."
+msgstr ""
+
+#: assets/templates/pages/page.options.php:25
+msgid "CiviCRM Settings"
+msgstr ""
+
+#: assets/templates/pages/page.options.php:27
+msgid "We have collected some settings here because they are important for configuring CiviCRM in WordPress."
+msgstr ""
+
+#: civicrm.php:254
+#: civicrm.php:379
+msgid "Only one instance of CiviCRM_For_WordPress please"
+msgstr ""
+
+#: civicrm.php:263
+msgid "Please do not serialize CiviCRM_For_WordPress"
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:129
+msgid "Adding..."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:130
+msgid "Contact Added"
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:190
+msgid "Quick Add Contact to CiviCRM"
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:243
+msgid "Failed to init CiviCRM."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:247
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:464
+msgid "Please enter a first name."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:251
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:470
+msgid "Please enter a last name."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:255
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:476
+msgid "Please enter a valid email."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:259
+msgid "Could not create Contact."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:263
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:512
+msgid "Could not find the created Contact."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:432
+msgid "Could not save the contact."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:439
+msgid "Authentication failed."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:445
+msgid "CiviCRM not loaded."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:451
+msgid "Permission denied."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:458
+msgid "No data received."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:491
+msgid "There seems to be %1$san existing Contact%2$s with these details."
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:506
+msgid "Could not create Contact: %s"
+msgstr ""
+
+#: includes/admin-metaboxes/civicrm.metabox.contact.add.php:548
+msgid "Contact added."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.error.php:106
+msgid "Troubleshooting"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.error.php:228
+msgid "PHP Error Information"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.error.php:246
+msgid "Path Error Information"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.error.php:263
+msgid "General Information"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.integration.php:133
+msgid "Integration"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.integration.php:253
+msgid "WordPress Plugin Directory"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.integration.php:268
+msgid "Other Plugin Repositories"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.integration.php:279
+#: includes/admin-pages/civicrm.page.options.php:644
+msgid "CiviCRM Extensions"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:135
+msgid "CiviCRM Settings for WordPress"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:136
+msgid "Settings"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:178
+msgid "Saving..."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:180
+msgid "Refresh"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:181
+msgid "Refreshing..."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:182
+msgid "Refreshed"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:184
+msgid "Clearing..."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:185
+msgid "Cleared"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:314
+msgid "WordPress Base Page"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:325
+msgid "Shortcode Display Mode"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:336
+msgid "Contact Email to User Email Sync"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:358
+msgid "Permissions and Capabilities"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:369
+msgid "Useful Links"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:416
+msgid "Could not find the WordPress Base Page."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:632
+msgid "Settings - Resource URLs"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:636
+msgid "Settings - Upload Directories"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:640
+msgid "WordPress Access Control"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:661
+msgid "Rebuild the CiviCRM menu"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:665
+msgid "Rebuild the CiviCRM database triggers"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:669
+msgid "Upgrade CiviCRM"
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:670
+msgid "Please note: you need to update the CiviCRM plugin directory first."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:844
+msgid "Unable to save the WordPress Base Page."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:852
+msgid "Authentication failed. Unable to save the WordPress Base Page."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:859
+msgid "No Page ID detected. Unable to save the WordPress Base Page."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:866
+msgid "Could not find selected Page. Unable to save the WordPress Base Page."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:892
+msgid "Could not get data for the selected Page."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:922
+#: includes/admin-pages/civicrm.page.options.php:966
+msgid "Could not save the selected setting."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:929
+#: includes/admin-pages/civicrm.page.options.php:973
+msgid "Authentication failed. Could not save the selected setting."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:936
+#: includes/admin-pages/civicrm.page.options.php:980
+msgid "Unrecognised parameter. Could not save the selected setting."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:947
+#: includes/admin-pages/civicrm.page.options.php:1003
+msgid "Setting saved."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:1022
+msgid "Could not refresh the CiviCRM permissions."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:1029
+msgid "Authentication failed. Could not refresh the CiviCRM permissions."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:1036
+msgid "Unrecognised parameter. Could not refresh the CiviCRM permissions."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:1064
+msgid "CiviCRM permissions refreshed."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:1083
+msgid "Could not clear the CiviCRM caches."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:1090
+msgid "Authentication failed. Could not clear the CiviCRM caches."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:1098
+msgid "Unrecognised parameter. Could not clear the CiviCRM caches."
+msgstr ""
+
+#: includes/admin-pages/civicrm.page.options.php:1108
+msgid "CiviCRM caches cleared."
+msgstr ""
+
+#: includes/civicrm.admin.php:209
+msgid "%1$sCiviCRM is almost ready.%2$s You must %3$sconfigure CiviCRM%4$s for it to work."
+msgstr ""
+
+#: includes/civicrm.admin.php:267
 msgid "Installer unavailable. Failed to locate CiviCRM libraries."
 msgstr ""
 
-#: civicrm.php:1371
-msgid "CiviCRM is almost ready."
+#: includes/civicrm.admin.php:301
+msgid "%1$sCiviCRM needs your attention.%2$s Please visit the %3$sInformation Page%4$s for details."
 msgstr ""
 
-#: civicrm.php:1374
-msgid "You must <a href=\"%s\">configure CiviCRM</a> for it to work."
+#: includes/civicrm.admin.php:560
+msgid "Auto-updates are not available for this plugin."
 msgstr ""
 
-#: includes/civicrm.basepage.php:286
+#: includes/civicrm.admin.php:661
+#: includes/civicrm.admin.php:662
+msgid "CiviCRM Installer"
+msgstr ""
+
+#: includes/civicrm.basepage.php:276
 msgid "Do not delete this page. Page content is generated by CiviCRM."
 msgstr ""
 
-#: includes/civicrm.shortcodes.modal.php:99
+#: includes/civicrm.shortcodes.modal.php:92
 msgid "Add CiviCRM Public Pages"
 msgstr ""
 
-#: includes/civicrm.shortcodes.php:309 includes/civicrm.shortcodes.php:362
-msgid "Do not know how to handle this shortcode."
+#: includes/civicrm.shortcodes.php:368
+msgid "This Shortcode could not be handled. It could be malformed or used incorrectly."
 msgstr ""
 
-#: includes/civicrm.shortcodes.php:374
+#: includes/civicrm.shortcodes.php:473
 msgid "Content via CiviCRM"
 msgstr ""
 
-#: includes/civicrm.shortcodes.php:487
+#: includes/civicrm.shortcodes.php:585
 msgid "Find out more..."
 msgstr ""
 
-#: includes/civicrm.shortcodes.php:499
+#: includes/civicrm.shortcodes.php:597
 msgid "CiviCRM.org - Growing and Sustaining Relationships"
 msgstr ""
 
-#: includes/civicrm.shortcodes.php:502
+#: includes/civicrm.shortcodes.php:600
 msgid "Empowered by %s"
 msgstr ""
 
-#: includes/civicrm.shortcodes.php:866
+#: includes/civicrm.shortcodes.php:1024
 msgid "Register for %s"
 msgstr ""
 
-#: includes/civicrm.shortcodes.php:898
+#: includes/civicrm.shortcodes.php:1053
 msgid "Dashboard"
 msgstr ""
 
-#: includes/civicrm.users.php:145
+#: includes/civicrm.users.php:180
 msgid "You do not have permission to access this content."
 msgstr ""
 
-#: includes/civicrm.users.php:299
+#: includes/civicrm.users.php:315
 msgid "Anonymous User"
+msgstr ""
+
+#: includes/civicrm.users.php:607
+msgid "CiviCRM Admin"
 msgstr ""
 
 #: wp-rest/Autoloader.php:70
 msgid "The source %s is not readable."
 msgstr ""
 
-#: wp-rest/Controller/AuthorizeIPN.php:75 wp-rest/Controller/PayPalIPN.php:86
+#: wp-rest/Controller/AuthorizeIPN.php:78
+#: wp-rest/Controller/PayPalIPN.php:91
 msgid "%s must implement a \"main\" method."
 msgstr ""
 
-#: wp-rest/Controller/Open.php:96
+#: wp-rest/Controller/Open.php:98
 msgid "CiviCRM Open endpoint"
 msgstr ""
 
-#: wp-rest/Controller/Rest.php:77
+#: wp-rest/Controller/Rest.php:79
 msgid "CiviCRM WP REST permission check error."
 msgstr ""
 
-#: wp-rest/Controller/Rest.php:86
+#: wp-rest/Controller/Rest.php:92
 msgid "Param api_key is not valid."
 msgstr ""
 
-#: wp-rest/Controller/Rest.php:89
+#: wp-rest/Controller/Rest.php:96
 msgid "Param key is not valid."
 msgstr ""
 
-#: wp-rest/Controller/Rest.php:368
+#: wp-rest/Controller/Rest.php:395
 msgid "CiviCRM API3 WP rest endpoint wrapper"
 msgstr ""
 
-#: wp-rest/Controller/Url.php:159 wp-rest/Controller/Widget.php:143
+#: wp-rest/Controller/Url.php:165
+#: wp-rest/Controller/Widget.php:150
 msgid "CiviCRM API3 wrapper"
 msgstr ""
 
-#: wp-rest/Plugin.php:240
+#: wp-rest/Plugin.php:306
 msgid "Missing or invalid param \"api_key\"."
 msgstr ""
 
-#: wp-rest/Plugin.php:282
+#: wp-rest/Plugin.php:350
 msgid "A WordPress user must be associated with the contact for the provided API key."
-msgstr ""
-#. Plugin Name of the plugin/theme
-msgid "CiviCRM"
-msgstr ""
-
-#. Plugin URI of the plugin/theme
-msgid "https://docs.civicrm.org/sysadmin/en/latest/install/wordpress/"
-msgstr ""
-
-#. Description of the plugin/theme
-msgid "CiviCRM - Growing and Sustaining Relationships"
-msgstr ""
-
-#. Author of the plugin/theme
-msgid "CiviCRM LLC"
-msgstr ""
-
-#. Author URI of the plugin/theme
-msgid "https://civicrm.org/"
 msgstr ""
