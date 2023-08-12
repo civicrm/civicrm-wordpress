@@ -1423,11 +1423,11 @@ class CiviCRM_For_WordPress {
    *
    * @since 4.6
    *
-   * @return array $argdata Array containing request arguments and request string.
+   * @return array{args: array, argString: string}
    */
   public function get_request_args() {
 
-    $argString = NULL;
+    $argString = '';
     $args = [];
 
     // Get path from query vars.
