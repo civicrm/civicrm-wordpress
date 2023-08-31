@@ -147,8 +147,18 @@ class CiviCRM_For_WordPress_Shortcodes {
 
         global $post;
 
+        /**
+         * Allows to check if there are other shortcodes
+         * associated with the current post (e.g. a custom field).
+         *
+         * @since 5.64.3
+         *
+         * @param bool the result of has_shortcode() function
+         */
+        $has_shortcode = apply_filters('civicrm_has_shortcode', has_shortcode($post->post_content, 'civicrm'));
+
         // Check for existence of Shortcode in content.
-        if (has_shortcode($post->post_content, 'civicrm')) {
+        if ($has_shortcode) {
 
           // Get CiviCRM Shortcodes in this post.
           $shortcodes_array = $this->get_for_post($post->post_content);
