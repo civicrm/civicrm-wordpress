@@ -752,6 +752,16 @@ class CiviCRM_For_WordPress_Shortcodes {
    */
   private function get_for_post($content) {
 
+    /**
+     * Allows to include other shortcodes
+     * associated with the current post (e.g. a custom field).
+     *
+     * @since 5.64.3
+     *
+     * @param str the post content
+     */
+    $content = apply_filters('civicrm_content_shortcode', $content);
+
     // Init return array.
     $shortcodes = [];
 
