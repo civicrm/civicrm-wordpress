@@ -168,7 +168,7 @@ function civicrm_get_ctype($default = NULL) {
  *
  * @since 4.3
  *
- * @return string $wp_set_breadCrumb The breadcrumb markup.
+ * @return array $wp_set_breadCrumb The breadcrumb markup.
  */
 function wp_get_breadcrumb() {
   global $wp_set_breadCrumb;
@@ -183,8 +183,8 @@ function wp_get_breadcrumb() {
  *
  * @since 4.3
  *
- * @param string $breadCrumb The desired breadcrumb markup.
- * @return string $wp_set_breadCrumb The breadcrumb markup.
+ * @param array $breadCrumb The desired breadcrumb markup.
+ * @return array $wp_set_breadCrumb The breadcrumb markup.
  */
 function wp_set_breadcrumb($breadCrumb) {
   global $wp_set_breadCrumb;
