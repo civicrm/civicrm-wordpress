@@ -197,6 +197,34 @@ class CiviCRM_For_WordPress {
    */
   public $admin;
 
+  /**
+   * @var array
+   * Reference to the original $_GET value.
+   * @access protected
+   */
+  protected $wp_get;
+
+  /**
+   * @var array
+   * Reference to the original $_POST value.
+   * @access protected
+   */
+  protected $wp_post;
+
+  /**
+   * @var array
+   * Reference to the original $_COOKIE value.
+   * @access protected
+   */
+  protected $wp_cookie;
+
+  /**
+   * @var array
+   * Reference to the original $_REQUEST value.
+   * @access protected
+   */
+  protected $wp_request;
+
   // ---------------------------------------------------------------------------
   // Setup
   // ---------------------------------------------------------------------------

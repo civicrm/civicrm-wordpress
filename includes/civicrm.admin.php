@@ -77,6 +77,13 @@ class CiviCRM_For_WordPress_Admin {
   public $metabox_quick_add;
 
   /**
+   * @var string
+   * Reference to the CiviCRM menu item's hook_suffix, in the WordPress admin menu.
+   * @access public
+   */
+  public $menu_page;
+
+  /**
    * Instance constructor.
    *
    * @since 5.33
