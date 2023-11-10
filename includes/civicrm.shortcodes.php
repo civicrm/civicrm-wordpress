@@ -345,12 +345,7 @@ class CiviCRM_For_WordPress_Shortcodes {
         if (isset($this->shortcode_markup[$post->ID])) {
 
           // Set counter flag.
-          if (!isset($this->shortcode_in_post[$post->ID])) {
-            $this->shortcode_in_post[$post->ID] = 0;
-          }
-          else {
-            $this->shortcode_in_post[$post->ID]++;
-          }
+          $this->shortcode_in_post[$post->ID] = 0;
 
           // This Shortcode must have been rendered.
           return $this->shortcode_markup[$post->ID][$this->shortcode_in_post[$post->ID]];
