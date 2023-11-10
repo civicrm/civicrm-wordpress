@@ -17,6 +17,11 @@
  *
  */
 
+// This file must not accessed directly.
+if (!defined('ABSPATH')) {
+  exit;
+}
+
 ?><!-- assets/templates/metaboxes/metabox.options.cache.php -->
 <?php
 
@@ -35,7 +40,7 @@ do_action('civicrm/metabox/cache/pre');
   <p></p>
 </div>
 
-<p><?php _e('You may sometimes find yourself in situations that require the CiviCRM caches to be cleared, e.g. when template files need to be refreshed.', 'civicrm'); ?></p>
+<p><?php esc_html_e('You may sometimes find yourself in situations that require the CiviCRM caches to be cleared, e.g. when template files need to be refreshed.', 'civicrm'); ?></p>
 
 <p class="submit">
   <?php submit_button(esc_html__('Clear Caches', 'civicrm'), 'primary', 'civicrm_cache_submit', FALSE, $options); ?>

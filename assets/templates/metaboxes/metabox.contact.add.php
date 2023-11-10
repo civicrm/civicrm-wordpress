@@ -17,6 +17,11 @@
  *
  */
 
+// This file must not accessed directly.
+if (!defined('ABSPATH')) {
+  exit;
+}
+
 ?><!-- assets/templates/metaboxes/metabox.contact.add.php -->
 <?php
 
@@ -37,19 +42,19 @@ do_action('civicrm/metabox/contact/add/pre');
   <?php wp_nonce_field('civicrm_quick_add_action', 'civicrm_quick_add_nonce'); ?>
 
   <div class="input-text-wrap" id="contact-first-name-wrap">
-    <label for="civicrm_quick_add_first_name"><?php _e('First Name', 'civicrm'); ?></label>
+    <label for="civicrm_quick_add_first_name"><?php esc_html_e('First Name', 'civicrm'); ?></label>
     <input type="text" name="civicrm_quick_add_first_name" id="civicrm_quick_add_first_name" autocomplete="off" />
     <br class="clear" />
   </div>
 
   <div class="input-text-wrap" id="contact-last-name-wrap">
-    <label for="civicrm_quick_add_last_name"><?php _e('Last Name', 'civicrm'); ?></label>
+    <label for="civicrm_quick_add_last_name"><?php esc_html_e('Last Name', 'civicrm'); ?></label>
     <input type="text" name="civicrm_quick_add_last_name" id="civicrm_quick_add_last_name" autocomplete="off" />
     <br class="clear" />
   </div>
 
   <div class="input-text-wrap" id="contact-email-wrap">
-    <label for="civicrm_quick_add_email"><?php _e('Email', 'civicrm'); ?></label>
+    <label for="civicrm_quick_add_email"><?php esc_html_e('Email', 'civicrm'); ?></label>
     <input type="text" name="civicrm_quick_add_email" id="civicrm_quick_add_email" autocomplete="off" />
     <br class="clear" />
   </div>
@@ -63,7 +68,7 @@ do_action('civicrm/metabox/contact/add/pre');
 </form>
 
 <div class="contacts-added-wrap<?php echo $visiblity_class; ?>">
-  <h3><?php _e('Recently Added Contacts', 'civicrm'); ?></h3>
+  <h3><?php esc_html_e('Recently Added Contacts', 'civicrm'); ?></h3>
 
   <div class="civicrm_quick_add_success notice notice-success inline" style="background-color: #f7f7f7; display: none;">
     <p></p>

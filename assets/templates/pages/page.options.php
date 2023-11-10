@@ -17,14 +17,19 @@
  *
  */
 
+// This file must not accessed directly.
+if (!defined('ABSPATH')) {
+  exit;
+}
+
 ?><!-- assets/templates/page.options.php -->
 <div class="wrap civicrm-wrap civicrm-settings-wrap">
 
   <img src="<?php echo CIVICRM_PLUGIN_URL . 'assets/images/civicrm-logo.png'; ?>" width="160" height="42" alt="<?php esc_attr_e('CiviCRM Logo', 'civicrm'); ?>" id="civicrm-logo">
 
-  <h1><?php _e('CiviCRM Settings', 'civicrm'); ?></h1>
+  <h1><?php esc_html_e('CiviCRM Settings', 'civicrm'); ?></h1>
 
-  <p><?php _e('We have collected some settings here because they are important for configuring CiviCRM in WordPress.', 'civicrm'); ?></p>
+  <p><?php esc_html_e('We have collected some settings here because they are important for configuring CiviCRM in WordPress.', 'civicrm'); ?></p>
 
   <form method="post" id="civicrm_options_form" action="<?php echo $this->page_submit_url_get(); ?>">
 
@@ -40,7 +45,7 @@
       <div id="dashboard-widgets" class="metabox-holder<?php echo $columns_css; ?>">
 
         <div id="postbox-container-1" class="postbox-container">
-          <?php do_meta_boxes($screen->id, 'normal', '');  ?>
+          <?php do_meta_boxes($screen->id, 'normal', ''); ?>
         </div>
 
         <div id="postbox-container-2" class="postbox-container">

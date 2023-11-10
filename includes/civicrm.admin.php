@@ -208,11 +208,12 @@ class CiviCRM_For_WordPress_Admin {
     }
 
     // Bail if we are on our installer page.
-    if ($screen->id == 'toplevel_page_civicrm-install') {
+    if ($screen->id === 'toplevel_page_civicrm-install') {
       return;
     }
 
     $message = sprintf(
+      /* translators: 1: Opening strong tag, 2: Closing strong tag, 3: Opening anchor tag, 4: Closing anchor tag. */
       __('%1$sCiviCRM is almost ready.%2$s You must %3$sconfigure CiviCRM%4$s for it to work.', 'civicrm'),
       '<strong>',
       '</strong>',
@@ -234,6 +235,7 @@ class CiviCRM_For_WordPress_Admin {
   public function run_installer() {
 
     // Set install type.
+    // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
     $_GET['civicrm_install_type'] = 'wordpress';
 
     $civicrmCore = CIVICRM_PLUGIN_DIR . 'civicrm';
@@ -300,11 +302,12 @@ class CiviCRM_For_WordPress_Admin {
     }
 
     // Bail if we are on our error page.
-    if ($screen->id == 'toplevel_page_CiviCRM') {
+    if ($screen->id === 'toplevel_page_CiviCRM') {
       return;
     }
 
     $message = sprintf(
+      /* translators: 1: Opening strong tag, 2: Closing strong tag, 3: Opening anchor tag, 4: Closing anchor tag. */
       __('%1$sCiviCRM needs your attention.%2$s Please visit the %3$sInformation Page%4$s for details.', 'civicrm'),
       '<strong>',
       '</strong>',
@@ -407,7 +410,7 @@ class CiviCRM_For_WordPress_Admin {
      * including "civicrm.settings.php" will throw a fatal error if $civicrm_root
      * is wrong.
      */
-    if ($error == FALSE) {
+    if ($error === FALSE) {
       $this->error_flag = 'settings-include';
       $initialized = FALSE;
       return FALSE;
@@ -431,7 +434,7 @@ class CiviCRM_For_WordPress_Admin {
     $error = include_once 'CRM/Core/Config.php';
 
     // Bail if the config file returns something other than int(1).
-    if ($error == FALSE) {
+    if ($error === FALSE) {
       $this->error_flag = 'config-include';
       $initialized = FALSE;
       return FALSE;
@@ -512,7 +515,7 @@ class CiviCRM_For_WordPress_Admin {
     }
 
     // Bail if this is not CiviCRM admin.
-    if ($pagenow != 'admin.php' || FALSE === strpos($current_screen['query'], 'page=CiviCRM')) {
+    if ($pagenow !== 'admin.php' || FALSE === strpos($current_screen['query'], 'page=CiviCRM')) {
       return $settings;
     }
 
@@ -544,7 +547,7 @@ class CiviCRM_For_WordPress_Admin {
 
     // Delete the option if conditions are met.
     if ($dao instanceof CRM_Core_DAO_Setting) {
-      if (isset($dao->name) && $dao->name == 'wpBasePage') {
+      if (isset($dao->name) && $dao->name === 'wpBasePage') {
         delete_option('civicrm_rules_flushed');
       }
     }
@@ -558,6 +561,11 @@ class CiviCRM_For_WordPress_Admin {
    *
    * @since 5.28
    * @since 5.33 Moved to this class.
+   *
+   * @param string $html The auto-update markup.
+   * @param string $plugin_file The path to the plugin.
+   * @param array $plugin_data An array of plugin data.
+   * @return string $html The modified auto-update markup.
    */
   public function auto_update_prevent($html, $plugin_file, $plugin_data) {
 
@@ -602,6 +610,7 @@ class CiviCRM_For_WordPress_Admin {
    */
   public function add_menu_items() {
 
+    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
     $civilogo = file_get_contents(CIVICRM_PLUGIN_DIR . 'assets/images/civilogo.svg.b64');
 
     global $wp_version;
@@ -713,7 +722,7 @@ class CiviCRM_For_WordPress_Admin {
 
     // This option is created on activation.
     $existing_option = FALSE;
-    if ('fjwlws' != get_option('civicrm_activation_in_progress', 'fjwlws')) {
+    if ('fjwlws' !== get_option('civicrm_activation_in_progress', 'fjwlws')) {
       $existing_option = TRUE;
     }
 

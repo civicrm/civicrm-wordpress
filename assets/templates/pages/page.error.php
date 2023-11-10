@@ -17,14 +17,19 @@
  *
  */
 
+// This file must not accessed directly.
+if (!defined('ABSPATH')) {
+  exit;
+}
+
 ?><!-- assets/templates/page.error.php -->
 <div class="wrap civicrm-wrap civicrm-error-wrap">
 
   <img src="<?php echo CIVICRM_PLUGIN_URL . 'assets/images/civicrm-logo.png'; ?>" width="160" height="42" alt="<?php esc_attr_e('CiviCRM Logo', 'civicrm'); ?>" id="civicrm-logo">
 
-  <h1><?php _e('CiviCRM Troubleshooting', 'civicrm'); ?></h1>
+  <h1><?php esc_html_e('CiviCRM Troubleshooting', 'civicrm'); ?></h1>
 
-  <p><?php _e('Something seems to be wrong with your CiviCRM installation. This page will help you try and troubleshoot the problem.', 'civicrm'); ?></p>
+  <p><?php esc_html_e('Something seems to be wrong with your CiviCRM installation. This page will help you try and troubleshoot the problem.', 'civicrm'); ?></p>
 
   <form method="post" id="civicrm_error_form" action="">
 
@@ -34,14 +39,14 @@
 
     <div id="poststuff">
 
-      <div id="post-body" class="metabox-holder columns-<?php echo $columns;?>">
+      <div id="post-body" class="metabox-holder columns-<?php echo $columns; ?>">
 
         <div id="postbox-container-1" class="postbox-container">
           <?php do_meta_boxes($screen->id, 'side', NULL); ?>
         </div>
 
         <div id="postbox-container-2" class="postbox-container">
-          <?php do_meta_boxes($screen->id, 'normal', NULL);  ?>
+          <?php do_meta_boxes($screen->id, 'normal', NULL); ?>
           <?php do_meta_boxes($screen->id, 'advanced', NULL); ?>
         </div>
 

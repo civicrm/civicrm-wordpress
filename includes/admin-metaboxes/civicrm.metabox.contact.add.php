@@ -107,7 +107,7 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
   public function enqueue_js($hook) {
 
     // Bail if not the dashboard.
-    if ('index.php' != $hook) {
+    if ('index.php' !== $hook) {
       return;
     }
 
@@ -116,7 +116,8 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
       'civicrm-contact-add-script',
       CIVICRM_PLUGIN_URL . 'assets/js/civicrm.contact.add.js',
       ['jquery'],
-      CIVICRM_PLUGIN_VERSION
+      CIVICRM_PLUGIN_VERSION,
+      FALSE
     );
 
     // Init settings and localisation array.
@@ -150,7 +151,7 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
   public function enqueue_css($hook) {
 
     // Bail if not the dashboard.
-    if ('index.php' != $hook) {
+    if ('index.php' !== $hook) {
       return;
     }
 
@@ -236,8 +237,11 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
     // Detect error message.
     $error = '';
     $error_css = ' display: none;';
-    if (!empty($_GET['quick-add-error'])) {
-      switch ($_GET['quick-add-error']) {
+    // Nonce not needed since $_GET['quick-add-error'] must match certain pre-defined slugs.
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    $quick_add_error = isset($_GET['quick-add-error']) ? sanitize_text_field(wp_unslash($_GET['quick-add-error'])) : '';
+    if (!empty($quick_add_error)) {
+      switch ($quick_add_error) {
 
         case 'civicrm':
           $error = __('Failed to init CiviCRM.', 'civicrm');
@@ -289,17 +293,21 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
    */
   public function form_submitted() {
 
-    if (!empty($_POST['civicrm_quick_add_submit'])) {
-      // Save Contact.
-      $this->form_nonce_check();
-      $this->form_save_contact();
-      $this->form_redirect();
+    // Nonce is checked in self::form_nonce_check().
+    // phpcs:ignore WordPress.Security.NonceVerification.Missing
+    if (!isset($_POST['civicrm_quick_add_submit'])) {
+      return;
     }
+
+    // Save Contact.
+    $this->form_nonce_check();
+    $this->form_save_contact();
+    $this->form_redirect();
 
   }
 
   /**
-   * Save the CiviCRM Base Page Setting.
+   * Save the CiviCRM Contact.
    *
    * @since 5.34
    */
@@ -309,24 +317,30 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
       $this->form_redirect(['quick-add-error' => 'civicrm']);
     }
 
-    // Bail if there's no valid First Name.
-    $first_name = empty($_POST['civicrm_quick_add_first_name']) ? '' : trim($_POST['civicrm_quick_add_first_name']);
+    // Nonce is checked in self::form_nonce_check().
+    // phpcs:disable WordPress.Security.NonceVerification.Recommended
+    // phpcs:disable WordPress.Security.NonceVerification.Missing
 
+    // Bail if there's no valid First Name.
+    $first_name = empty($_POST['civicrm_quick_add_first_name']) ? '' : sanitize_text_field(wp_unslash($_POST['civicrm_quick_add_first_name']));
     if ($first_name === '') {
       $this->form_redirect(['quick-add-error' => 'first-name']);
     }
 
     // Bail if there's no valid Last Name.
-    $last_name = empty($_POST['civicrm_quick_add_last_name']) ? '' : trim($_POST['civicrm_quick_add_last_name']);
+    $last_name = empty($_POST['civicrm_quick_add_last_name']) ? '' : sanitize_text_field(wp_unslash($_POST['civicrm_quick_add_last_name']));
     if ($last_name === '') {
       $this->form_redirect(['quick-add-error' => 'last-name']);
     }
 
     // Bail if there's no valid Email.
-    $email = empty($_POST['civicrm_quick_add_email']) ? '' : trim($_POST['civicrm_quick_add_email']);
+    $email = empty($_POST['civicrm_quick_add_email']) ? '' : sanitize_email(wp_unslash($_POST['civicrm_quick_add_email']));
     if (!is_email($email)) {
       $this->form_redirect(['quick-add-error' => 'email']);
     }
+
+    // phpcs:enable WordPress.Security.NonceVerification.Recommended
+    // phpcs:enable WordPress.Security.NonceVerification.Missing
 
     // Build params to create Contact.
     $params = [
@@ -341,7 +355,7 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
     $result = civicrm_api('Contact', 'create', $params);
 
     // Bail if there's an error.
-    if (!empty($result['is_error']) && $result['is_error'] == 1) {
+    if (!empty($result['is_error']) && 1 === (int) $result['is_error']) {
       $this->form_redirect(['quick-add-error' => 'api']);
     }
 
@@ -428,7 +442,7 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
   public function ajax_contact_add() {
 
     // Default response.
-    $data = [
+    $response = [
       'notice' => __('Could not save the contact.', 'civicrm'),
       'added' => FALSE,
     ];
@@ -436,60 +450,64 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
     // Since this is an AJAX request, check security.
     $result = check_ajax_referer('civicrm_metabox_contact_add', FALSE, FALSE);
     if ($result === FALSE) {
-      $data['notice'] = __('Authentication failed.', 'civicrm');
-      wp_send_json($data);
+      $response['notice'] = __('Authentication failed.', 'civicrm');
+      wp_send_json($response);
     }
 
     // Bail if CiviCRM not inited.
     if (!$this->civi->initialize()) {
-      $data['notice'] = __('CiviCRM not loaded.', 'civicrm');
-      wp_send_json($data);
+      $response['notice'] = __('CiviCRM not loaded.', 'civicrm');
+      wp_send_json($response);
     }
 
     // Bail if user cannot create Contacts.
     if (!CRM_Core_Permission::check('add contacts')) {
-      $data['notice'] = __('Permission denied.', 'civicrm');
-      wp_send_json($data);
+      $response['notice'] = __('Permission denied.', 'civicrm');
+      wp_send_json($response);
     }
 
     // Bail if there is no valid data.
-    $data = isset($_POST['value']) ? (array) $_POST['value'] : [];
+    $data = filter_input(INPUT_POST, 'value', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
     if (empty($data)) {
-      $data['notice'] = __('No data received.', 'civicrm');
-      wp_send_json($data);
+      $response['notice'] = __('No data received.', 'civicrm');
+      wp_send_json($response);
     }
 
     // Bail if first name is not valid.
-    if (empty($data['first_name'])) {
-      $data['notice'] = __('Please enter a first name.', 'civicrm');
-      wp_send_json($data);
+    $first_name = sanitize_text_field(wp_unslash($data['first_name']));
+    if (empty($first_name)) {
+      $response['notice'] = __('Please enter a first name.', 'civicrm');
+      wp_send_json($response);
     }
 
     // Bail if last name is not valid.
-    if (empty($data['last_name'])) {
-      $data['notice'] = __('Please enter a last name.', 'civicrm');
-      wp_send_json($data);
+    $last_name = sanitize_text_field(wp_unslash($data['last_name']));
+    if (empty($last_name)) {
+      $response['notice'] = __('Please enter a last name.', 'civicrm');
+      wp_send_json($response);
     }
 
     // Bail if email is not valid.
-    if (!is_email($data['email'])) {
-      $data['notice'] = __('Please enter a valid email.', 'civicrm');
-      wp_send_json($data);
+    $email = sanitize_email(wp_unslash($data['email']));
+    if (!is_email($email)) {
+      $response['notice'] = __('Please enter a valid email.', 'civicrm');
+      wp_send_json($response);
     }
 
     // Build params to check for an existing Contact.
     $contact = [
-      'first_name' => $data['first_name'],
-      'last_name' => $data['last_name'],
-      'email' => $data['email'],
+      'first_name' => $first_name,
+      'last_name' => $last_name,
+      'email' => $email,
     ];
 
     // Bail if there is an existing Contact.
     $existing_id = civi_wp()->admin->get_by_dedupe_unsupervised($contact);
     if ($existing_id !== FALSE && $existing_id !== 0) {
       $open = '<a href="' . $this->civi->admin->get_admin_link('civicrm/contact/view', 'reset=1&cid=' . $existing_id) . '">';
-      $data['notice'] = sprintf(__('There seems to be %1$san existing Contact%2$s with these details.', 'civicrm'), $open, '</a>');
-      wp_send_json($data);
+      /* translators: 1: The opening anchor tag, 2: The closing anchor tag. */
+      $response['notice'] = sprintf(__('There seems to be %1$san existing Contact%2$s with these details.', 'civicrm'), $open, '</a>');
+      wp_send_json($response);
     }
 
     // Build params to create Contact.
@@ -502,15 +520,16 @@ class CiviCRM_For_WordPress_Admin_Metabox_Contact_Add {
     $result = civicrm_api('Contact', 'create', $params);
 
     // Bail if there's an error.
-    if (!empty($result['is_error']) && $result['is_error'] == 1) {
-      $data['notice'] = sprintf(__('Could not create Contact: %s', 'civicrm'), $result['error_message']);
-      wp_send_json($data);
+    if (!empty($result['is_error']) && 1 === (int) $result['is_error']) {
+      /* translators: %s: The error message. */
+      $response['notice'] = sprintf(__('Could not create Contact: %s', 'civicrm'), $result['error_message']);
+      wp_send_json($response);
     }
 
     // Bail if there are no results.
     if (empty($result['values'])) {
-      $data['notice'] = __('Could not find the created Contact.', 'civicrm');
-      wp_send_json($data);
+      $response['notice'] = __('Could not find the created Contact.', 'civicrm');
+      wp_send_json($response);
     }
 
     // The result set should contain only one item.

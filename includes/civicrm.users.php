@@ -118,7 +118,7 @@ class CiviCRM_For_WordPress_Users {
    */
   public function check_permission($args) {
 
-    if ($args[0] != 'civicrm') {
+    if ($args[0] !== 'civicrm') {
       return FALSE;
     }
 
@@ -246,7 +246,7 @@ class CiviCRM_For_WordPress_Users {
    *
    * @since 4.6
    *
-   * @param $user_id The numerical ID of the WordPress user.
+   * @param int $user_id The numerical ID of the WordPress user.
    */
   public function delete_user_ufmatch($user_id) {
 
@@ -367,27 +367,32 @@ class CiviCRM_For_WordPress_Users {
    */
   public function get_civicrm_contact_type($default = NULL) {
 
+    // Nonce verification not necessary here.
+    // phpcs:disable WordPress.Security.NonceVerification.Recommended
+
     /*
      * Here we are creating a new Contact.
      * Get the Contact Type from the POST variables if any.
      */
     if (isset($_REQUEST['ctype'])) {
-      $ctype = $_REQUEST['ctype'];
+      $ctype = sanitize_text_field(wp_unslash($_REQUEST['ctype']));
     }
     elseif (
       isset($_REQUEST['edit']) &&
       isset($_REQUEST['edit']['ctype'])
     ) {
-      $ctype = $_REQUEST['edit']['ctype'];
+      $ctype = sanitize_text_field(wp_unslash($_REQUEST['edit']['ctype']));
     }
     else {
       $ctype = $default;
     }
 
+    // phpcs:enable WordPress.Security.NonceVerification.Recommended
+
     if (
-      $ctype != 'Individual' &&
-      $ctype != 'Organization' &&
-      $ctype != 'Household'
+      $ctype !== 'Individual' &&
+      $ctype !== 'Organization' &&
+      $ctype !== 'Household'
     ) {
       $ctype = $default;
     }

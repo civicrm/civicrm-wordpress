@@ -200,6 +200,7 @@ class CiviCRM_For_WordPress {
   /**
    * @var array
    * Reference to the original $_GET value.
+   * @since 4.6
    * @access protected
    */
   protected $wp_get;
@@ -207,6 +208,7 @@ class CiviCRM_For_WordPress {
   /**
    * @var array
    * Reference to the original $_POST value.
+   * @since 4.6
    * @access protected
    */
   protected $wp_post;
@@ -214,6 +216,7 @@ class CiviCRM_For_WordPress {
   /**
    * @var array
    * Reference to the original $_COOKIE value.
+   * @since 4.6
    * @access protected
    */
   protected $wp_cookie;
@@ -221,6 +224,7 @@ class CiviCRM_For_WordPress {
   /**
    * @var array
    * Reference to the original $_REQUEST value.
+   * @since 4.6
    * @access protected
    */
   protected $wp_request;
@@ -357,8 +361,10 @@ class CiviCRM_For_WordPress {
     update_option('civicrm_activation_in_progress', 'false');
 
     // When installed via the WordPress UI, try and redirect to the Installer page.
-    if (!is_multisite() && !isset($_GET['activate-multi']) && !CIVICRM_INSTALLED) {
-      wp_redirect(admin_url('admin.php?page=civicrm-install'));
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    $activate_multi = isset($_GET['activate-multi']) ? sanitize_text_field(wp_unslash($_GET['activate-multi'])) : '';
+    if (!is_multisite() && empty($activate_multi) && !CIVICRM_INSTALLED) {
+      wp_safe_redirect(admin_url('admin.php?page=civicrm-install'));
       exit;
     }
 
@@ -546,6 +552,7 @@ class CiviCRM_For_WordPress {
   public function enable_translation() {
 
     // Load translations.
+    // phpcs:ignore WordPress.WP.DeprecatedParameters.Load_plugin_textdomainParam2Found
     load_plugin_textdomain(
       // Unique name.
       'civicrm',
@@ -577,11 +584,9 @@ class CiviCRM_For_WordPress {
    */
   public function civicrm_in_wordpress_set() {
 
-    // Get identifying query var.
+    // Store identifying query var.
     $page = get_query_var('civiwp');
-
-    // Store.
-    self::$in_wordpress = ($page == 'CiviCRM') ? TRUE : FALSE;
+    self::$in_wordpress = ($page === 'CiviCRM') ? TRUE : FALSE;
 
   }
 
@@ -725,7 +730,7 @@ class CiviCRM_For_WordPress {
     }
 
     // Bail if filters are suppressed on this query.
-    if (TRUE == $query->get('suppress_filters')) {
+    if (TRUE === $query->get('suppress_filters')) {
       return;
     }
 
@@ -737,10 +742,10 @@ class CiviCRM_For_WordPress {
     $alreadyRegistered = TRUE;
 
     // Redirect if old query var is present.
-    if ('CiviCRM' == get_query_var('page') && 'CiviCRM' != get_query_var('civiwp')) {
+    if ('CiviCRM' === get_query_var('page') && 'CiviCRM' !== get_query_var('civiwp')) {
       $redirect_url = remove_query_arg('page', FALSE);
       $redirect_url = add_query_arg('civiwp', 'CiviCRM', $redirect_url);
-      wp_redirect($redirect_url, 301);
+      wp_safe_redirect($redirect_url, 301);
       exit();
     }
 
@@ -1183,6 +1188,7 @@ class CiviCRM_For_WordPress {
     $original_timezone = date_default_timezone_get();
     $wp_site_timezone = $this->get_timezone_string();
     if ($wp_site_timezone) {
+      // phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set
       date_default_timezone_set($wp_site_timezone);
       CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
     }
@@ -1206,7 +1212,8 @@ class CiviCRM_For_WordPress {
      * Bypass synchronize if running upgrade to avoid any serious non-recoverable
      * error which might hinder the upgrade process.
      */
-    if (CRM_Utils_Array::value('q', $_GET) != 'civicrm/upgrade') {
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    if (CRM_Utils_Array::value('q', $_GET) !== 'civicrm/upgrade') {
       $this->users->sync_user($current_user);
     }
 
@@ -1228,6 +1235,7 @@ class CiviCRM_For_WordPress {
 
     // Restore original timezone.
     if ($original_timezone) {
+      // phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set
       date_default_timezone_set($original_timezone);
     }
 
@@ -1276,8 +1284,10 @@ class CiviCRM_For_WordPress {
      * @see https://www.php.net/manual/en/timezones.others.php
      */
     $offset = get_option('gmt_offset');
+    // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
     if (0 != $offset && floor($offset) == $offset) {
-      $offset_string = $offset > 0 ? "-$offset" : '+' . abs((int) $offset);
+      $offset_int = (int) $offset;
+      $offset_string = $offset > 0 ? "-$offset" : '+' . abs($offset_int);
       $tzstring = 'Etc/GMT' . $offset_string;
     }
 
@@ -1300,6 +1310,9 @@ class CiviCRM_For_WordPress {
    */
   private function remove_wp_magic_quotes() {
 
+    // phpcs:disable WordPress.Security.NonceVerification.Recommended
+    // phpcs:disable WordPress.Security.NonceVerification.Missing
+
     // Save original arrays.
     $this->wp_get     = $_GET;
     $this->wp_post    = $_POST;
@@ -1311,6 +1324,9 @@ class CiviCRM_For_WordPress {
     $_POST    = stripslashes_deep($_POST);
     $_COOKIE  = stripslashes_deep($_COOKIE);
     $_REQUEST = stripslashes_deep($_REQUEST);
+
+    // phpcs:enable WordPress.Security.NonceVerification.Recommended
+    // phpcs:enable WordPress.Security.NonceVerification.Missing
 
     // Test for query var.
     $q = get_query_var('q');
@@ -1397,6 +1413,8 @@ class CiviCRM_For_WordPress {
     $_COOKIE  = $this->wp_cookie;
     $_REQUEST = $this->wp_request;
 
+    unset($this->wp_get, $this->wp_post, $this->wp_cookie, $this->wp_request);
+
   }
 
   /**
@@ -1422,7 +1440,12 @@ class CiviCRM_For_WordPress {
     // Grab query var.
     $html = get_query_var('html');
     if (empty($html)) {
-      $html = isset($_GET['html']) ? $_GET['html'] : '';
+      // We do not use $html apart to test for empty.
+      // phpcs:disable WordPress.Security.NonceVerification.Recommended
+      // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+      $html = isset($_GET['html']) ? wp_unslash($_GET['html']) : '';
+      // phpcs:enable WordPress.Security.NonceVerification.Recommended
+      // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
     }
 
     /*
@@ -1430,9 +1453,11 @@ class CiviCRM_For_WordPress {
      * pages. Maybe the menu-XML should include some metadata to make this
      * unnecessary?
      */
-    if (CRM_Utils_Array::value('HTTP_X_REQUESTED_WITH', $_SERVER) == 'XMLHttpRequest'
-        || ($argdata['args'][0] == 'civicrm' && in_array($argdata['args'][1], ['ajax', 'file']))
+    if (CRM_Utils_Array::value('HTTP_X_REQUESTED_WITH', $_SERVER) === 'XMLHttpRequest'
+        || ($argdata['args'][0] === 'civicrm' && in_array($argdata['args'][1], ['ajax', 'file']))
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         || !empty($_REQUEST['snippet'])
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
         || strpos($argdata['argString'], 'civicrm/event/ical') === 0 && empty($html)
         || strpos($argdata['argString'], 'civicrm/contact/imagefile') === 0
     ) {
@@ -1461,7 +1486,9 @@ class CiviCRM_For_WordPress {
     // Get path from query vars.
     $q = get_query_var('q');
     if (empty($q)) {
-      $q = isset($_GET['q']) ? $_GET['q'] : '';
+      // phpcs:disable WordPress.Security.NonceVerification.Recommended
+      $q = isset($_GET['q']) ? sanitize_text_field(wp_unslash($_GET['q'])) : '';
+      // phpcs:enable WordPress.Security.NonceVerification.Recommended
     }
 
     /*
@@ -1509,7 +1536,7 @@ class CiviCRM_For_WordPress {
    *
    * @param bool $absolute Passing TRUE prepends the scheme and domain, FALSE doesn't.
    * @param bool $frontend Passing FALSE returns the admin URL.
-   * @param $forceBackend Passing TRUE overrides $frontend and returns the admin URL.
+   * @param bool $forceBackend Passing TRUE overrides $frontend and returns the admin URL.
    * @return mixed|null|string
    */
   public function get_base_url($absolute, $frontend, $forceBackend) {
