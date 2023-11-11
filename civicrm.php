@@ -32,7 +32,8 @@
 
 // This file must not accessed directly.
 if (!defined('ABSPATH')) {
-  exit;
+  exit
+  ;
 }
 
 // Set version here: changing it forces Javascript and CSS to reload.
