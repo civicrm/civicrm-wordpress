@@ -248,12 +248,9 @@ class CiviCRM_For_WordPress {
       // Include legacy global scope functions.
       include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.functions.php';
 
-      /*
-       * Incorporate WP-CLI Integration based on drush CiviCRM functionality.
-       * @see https://github.com/andy-walker/wp-cli-civicrm
-       */
+      // Add WP-CLI commands.
       if (defined('WP_CLI') && WP_CLI) {
-        include_once CIVICRM_PLUGIN_DIR . 'wp-cli/civicrm.php';
+        include_once CIVICRM_PLUGIN_DIR . 'wp-cli/wp-cli-civicrm.php';
       }
 
       // Delay setup until 'plugins_loaded' to allow other plugins to load as well.
