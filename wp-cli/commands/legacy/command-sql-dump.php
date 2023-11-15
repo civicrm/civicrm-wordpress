@@ -11,10 +11,10 @@
 class CLI_Tools_CiviCRM_Command_SQL_Dump extends CLI_Tools_CiviCRM_Command {
 
   /**
-   * Export the whole database that CiviCRM has credentials for and print to STDOUT or save to a file.
+   * Dump the whole database that CiviCRM has credentials for and print to STDOUT or save to a file. Deprecated: use `wp civicrm db dump` instead.
    *
    * This command is useful on servers where the user may not have direct access to the `mysqldump`
-   * command and the user wants to export the entire database in which the CiviCRM tables reside.
+   * command and the user wants to dump the entire database in which the CiviCRM tables reside.
    * For more granular exports of the CiviCRM tables, functions, procedures and views, use the
    * `wp civicrm db export` command instead.
    *
@@ -40,48 +40,20 @@ class CLI_Tools_CiviCRM_Command_SQL_Dump extends CLI_Tools_CiviCRM_Command {
    */
   public function __invoke($args, $assoc_args) {
 
+    WP_CLI::log(WP_CLI::colorize('%CDeprecated command:%n %cuse `wp civicrm db dump` instead.%n'));
+
     // Grab associative arguments.
     $tables = \WP_CLI\Utils\get_flag_value($assoc_args, 'tables', FALSE);
-
-    // Bootstrap CiviCRM.
-    $this->bootstrap_civicrm();
-
-    if (!defined('CIVICRM_DSN')) {
-      WP_CLI::error('CIVICRM_DSN is not defined.');
-    }
-
-    $mysqldump_binary = \WP_CLI\Utils\force_env_on_nix_systems('mysqldump');
-    $dsn = DB::parseDSN(CIVICRM_DSN);
-
-    // Build command and escaped shell arguments.
-    $command = $mysqldump_binary . " --opt --triggers --routines --events --host={$dsn['hostspec']} --user={$dsn['username']} --password='{$dsn['password']}' %s";
-    $command_esc_args = [$dsn['database']];
-    if (!empty($tables)) {
-      $requested_tables = explode(',', $tables);
-      unset($assoc_args['tables']);
-      $command .= ' --tables';
-      foreach ($requested_tables as $table) {
-        $command .= ' %s';
-        $command_esc_args[] = trim($table);
-      }
-    }
-
-    // Process command and escaped shell arguments.
-    $escaped_command = call_user_func_array(
-      '\WP_CLI\Utils\esc_cmd',
-      array_merge(
-        [$command],
-        $command_esc_args
-      )
-    );
-
-    \WP_CLI\Utils\run_mysql_command($escaped_command, $assoc_args);
-
-    // Maybe show some feedback.
     $result_file = \WP_CLI\Utils\get_flag_value($assoc_args, 'result-file', FALSE);
-    if (!empty($result_file)) {
-      WP_CLI::success(sprintf('Exported to %s', $assoc_args['result-file']));
-    }
+
+    // Build command.
+    $command = 'civicrm db dump' .
+      (empty($tables) ? '' : ' --tables=' . $tables) .
+      (empty($result_file) ? '' : ' --result-file=' . $result_file);
+
+    // Pass on to "wp civicrm db dump".
+    $options = ['launch' => FALSE, 'return' => FALSE];
+    WP_CLI::runcommand($command, $options);
 
   }
 
