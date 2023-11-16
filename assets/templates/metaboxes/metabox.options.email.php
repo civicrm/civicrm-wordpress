@@ -17,6 +17,11 @@
  *
  */
 
+// This file must not accessed directly.
+if (!defined('ABSPATH')) {
+  exit;
+}
+
 ?><!-- assets/templates/metaboxes/metabox.options.email.php -->
 <?php
 
@@ -32,9 +37,9 @@ do_action('civicrm/metabox/email_sync/pre');
   <p></p>
 </div>
 
-<p><?php _e('When a WordPress User updates their Email, CiviCRM will automatically update the Primary Email of their linked Contact record. This setting lets you choose whether the reverse update should happen - i.e. if the Primary Email of a Contact that has a linked WordPress User is updated, do you want CiviCRM to update the WordPress User Email?', 'civicrm'); ?></p>
+<p><?php esc_html_e('When a WordPress User updates their Email, CiviCRM will automatically update the Primary Email of their linked Contact record. This setting lets you choose whether the reverse update should happen - i.e. if the Primary Email of a Contact that has a linked WordPress User is updated, do you want CiviCRM to update the WordPress User Email?', 'civicrm'); ?></p>
 
-<label for="sync_email" class="screen-reader-text"><?php _e('Sync Emails', 'civicrm'); ?></label>
+<label for="sync_email" class="screen-reader-text"><?php esc_html_e('Sync Emails', 'civicrm'); ?></label>
 <select name="sync_email" id="sync_email">
   <option value="yes"<?php echo $selected_yes; ?>><?php esc_html_e('Yes', 'civicrm'); ?></option>
   <option value="no"<?php echo $selected_no; ?>><?php esc_html_e('No', 'civicrm'); ?></option>

@@ -180,7 +180,7 @@ class CiviCRM_For_WordPress_Admin_Page_Error {
     do_action('civicrm/page/error/add_meta_boxes', $screen->id);
 
     // Grab columns.
-    $columns = (1 == $screen->get_columns() ? '1' : '2');
+    $columns = (1 === $screen->get_columns() ? '1' : '2');
 
     // Include template file.
     include CIVICRM_PLUGIN_DIR . 'assets/templates/pages/page.error.php';

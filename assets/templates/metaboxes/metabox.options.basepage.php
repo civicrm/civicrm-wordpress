@@ -17,6 +17,11 @@
  *
  */
 
+// This file must not accessed directly.
+if (!defined('ABSPATH')) {
+  exit;
+}
+
 ?><!-- assets/templates/metaboxes/metabox.options.basepage.php -->
 <?php
 
@@ -33,15 +38,15 @@ do_action('civicrm/metabox/basepage/pre');
 </div>
 
 <p>
-  <?php _e('CiviCRM needs a WordPress Page to show its content on the public-facing pages of your website.', 'civicrm'); ?>
+  <?php esc_html_e('CiviCRM needs a WordPress Page to show its content on the public-facing pages of your website.', 'civicrm'); ?>
   <?php if (!($basepage instanceof WP_Post)) : ?>
-    <em class="basepage_feedback"><?php _e('Please select a Page from the drop-down for CiviCRM to use as its Base Page. If CiviCRM was able to create one automatically, there should be one with the title "CiviCRM". If not, please select another suitable WordPress Page.', 'civicrm'); ?></em>
+    <em class="basepage_feedback"><?php esc_html_e('Please select a Page from the drop-down for CiviCRM to use as its Base Page. If CiviCRM was able to create one automatically, there should be one with the title "CiviCRM". If not, please select another suitable WordPress Page.', 'civicrm'); ?></em>
   <?php else : ?>
-    <em class="basepage_feedback"><?php _e('It appears that your Base Page has been set. Looking good.', 'civicrm'); ?></em>
+    <em class="basepage_feedback"><?php esc_html_e('It appears that your Base Page has been set. Looking good.', 'civicrm'); ?></em>
   <?php endif; ?>
 </p>
 
-<label for="page_id" class="screen-reader-text"><?php _e('Choose Base Page', 'civicrm'); ?></label>
+<label for="page_id" class="screen-reader-text"><?php esc_html_e('Choose Base Page', 'civicrm'); ?></label>
 <?php wp_dropdown_pages($params); ?>
 
 <p class="submit">

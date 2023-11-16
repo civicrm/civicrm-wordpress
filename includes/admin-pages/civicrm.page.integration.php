@@ -306,7 +306,7 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
     // Query again if it's not found.
     if ($plugins === FALSE) {
 
-      // Build query
+      // Build query.
       $query = [
         'tag' => 'civicrm',
         'fields' => [
@@ -374,7 +374,7 @@ class CiviCRM_For_WordPress_Admin_Page_Integration {
           // We're good - grab the actual data.
           $plugins = json_decode(wp_remote_retrieve_body($response), TRUE);
 
-          // Store for a week given how infrequently plugins are added,
+          // Store for a week given how infrequently plugins are added.
           set_site_transient('civicrm_plugins_by_repo', $plugins, 1 * WEEK_IN_SECONDS);
 
         }

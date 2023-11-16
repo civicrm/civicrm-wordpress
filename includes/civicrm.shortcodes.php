@@ -224,7 +224,7 @@ class CiviCRM_For_WordPress_Shortcodes {
           $atts = $this->get_atts($shortcode);
 
           // Test for hijacking.
-          if (isset($atts['hijack']) && $atts['hijack'] == '1') {
+          if (isset($atts['hijack']) && 1 === (int) $atts['hijack']) {
             add_filter('civicrm_context', [$this, 'get_context']);
           }
 
@@ -232,7 +232,7 @@ class CiviCRM_For_WordPress_Shortcodes {
           $this->shortcode_markup[$post->ID][$key] = do_shortcode($shortcode);
 
           // Test for hijacking.
-          if (isset($atts['hijack']) && $atts['hijack'] == '1') {
+          if (isset($atts['hijack']) && 1 === (int) $atts['hijack']) {
 
             // Ditch the filter.
             remove_filter('civicrm_context', [$this, 'get_context']);
@@ -328,6 +328,8 @@ class CiviCRM_For_WordPress_Shortcodes {
   public function render_single($atts) {
 
     // Do not parse Shortcodes in REST context for PUT, POST and DELETE methods.
+    // Nonce is not necessary here.
+    // phpcs:ignore WordPress.Security.NonceVerification.Missing
     if (defined('REST_REQUEST') && REST_REQUEST && (isset($_PUT) || isset($_POST) || isset($_DELETE))) {
       // Return the original Shortcode.
       $shortcode = '[civicrm';
@@ -488,17 +490,17 @@ class CiviCRM_For_WordPress_Shortcodes {
     $config = CRM_Core_Config::singleton();
 
     // Do we have multiple Shortcodes?
-    if ($multiple != 0) {
+    if ($multiple !== 0) {
 
       $links = [];
       foreach ($args as $var => $arg) {
-        if (!empty($arg) && $var != 'q') {
+        if (!empty($arg) && $var !== 'q') {
           $links[] = $var . '=' . $arg;
         }
       }
       $query = implode('&', $links);
 
-      // $absolute, $frontend, $forceBackend
+      // Params are: $absolute, $frontend, $forceBackend.
       $base_url = $this->civi->get_base_url(TRUE, FALSE, FALSE);
 
       // Init query parts.
@@ -541,7 +543,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     // Test for hijacking.
     if (!$multiple) {
 
-      if (isset($atts['hijack']) && $atts['hijack'] == '1') {
+      if (isset($atts['hijack']) && 1 === (int) $atts['hijack']) {
 
         // Add title to array.
         $this->post_titles[$post_id] = $data['title'];
@@ -570,33 +572,30 @@ class CiviCRM_For_WordPress_Shortcodes {
       $description = $data['text'];
     }
 
+    /**
+     * Filter the CiviCRM Shortcode more link text.
+     *
+     * @since 4.6
+     *
+     * @param str The existing Shortcode more link text.
+     */
+    $link_text = apply_filters('civicrm_shortcode_more_link', __('Find out more...', 'civicrm'));
+
     // Provide an enticing link.
-    $more_link = sprintf(
-      '<a href="%s">%s</a>',
-      $link,
-
-      /**
-       * Filter the CiviCRM Shortcode more link text.
-       *
-       * @since 4.6
-       *
-       * @param str The existing Shortcode more link text.
-       */
-      apply_filters('civicrm_shortcode_more_link', __('Find out more...', 'civicrm'))
-
-    );
+    $more_link = sprintf('<a href="%s">%s</a>', $link, $link_text);
 
     // Assume CiviCRM footer is not enabled.
     $empowered_enabled = FALSE;
     $footer = '';
 
     // Test config object for setting.
-    if ($config->empoweredBy == 1) {
+    if (1 === (int) $config->empoweredBy) {
 
       // Footer enabled - define it.
       $civi = __('CiviCRM.org - Growing and Sustaining Relationships', 'civicrm');
       $logo = '<div class="empowered-by-logo"><span>' . __('CiviCRM', 'civicrm') . '</span></div>';
       $civi_link = '<a href="https://civicrm.org/" title="' . $civi . '" target="_blank" class="empowered-by-link">' . $logo . '</a>';
+      /* translators: %s: The link to the CiviCRM website. */
       $empowered = sprintf(__('Empowered by %s', 'civicrm'), $civi_link);
 
       /**
@@ -650,7 +649,8 @@ class CiviCRM_For_WordPress_Shortcodes {
    *
    * @since 4.6
    *
-   * @return string The overridden content.
+   * @param string $content The content.
+   * @return string $content The overridden content.
    */
   public function get_content($content) {
 
@@ -726,7 +726,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       return $civicrm_wp_title;
     }
 
-    // Fallback
+    // Fallback.
     return $post_title;
 
   }
@@ -784,7 +784,7 @@ class CiviCRM_For_WordPress_Shortcodes {
    *
    * @since 4.6
    *
-   * @param $shortcode The Shortcode to parse.
+   * @param string $shortcode The Shortcode to parse.
    * @return array $shortcode_atts Array of Shortcode attributes.
    */
   private function get_atts($shortcode) {
@@ -822,37 +822,33 @@ class CiviCRM_For_WordPress_Shortcodes {
     ];
 
     // Parse Shortcode attributes.
-    $shortcode_atts = shortcode_atts($defaults, $atts, 'civicrm');
-    extract($shortcode_atts);
+    $attributes = shortcode_atts($defaults, $atts, 'civicrm');
 
     $args = [
       'reset' => 1,
-      'id'    => $id,
-      'force' => $force,
+      'id'    => $attributes['id'],
+      'force' => $attributes['force'],
     ];
 
     // Construct args for known components.
-    switch ($component) {
+    switch ($attributes['component']) {
 
       case 'contribution':
 
-        if ($mode == 'preview' || $mode == 'test') {
+        if ($attributes['mode'] === 'preview' || $attributes['mode'] === 'test') {
           $args['action'] = 'preview';
         }
 
-        switch ($action) {
-          case 'transact':
-            $args['q'] = 'civicrm/contribute/transact';
-            break;
-
+        switch ($attributes['action']) {
           case 'setup':
             $args['q'] = 'civicrm/contribute/campaign';
             $args['action'] = 'add';
             $args['component'] = 'contribute';
             unset($args['id']);
-            $args['pageId'] = $id;
+            $args['pageId'] = $attributes['id'];
             break;
 
+          case 'transact':
           default:
             $args['q'] = 'civicrm/contribute/transact';
             break;
@@ -861,11 +857,11 @@ class CiviCRM_For_WordPress_Shortcodes {
 
       case 'pcp':
 
-        if ($mode == 'preview' || $mode == 'test') {
+        if ($attributes['mode'] === 'preview' || $attributes['mode'] === 'test') {
           $args['action'] = 'preview';
         }
 
-        switch ($action) {
+        switch ($attributes['action']) {
           case 'transact':
             $args['q'] = 'civicrm/contribute/transact';
             $args['pcpId'] = $args['id'];
@@ -884,10 +880,10 @@ class CiviCRM_For_WordPress_Shortcodes {
 
       case 'event':
 
-        switch ($action) {
+        switch ($attributes['action']) {
           case 'register':
             $args['q'] = 'civicrm/event/register';
-            if ($mode == 'preview' || $mode == 'test') {
+            if ($attributes['mode'] === 'preview' || $attributes['mode'] === 'test') {
               $args['action'] = 'preview';
             }
             break;
@@ -909,23 +905,23 @@ class CiviCRM_For_WordPress_Shortcodes {
 
       case 'profile':
 
-        if ($mode == 'edit') {
+        if ($attributes['mode'] === 'edit') {
           $args['q'] = 'civicrm/profile/edit';
         }
-        elseif ($mode == 'view') {
+        elseif ($attributes['mode'] === 'view') {
           $args['q'] = 'civicrm/profile/view';
         }
-        elseif ($mode == 'search') {
+        elseif ($attributes['mode'] === 'search') {
           $args['q'] = 'civicrm/profile';
         }
-        elseif ($mode == 'map') {
+        elseif ($attributes['mode'] === 'map') {
           $args['q'] = 'civicrm/profile/map';
           $args['map'] = 1;
         }
         else {
           $args['q'] = 'civicrm/profile/create';
         }
-        $args['gid'] = $gid;
+        $args['gid'] = $attributes['gid'];
         break;
 
       case 'petition':
@@ -947,9 +943,9 @@ class CiviCRM_For_WordPress_Shortcodes {
      * @since 4.7.28
      *
      * @param array $args Existing Shortcode arguments.
-     * @param array $shortcode_atts Shortcode attributes.
+     * @param array $attributes Shortcode attributes.
      */
-    return apply_filters('civicrm_shortcode_preprocess_atts', $args, $shortcode_atts);
+    return apply_filters('civicrm_shortcode_preprocess_atts', $args, $attributes);
 
   }
 
@@ -1021,6 +1017,7 @@ class CiviCRM_For_WordPress_Shortcodes {
         switch ($atts['action']) {
           case 'register':
             $data['title'] = sprintf(
+              /* translators: %s: The event title. */
               __('Register for %s', 'civicrm'),
               $civi_entity['title']
             );

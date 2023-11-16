@@ -17,13 +17,15 @@
  *
  */
 
+// This file must not accessed directly.
+if (!defined('ABSPATH')) {
+  exit;
+}
+
 ?><!-- assets/templates/metaboxes/metabox.error.php.php -->
-<p><?php printf(
-  __('CiviCRM requires PHP version %1$s or greater. You are running PHP version %2$s', 'civicrm'),
-  CIVICRM_WP_PHP_MINIMUM,
-  PHP_VERSION
-); ?></p>
+<?php /* translators: 1: The minimum PHP version, 2: The current PHP version. */ ?>
+<p><?php printf(__('CiviCRM requires PHP version %1$s or greater. You are running PHP version %2$s', 'civicrm'), CIVICRM_WP_PHP_MINIMUM, PHP_VERSION); ?></p>
 
-<p><?php _e('You will have to upgrade PHP before you can run this version CiviCRM.', 'civicrm'); ?></p>
+<p><?php esc_html_e('You will have to upgrade PHP before you can run this version CiviCRM.', 'civicrm'); ?></p>
 
-<p><?php _e('To continue using CiviCRM without upgrading PHP, you will have to revert both the plugin and the database to a backup of your previous version.', 'civicrm'); ?></p>
+<p><?php esc_html_e('To continue using CiviCRM without upgrading PHP, you will have to revert both the plugin and the database to a backup of your previous version.', 'civicrm'); ?></p>

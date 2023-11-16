@@ -17,6 +17,11 @@
  *
  */
 
+// This file must not accessed directly.
+if (!defined('ABSPATH')) {
+  exit;
+}
+
 ?><!-- assets/templates/metaboxes/metabox.options.shortcode.php -->
 <?php
 
@@ -32,9 +37,9 @@ do_action('civicrm/metabox/shortcode/pre');
   <p></p>
 </div>
 
-<p><?php _e('When a CiviCRM Shortcode is embedded in a Post/Page without "hijack" being set, it is shown embedded in the content in "Shortcode Mode". If any action is taken via the Shortcode, a query string is appended to the URL and the Post/Page is shown in "Base Page Mode" and the title and content are overwritten. Choose to keep this legacy behaviour or move to the new "Remain in Shortcode Mode" behaviour.', 'civicrm'); ?></p>
+<p><?php esc_html_e('When a CiviCRM Shortcode is embedded in a Post/Page without "hijack" being set, it is shown embedded in the content in "Shortcode Mode". If any action is taken via the Shortcode, a query string is appended to the URL and the Post/Page is shown in "Base Page Mode" and the title and content are overwritten. Choose to keep this legacy behaviour or move to the new "Remain in Shortcode Mode" behaviour.', 'civicrm'); ?></p>
 
-<label for="shortcode_mode" class="screen-reader-text"><?php _e('Display Mode', 'civicrm'); ?></label>
+<label for="shortcode_mode" class="screen-reader-text"><?php esc_html_e('Display Mode', 'civicrm'); ?></label>
 <select name="shortcode_mode" id="shortcode_mode">
   <option value="modern"<?php echo $selected_modern; ?>><?php esc_html_e('Remain in Shortcode Mode', 'civicrm'); ?></option>
   <option value="legacy"<?php echo $selected_legacy; ?>><?php esc_html_e('Legacy Base Page Mode', 'civicrm'); ?></option>

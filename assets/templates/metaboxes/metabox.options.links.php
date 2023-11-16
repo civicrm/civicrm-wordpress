@@ -17,6 +17,11 @@
  *
  */
 
+// This file must not accessed directly.
+if (!defined('ABSPATH')) {
+  exit;
+}
+
 ?><!-- assets/templates/metaboxes/metabox.options.links.php -->
 <?php
 
@@ -28,7 +33,7 @@
 do_action('civicrm/metabox/links/pre');
 
 ?>
-<p><?php _e('Below is a list of shortcuts to some CiviCRM admin pages that are important when you are setting up CiviCRM. When these settings are correctly configured, your CiviCRM installation should be ready for you to customise to your requirements.', 'civicrm'); ?></p>
+<p><?php esc_html_e('Below is a list of shortcuts to some CiviCRM admin pages that are important when you are setting up CiviCRM. When these settings are correctly configured, your CiviCRM installation should be ready for you to customise to your requirements.', 'civicrm'); ?></p>
 
 <ul>
   <?php foreach ($admin_links as $admin_link) : ?>
@@ -40,7 +45,7 @@ do_action('civicrm/metabox/links/pre');
 
 <hr>
 
-<p><?php _e('Shortcuts to some CiviCRM maintenance tasks.', 'civicrm'); ?></p>
+<p><?php esc_html_e('Shortcuts to some CiviCRM maintenance tasks.', 'civicrm'); ?></p>
 
 <ul>
   <?php foreach ($maintenance_links as $maintenance_link) : ?>

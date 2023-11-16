@@ -165,7 +165,8 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       'civicrm-options-script',
       CIVICRM_PLUGIN_URL . 'assets/js/civicrm.options.js',
       ['jquery'],
-      CIVICRM_PLUGIN_VERSION
+      CIVICRM_PLUGIN_VERSION,
+      FALSE
     );
 
     // Init settings and localisation array.
@@ -425,7 +426,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     $params = [
       'post_type' => 'page',
       'sort_column' => 'menu_order, post_title',
-      'show_option_none' => __('- Select a Base Page -'),
+      'show_option_none' => __('- Select a Base Page -', 'civicrm'),
     ];
 
     // If the Base Page is set, add its ID.
@@ -696,6 +697,10 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
    */
   public function form_submitted() {
 
+    // Nonce is irrelevant at this stage.
+    // phpcs:disable WordPress.Security.NonceVerification.Recommended
+    // phpcs:disable WordPress.Security.NonceVerification.Missing
+
     if (!empty($_POST['civicrm_basepage_post_submit'])) {
       // Save Base Page.
       $this->form_nonce_check();
@@ -727,6 +732,9 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       $this->form_redirect();
     }
 
+    // phpcs:enable WordPress.Security.NonceVerification.Recommended
+    // phpcs:enable WordPress.Security.NonceVerification.Missing
+
   }
 
   /**
@@ -734,10 +742,13 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
    *
    * @since 5.34
    */
-  public function form_save_basepage() {
+  private function form_save_basepage() {
 
     // Bail if there's no valid Post ID.
-    $post_id = empty($_POST['page_id']) ? 0 : (int) trim($_POST['page_id']);
+    // Nonce is checked in self::form_nonce_check().
+    // phpcs:disable WordPress.Security.NonceVerification.Missing
+    $post_id = empty($_POST['page_id']) ? 0 : (int) sanitize_text_field(wp_unslash($_POST['page_id']));
+    // phpcs:enable WordPress.Security.NonceVerification.Missing
     if ($post_id === 0) {
       return;
     }
@@ -760,10 +771,13 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
    *
    * @since 5.44
    */
-  public function form_save_shortcode() {
+  private function form_save_shortcode() {
 
     // Bail if there is no valid chosen value.
-    $chosen = isset($_POST['shortcode_mode']) ? trim($_POST['shortcode_mode']) : 0;
+    // Nonce is checked in self::form_nonce_check().
+    // phpcs:disable WordPress.Security.NonceVerification.Missing
+    $chosen = isset($_POST['shortcode_mode']) ? sanitize_text_field(wp_unslash($_POST['shortcode_mode'])) : 0;
+    // phpcs:enable WordPress.Security.NonceVerification.Missing
     if ($chosen === 0 || !in_array($chosen, $this->civi->admin->get_shortcode_modes())) {
       return;
     }
@@ -778,10 +792,13 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
    *
    * @since 5.34
    */
-  public function form_save_email_sync() {
+  private function form_save_email_sync() {
 
     // Bail if there is no valid chosen value.
-    $chosen = isset($_POST['sync_email']) ? trim($_POST['sync_email']) : 0;
+    // Nonce is checked in self::form_nonce_check().
+    // phpcs:disable WordPress.Security.NonceVerification.Missing
+    $chosen = isset($_POST['sync_email']) ? sanitize_text_field(wp_unslash($_POST['sync_email'])) : 0;
+    // phpcs:enable WordPress.Security.NonceVerification.Missing
     if ($chosen === 0) {
       return;
     }
@@ -854,7 +871,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     }
 
     // Bail if there's no valid Post ID.
-    $post_id = empty($_POST['value']) ? 0 : (int) trim($_POST['value']);
+    $post_id = empty($_POST['value']) ? 0 : (int) sanitize_text_field(wp_unslash($_POST['value']));
     if ($post_id === 0) {
       $data['notice'] = __('No Page ID detected. Unable to save the WordPress Base Page.', 'civicrm');
       wp_send_json($data);
@@ -931,7 +948,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     }
 
     // Bail if there is no valid chosen value.
-    $chosen = isset($_POST['value']) ? trim($_POST['value']) : 0;
+    $chosen = isset($_POST['value']) ? sanitize_text_field(wp_unslash($_POST['value'])) : 0;
     if ($chosen === 0 || !in_array($chosen, $this->civi->admin->get_shortcode_modes())) {
       $data['notice'] = __('Unrecognised parameter. Could not save the selected setting.', 'civicrm');
       wp_send_json($data);
@@ -975,7 +992,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     }
 
     // Bail if there is no valid chosen value.
-    $chosen = isset($_POST['value']) ? trim($_POST['value']) : 0;
+    $chosen = isset($_POST['value']) ? sanitize_text_field(wp_unslash($_POST['value'])) : 0;
     if ($chosen === 0) {
       $data['notice'] = __('Unrecognised parameter. Could not save the selected setting.', 'civicrm');
       wp_send_json($data);
@@ -1031,7 +1048,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     }
 
     // Bail if there is no valid chosen value.
-    $chosen = isset($_POST['value']) ? trim($_POST['value']) : 0;
+    $chosen = isset($_POST['value']) ? sanitize_text_field(wp_unslash($_POST['value'])) : 0;
     if ($chosen === 0 || !in_array($chosen, ['enable', 'disable'])) {
       $data['notice'] = __('Unrecognised parameter. Could not refresh the CiviCRM permissions.', 'civicrm');
       wp_send_json($data);
@@ -1092,8 +1109,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     }
 
     // Bail if there is no valid value.
-    $chosen = isset($_POST['value']) ? (int) trim($_POST['value']) : 0;
-
+    $chosen = isset($_POST['value']) ? (int) sanitize_text_field(wp_unslash($_POST['value'])) : 0;
     if ($chosen !== 1) {
       $data['notice'] = __('Unrecognised parameter. Could not clear the CiviCRM caches.', 'civicrm');
       wp_send_json($data);

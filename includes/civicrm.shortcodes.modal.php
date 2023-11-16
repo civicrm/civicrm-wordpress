@@ -86,6 +86,7 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
     // Add button to selected WordPress Post Types, if allowed.
     if ($this->post_type_has_button()) {
 
+      // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
       $civilogo = file_get_contents(CIVICRM_PLUGIN_DIR . 'assets/images/civilogo.svg.b64');
 
       $url = admin_url('admin.php?page=CiviCRM&q=civicrm/shortcode&reset=1');
@@ -122,7 +123,7 @@ class CiviCRM_For_WordPress_Shortcodes_Modal {
     // Get screen object.
     $screen = get_current_screen();
 
-    // Bail if no post type (e.g. Ninja Forms)
+    // Bail if no post type - e.g. Ninja Forms.
     if (!isset($screen->post_type)) {
       return;
     }
