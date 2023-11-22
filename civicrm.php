@@ -249,7 +249,7 @@ class CiviCRM_For_WordPress {
       // Create instance.
       self::$instance = new CiviCRM_For_WordPress();
 
-      // Include legacy global scope functions.
+      // Include global scope functions.
       include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.functions.php';
 
       // Add WP-CLI commands.

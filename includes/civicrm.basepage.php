@@ -871,6 +871,94 @@ class CiviCRM_For_WordPress_Basepage {
   }
 
   /**
+   * Gets a URL that points to the CiviCRM Base Page.
+   *
+   * There can be situations where `CRM_Utils_System::url` does not return
+   * a link to the Base Page, e.g. in a page template where the content
+   * contains a Shortcode. This utility method will always return a URL
+   * that points to the CiviCRM Base Page.
+   *
+   * @see https://lab.civicrm.org/dev/wordpress/-/issues/144
+   *
+   * @since 5.69
+   *
+   * @param string $path The path being linked to, such as "civicrm/add".
+   * @param array|string $query A query string to append to the link, or an array of key-value pairs.
+   * @param bool $absolute Whether to force the output to be an absolute link.
+   * @param string $fragment A fragment identifier (named anchor) to append to the link.
+   * @param bool $htmlize Whether to encode special html characters such as &.
+   * @return string $link An HTML string containing a link to the given path.
+   */
+  public function url(
+    $path = '',
+    $query = '',
+    $absolute = TRUE,
+    $fragment = NULL,
+    $htmlize = TRUE
+  ) {
+
+    // Return early if no CiviCRM.
+    $link = '';
+    if (!$this->civi->initialize()) {
+      return $link;
+    }
+
+    // Add modifying callbacks prior to multi-lingual compat.
+    add_filter('civicrm/basepage/match', [$this, 'ensure_match'], 9);
+    add_filter('civicrm/core/url/base', [$this, 'ensure_url'], 9, 2);
+
+    // Pass to CiviCRM to construct front-end URL.
+    $link = CRM_Utils_System::url(
+      $path,
+      $query,
+      TRUE,
+      $fragment,
+      $htmlize,
+      TRUE,
+      FALSE
+    );
+
+    // Remove callbacks.
+    remove_filter('civicrm/basepage/match', [$this, 'ensure_match'], 9);
+    remove_filter('civicrm/core/url/base', [$this, 'ensure_url'], 9);
+
+    return $link;
+
+  }
+
+  /**
+   * Callback to ensure CiviCRM returns a Base Page URL.
+   *
+   * @since 5.69
+   *
+   * @return bool
+   */
+  public function ensure_match() {
+    return TRUE;
+  }
+
+  /**
+   * Callback to ensure CiviCRM builds a Base Page URL.
+   *
+   * @since 5.69
+   *
+   * @param str $url The "base" URL as built by CiviCRM.
+   * @param bool $admin_request True if building an admin URL, false otherwise.
+   * @return str $url The Base Page URL.
+   */
+  public function ensure_url($url, $admin_request) {
+
+    // Skip when not defined.
+    if (empty($url) || $admin_request) {
+      return $url;
+    }
+
+    // Return the Base Page URL.
+    return $this->url_get();
+
+  }
+
+  /**
    * Gets the current Base Page ID.
    *
    * @since 5.66
