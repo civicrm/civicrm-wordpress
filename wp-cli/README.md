@@ -1,88 +1,103 @@
-# WP-CLI integration for CiviCRM
+# Command Line Tools for CiviCRM
 
-#### wp civicrm api
+Manage CiviCRM through the command line.
 
-Command for accessing the CiviCRM API. Syntax is identical to `drush cvap`.
+The latest iteration of the Command Line Tools for CiviCRM is built in a multi-class structure that WP-CLI expects and which enables proper documentation of the `wp civicrm` command and all its sub-commands. The following details what has changed, what has stayed the same, and what is new.
 
-#### wp civicrm cache-clear
+### Dropped Commands
 
-Command for accessing clearing cache. Equivilant of running `civicrm/admin/setting/updateConfigBackend&reset=1`.
+* `wp civicrm rest`: Use [CiviCRM's WordPress REST API](https://github.com/civicrm/civicrm-wordpress/tree/master/wp-rest) or `wp civicrm api` instead.
 
-#### wp civicrm enable-debug
+### Unchanged Commands
 
-Command for to turn debug on.
+* `wp civicrm api`: For the time-being this command is an alias of `wp civicrm api3`. It may become an alias for `wp civicrm api4` when that command is added, so it is definitely better to use `wp civicrm api3` directly to avoid problems in the future. There will, of course, be a deprecation notice issued well before the switch, so don't worry!
+* `wp civicrm pipe`: This command will remain in the top-level namespace.
 
-#### wp civicrm disable-debug
+### New Commands
 
-Command for to turn debug off.
+There is a new command `wp civicrm core <command>` which (sort of) mirrors the functionality in `wp core <command>`. It holds the commands that apply to CiviCRM as a whole.
 
-#### wp civicrm member-records
+| Command | Description | Old Command |
+| --- | --- | --- |
+| `wp civicrm core activate` | Activates the CiviCRM plugin and loads the database. | New |
+| `wp civicrm core backup` | Back up the CiviCRM plugin, CiviCRM files and database. | New |
+| `wp civicrm core check-update` | Checks for CiviCRM updates via Version Check API. | New |
+| `wp civicrm core check-version` | Checks for a CiviCRM version or matching localization archive. | New |
+| `wp civicrm core download` | Downloads core CiviCRM files. | New |
+| `wp civicrm core install` | Installs the CiviCRM plugin. | `wp civicrm install` but without activation |
+| `wp civicrm core is-installed` | Checks if CiviCRM is installed. | Not implemented yet |
+| `wp civicrm core restore` | Restore the CiviCRM plugin, CiviCRM files and database from a backup. | Requires a backup made with `wp civicrm core backup` |
+| `wp civicrm core update` | Updates CiviCRM to a newer version. | `wp civicrm upgrade` |
+| `wp civicrm core update-cfg` | Reset paths to correct config settings. | `wp civicrm update-cfg` |
+| `wp civicrm core update-db` | Runs the CiviCRM database update procedure. | `wp civicrm upgrade-db` |
+| `wp civicrm core verify-checksums` | Verifies CiviCRM files against checksums via `googleapis`. | Not implemented yet |
+| `wp civicrm core version` | Displays the CiviCRM version. | New |
 
-Run the CiviMember UpdateMembershipRecord cron (civicrm member-records).
+Use `wp help civicrm <command>` or `wp help civicrm core <command>` for full details and examples.
 
-#### wp civicrm process-mail-queue
+There is a new command `wp civicrm db <command>` which (sort of) mirrors the functionality in `wp db <command>`. It holds the commands that apply to interaction with the CiviCRM database.
 
-Process pending CiviMail mailing jobs.
+| Command | Description | Old Command |
+| --- | --- | --- |
+| `wp civicrm db clear` | Drop all CiviCRM tables, views, functions and stored procedures from the database. | New |
+| `wp civicrm db cli` | Quickly enter the MySQL command line. | `wp civicrm sql-cli` |
+| `wp civicrm db config` | Show the CiviCRM database connection details. | `wp civicrm sql-conf` |
+| `wp civicrm db connect` | Get a string which connects to the CiviCRM database. | `wp civicrm sql-connect` |
+| `wp civicrm db drop` | Drop the CiviCRM database when it is not shared with WordPress. | New |
+| `wp civicrm db drop-tables` | Drop the CiviCRM tables from the database. | New |
+| `wp civicrm db dump` | Dump the whole CiviCRM database and print to STDOUT or save to a file. | `wp civicrm sql-dump` |
+| `wp civicrm db export` | Export the CiviCRM database and print to STDOUT or save to a file. | New |
+| `wp civicrm db functions` | Get the list of CiviCRM functions in the database. | New |
+| `wp civicrm db import` | Loads a whole CiviCRM database. | New |
+| `wp civicrm db is-shared` | Check if CiviCRM shares a database with WordPress. | New |
+| `wp civicrm db procedures` | Get the list of CiviCRM procedures in the database. | New |
+| `wp civicrm db query` | Perform a query on the CiviCRM database. | `wp civicrm sql-query` |
+| `wp civicrm db tables` | Gets a set of CiviCRM tables in the database. | New |
 
-Example: `wp civicrm process-mail-queue -u admin`
+Use `wp help civicrm db <command>` for full details and examples.
 
-#### wp civicrm rest
+### Deprecated Commands
 
-Rest interface for accessing CiviCRM APIs. It can return `xml` or `json` formatted data.
+All previous commands still exist for the time being. However, because they were attached to the top-level `wp civicrm` namespace, it seems sensible to deprecate them in favour of better-namespaced new commands. The following table shows you replacement commands:
 
-#### wp civicrm restore
+| Old Command | New Command |
+| --- | --- |
+| `wp civicrm cache-clear` | `wp civicrm cache flush` |
+| `wp civicrm disable-debug` | `wp civicrm debug disable` |
+| `wp civicrm enable-debug` | `wp civicrm debug enable` |
+| `wp civicrm install` | See [Composite Commands](#composite-commands) below |
+| `wp civicrm member-records` | `wp civicrm job member-records` or `wp civicrm job membership` |
+| `wp civicrm process-mail-queue` | `wp civicrm job process-mail-queue` or `wp civicrm job mailing` |
+| `wp civicrm restore` | Only works with backups made by `wp civicrm upgrade` |
+| `wp civicrm sql-conf` | `wp civicrm db config` or `wp civicrm db conf` |
+| `wp civicrm sql-connect` | `wp civicrm db connect` |
+| `wp civicrm sql-cli` | `wp civicrm db cli` |
+| `wp civicrm sql-dump` | `wp civicrm db dump` |
+| `wp civicrm sql-query` | `wp civicrm db query` |
+| `wp civicrm update-cfg` | `wp civicrm core update-cfg` |
+| `wp civicrm upgrade` | See [Composite Commands](#composite-commands) below |
+| `wp civicrm upgrade-db` | `wp civicrm core update-db` |
 
-Restore CiviCRM codebase and database back from the specified backup directory.
+As above, use `wp help civicrm <command>` for full details and examples.
 
-#### wp civicrm sql-conf
+### Composite Commands
 
-Show CiviCRM database connection details.
+There are two special cases in the set of old commands:
 
-#### wp civicrm sql-connect
+* `wp civicrm install`
+* `wp civicrm upgrade`
 
-A string which connects to the CiviCRM database.
+These are both composite commands.
 
-#### wp civicrm sql-cli
+The `wp civicrm install` command calls the following sequence:
 
-Quickly enter the `mysql` command line.
+1. `wp civicrm core install`
+2. `wp civicrm core activate`
 
-#### wp civicrm sql-dump
+The `wp civicrm upgrade` command calls the following sequence:
 
-Prints the whole CiviCRM database to `STDOUT` or save to a file.
+1. A custom backup procedure. Better to call `wp civicrm core backup` instead, but `wp civicrm restore` requires the custom procedure.
+2. `wp civicrm core update`
+3. `wp civicrm core update-db`
 
-#### wp civicrm sql-query
-
-Usage: `wp civicrm sql-query <query> <options>...`
-
-`<query>` is a SQL statement which can alternatively be passed via `STDIN`. Any additional arguments are passed to the `mysql` command directly.
-
-#### wp civicrm update-cfg
-
-Update `config_backend` to correct config settings, especially when the CiviCRM site has been cloned or migrated.
-
-#### wp civicrm upgrade
-
-Take backups, replace CiviCRM codebase with new specified tarfile and upgrade database by executing the CiviCRM upgrade process - `civicrm/upgrade?reset=1`. Use `wp civicrm restore` to revert to previous state in case anything goes wrong.
-
-#### wp civicrm upgrade-db
-
-Run `civicrm/upgrade?reset=1` just as a web browser would.
-
-#### wp civicrm install
-
-Command for to install CiviCRM. The install command requires that you have downloaded a tarball or zip file first.
-
-Options:
-
-```
---dbhost            MySQL host for your WordPress/CiviCRM database. Defaults to localhost.
---dbname            MySQL database name of your WordPress/CiviCRM database.
---dbpass            MySQL password for your WordPress/CiviCRM database.
---dbuser            MySQL username for your WordPress/CiviCRM database.
---lang              Default language to use for installation.
---langtarfile       Path to your l10n tar.gz file.
---site_url          Base Url for your WordPress/CiviCRM website without http (e.g. mysite.com)
---ssl               Using ssl for your WordPress/CiviCRM website if set to on (e.g. --ssl=on)
---tarfile           Path to your CiviCRM tar.gz file.
---zipfile           Path to your CiviCRM zip file.
-```
+It is preferable to call the new commands individually in the same sequence - but there may also be a case for a set of composite commands like these for commonly used sequences.
