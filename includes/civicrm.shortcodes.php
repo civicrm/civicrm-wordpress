@@ -501,7 +501,7 @@ class CiviCRM_For_WordPress_Shortcodes {
       $query = implode('&', $links);
 
       // Params are: $absolute, $frontend, $forceBackend.
-      $base_url = $this->civi->get_base_url(TRUE, FALSE, FALSE);
+      $base_url = CRM_Utils_System::getBaseUrl(TRUE, FALSE, FALSE);
 
       // Init query parts.
       $queryParts = [];

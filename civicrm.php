@@ -249,7 +249,7 @@ class CiviCRM_For_WordPress {
       // Create instance.
       self::$instance = new CiviCRM_For_WordPress();
 
-      // Include legacy global scope functions.
+      // Include global scope functions.
       include_once CIVICRM_PLUGIN_DIR . 'includes/civicrm.functions.php';
 
       // Add WP-CLI commands.
@@ -1518,16 +1518,8 @@ class CiviCRM_For_WordPress {
   /**
    * Get base URL.
    *
-   * Clone of CRM_Utils_System_WordPress::getBaseUrl() whose access is set to
-   * private. Until it is public, we cannot access the URL of the Base Page since
-   * CRM_Utils_System_WordPress::url().
-   *
-   * 27-09-2016
-   * CRM-16421 CRM-17633 WIP Changes to support WordPress in it's own directory.
-   * https://wiki.civicrm.org/confluence/display/CRM/WordPress+installed+in+its+own+directory+issues
-   * For now leave hard coded wp-admin references.
-   * TODO: remove wp-admin references and replace with admin_url() in the future.
-   * TODO: Look at best way to get path to admin_url.
+   * Clone of CRM_Utils_System_WordPress::getBaseUrl() whose access was set to
+   * private. Now that it is public, we can access that method instead.
    *
    * @since 4.4
    *
@@ -1537,6 +1529,7 @@ class CiviCRM_For_WordPress {
    * @return mixed|null|string
    */
   public function get_base_url($absolute, $frontend, $forceBackend) {
+    _deprecated_function(__METHOD__, '5.69', 'CRM_Utils_System::getBaseUrl');
     $config = CRM_Core_Config::singleton();
     if ((is_admin() && !$frontend) || $forceBackend) {
       return Civi::paths()->getUrl('[wp.backend]/.', $absolute ? 'absolute' : 'relative');
