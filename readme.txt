@@ -2,8 +2,8 @@
 Contributors: needle
 Tags: civicrm, crm
 Requires at least: 4.9
-Tested up to: 6.2
-Stable tag: 5.63
+Tested up to: 6.4
+Stable tag: 5.69
 License: AGPL3
 License URI: http://www.gnu.org/licenses/agpl-3.0.html
 
