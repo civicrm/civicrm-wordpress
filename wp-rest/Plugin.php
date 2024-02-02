@@ -343,7 +343,7 @@ class Plugin {
       ]);
 
     }
-    catch (\CiviCRM_API3_Exception $e) {
+    catch (\CRM_Core_Exception $e) {
 
       return new \WP_Error(
         'civicrm_rest_api_error',
