@@ -95,13 +95,13 @@ abstract class Base extends \WP_REST_Controller implements Endpoint_Interface {
    *
    * @since 5.25
    *
-   * @param string|\CiviCRM_API3_Exception|\WP_Error $error
+   * @param string|\CRM_Core_Exception|\WP_Error $error
    * @param mixed $data Error data
    * @return WP_Error $error
    */
   protected function civi_rest_error($error, $data = []) {
 
-    if ($error instanceof \CiviCRM_API3_Exception) {
+    if ($error instanceof \CRM_Core_Exception) {
 
       return $error->getExtraParams();
 

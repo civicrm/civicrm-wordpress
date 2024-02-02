@@ -124,7 +124,7 @@ class Rest extends Base {
     try {
       $items = civicrm_api3(...$params);
     }
-    catch (\CiviCRM_API3_Exception $e) {
+    catch (\CRM_Core_Exception $e) {
       $items = $this->civi_rest_error($e);
     }
 
