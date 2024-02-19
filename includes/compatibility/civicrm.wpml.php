@@ -107,14 +107,14 @@ class CiviCRM_For_WordPress_Compat_WPML {
   }
 
  /**
-   * Checks WPML for CiviCRM Base Page matches.
-   *
-   * @since 5.67
-   *
-   * @param bool $is_basepage TRUE if the Post ID matches the Base Page ID, FALSE otherwise.
-   * @param int $post_id The WordPress Post ID to check.
-   * @return bool $is_basepage TRUE if the Post ID matches the Base Page ID, FALSE otherwise.
-   */
+  * Checks WPML for CiviCRM Base Page matches.
+  *
+  * @since 5.70
+  *
+  * @param bool $is_basepage TRUE if the Post ID matches the Base Page ID, FALSE otherwise.
+  * @param int $post_id The WordPress Post ID to check.
+  * @return bool $is_basepage TRUE if the Post ID matches the Base Page ID, FALSE otherwise.
+  */
   public function basepage_match($is_basepage, $post_id) {
 
     // Bail if this is already the Base Page.
@@ -137,17 +137,17 @@ class CiviCRM_For_WordPress_Compat_WPML {
   }
 
  /**
-   * Filters the CiviCRM Base URL for the current language reported by WPML
-   *
-   * Only filters URLs that point to the front-end/back-end, since WordPress admin URLs are
-   * rewritten by WPML.
-   *
-   * @since 5.67
-   *
-   * @param str $url The URL as built by CiviCRM.
-   * @param bool $admin_request True if building an admin URL, false otherwise.
-   * @return str $url The URL as modified by WPML.
-   */
+  * Filters the CiviCRM Base URL for the current language reported by WPML
+  *
+  * Only filters URLs that point to the front-end/back-end, since WordPress admin URLs are
+  * rewritten by WPML.
+  *
+  * @since 5.70
+  *
+  * @param str $url The URL as built by CiviCRM.
+  * @param bool $admin_request True if building an admin URL, false otherwise.
+  * @return str $url The URL as modified by WPML.
+  */
   public function base_url_filter($url, $admin_request) {
 
     // Skip when not defined.
@@ -182,14 +182,14 @@ class CiviCRM_For_WordPress_Compat_WPML {
 
   }
 
-  /**
-   * Support WPML.
-   *
-   * @since 5.55.0
-   *
-   * @param bool $flush_rewrite_rules True if rules flushed, false otherwise.
-   * @param WP_Post $basepage The Base Page post object.
-   */
+ /**
+  * Setup the rewrite rules for WPML.
+  *
+  * @since 5.70
+  *
+  * @param bool $flush_rewrite_rules True if rules flushed, false otherwise.
+  * @param WP_Post $basepage The Base Page post object.
+  */
   public function rewrite_rules_wpml($flush_rewrite_rules, $basepage) {
 
     // Bail if WPML is not present.
@@ -219,19 +219,21 @@ class CiviCRM_For_WordPress_Compat_WPML {
     foreach ($wpml_active as $slug => $data) {
       $language_url = $sitepress->convert_url($basepage_raw_url, $slug);
       $parsed_url = wp_parse_url($language_url, PHP_URL_PATH);
-     $regex_path = substr($parsed_url, 1);
+      $regex_path = substr($parsed_url, 1);
 
       // Determine if there is a translation path
       $post_id = apply_filters('wpml_object_id', $basepage->ID, 'page', FALSE, $slug);
       if ($post_id == $basepage->ID) {
         $collected_rewrites[$post_id][] = $regex_path;
-      } else {
+      }
+      else {
         $url = get_permalink($post_id);
         $url = $sitepress->convert_url($url, $slug);
         $parsed_url = wp_parse_url($url, PHP_URL_PATH);
         $regex_path = substr($parsed_url, 1);
         $collected_rewrites[$post_id][] = $regex_path;
-     }
+      }
+
     };
 
     // Make collection unique and add remaining rewrite rules.
@@ -255,13 +257,14 @@ class CiviCRM_For_WordPress_Compat_WPML {
     }
   }
 
-  /**
-   * icl_ls_languages WPML Filter
-   *
-   * Rewrite all CiviCRM URLs to contain the proper language structure based on the WPML settings
-   *
-   * @param array $languages passed by WPML to modify current path
-   */
+ /**
+  * icl_ls_languages WPML Filter
+  * Rewrite all CiviCRM URLs to contain the proper language structure based on the WPML settings
+  *
+  * @since 5.70
+  *
+  * @param array $languages passed by WPML to modify current path
+  */
   public function rewrite_civicrm_urls_wpml($languages) {
 
     // Get the post slug
@@ -313,15 +316,17 @@ class CiviCRM_For_WordPress_Compat_WPML {
     return $languages;
   }
 
-  /**
-   * Remove Language from URL based on WPML configuration
-   *
-   * @param $url passed URL to strip language from
-   * @param object $sitepress WPML class
-   * @param int $wpml_negotiation language negotiation setting in WPML
-   *
-   * @return $url base page url without language
-   */
+ /**
+  * Remove Language from URL based on WPML configuration
+  *
+  * @since 5.70
+  *
+  * @param $url passed URL to strip language from
+  * @param object $sitepress WPML class
+  * @param int $wpml_negotiation language negotiation setting in WPML
+  *
+  * @return $url base page url without language
+  */
   private function wpml_remove_language_from_url($url, $sitepress, $wpml_negotiation) {
     $lang = $this->wpml_get_language_param_for_convert_url($sitepress);
     if ($lang) {
@@ -336,12 +341,14 @@ class CiviCRM_For_WordPress_Compat_WPML {
     return $url;
   }
 
-  /**
-   * Get Language for WPML.
-   * This code was taken from the WPML source, because it couldn't be referenced directly
-   *
-   * @param object $sitepress reference to WPML class
-   */
+ /**
+  * Get Language for WPML.
+  * This code was taken from the WPML source, because it couldn't be referenced directly
+  *
+  * @since 5.70
+  *
+  * @param object $sitepress reference to WPML class
+  */
   private function wpml_get_language_param_for_convert_url($sitepress) {
     if (!empty($sitepress)) {
       if (isset($_GET['lang'])) {
