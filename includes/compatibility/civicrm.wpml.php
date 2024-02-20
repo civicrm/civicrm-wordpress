@@ -37,6 +37,15 @@ class CiviCRM_For_WordPress_Compat_WPML {
   public $civi;
 
   /**
+   * @var array
+   * Collected rewrites.
+   * @since 5.66
+   * @access private
+   */
+  private $rewrites = [];
+
+
+  /**
    * Instance constructor.
    *
    * @since 5.66
@@ -237,7 +246,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
     };
 
     // Make collection unique and add remaining rewrite rules.
-    $rewrites = array_map('array_unique', $collected_rewrites);
+    $this->rewrites = array_map('array_unique', $collected_rewrites);
     if (!empty($rewrites)) {
       foreach ($rewrites as $post_id => $rewrite) {
         foreach ($rewrite as $path) {
@@ -249,7 +258,6 @@ class CiviCRM_For_WordPress_Compat_WPML {
         }
       }
     }
-    $this->rewrites = $rewrites;
 
     // Maybe force flush.
     if ($flush_rewrite_rules) {
@@ -328,7 +336,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
    * @return $url base page url without language
    */
   private function wpml_remove_language_from_url($url, $sitepress, $wpml_negotiation) {
-    $lang = $this->wpml_get_language_param_for_convert_url($sitepress);
+    $lang = apply_filters( 'wpml_current_language', null );
     if ($lang) {
       if ($wpml_negotiation == 1) {
         $url = str_replace('/' . $lang . '/', '/', $url);
@@ -339,31 +347,6 @@ class CiviCRM_For_WordPress_Compat_WPML {
     }
 
     return $url;
-  }
-
-  /**
-   * Get Language for WPML.
-   * This code was taken from the WPML source, because it couldn't be referenced directly
-   *
-   * @since 5.70
-   *
-   * @param object $sitepress reference to WPML class
-   */
-  private function wpml_get_language_param_for_convert_url($sitepress) {
-    if (!empty($sitepress)) {
-      if (isset($_GET['lang'])) {
-        return filter_var($_GET['lang'], FILTER_SANITIZE_STRING);
-      }
-
-      if (is_multisite() && isset($_POST['lang'])) {
-        return filter_var($_POST['lang'], FILTER_SANITIZE_STRING);
-      }
-
-      if (is_multisite() && defined('SUBDOMAIN_INSTALL') && SUBDOMAIN_INSTALL) {
-        return $sitepress->get_current_language();
-      }
-    }
-    return NULL;
   }
 
 }
