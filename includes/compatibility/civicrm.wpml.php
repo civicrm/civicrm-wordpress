@@ -102,7 +102,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
    */
   public function rewrite_rules($flush_rewrite_rules, $basepage) {
 
-    global $sitepress;
+    global $sitepress, $wpml_url_filters, $wpml_url_converter;
 
     /*
      * Collect all rewrite rules into an array.
@@ -116,29 +116,50 @@ class CiviCRM_For_WordPress_Compat_WPML {
     // Grab information about configuration.
     $wpml_active = apply_filters('wpml_active_languages', NULL);
 
-    // Obtain language negotiation setting.
-    $wpml_negotiation = apply_filters('wpml_setting', NULL, 'language_negotiation_type');
-
     // Support prefixes for a single Base Page.
+		$wpml_url_filters->remove_global_hooks();
+		remove_filter('page_link', [$wpml_url_filters, 'page_link_filter'], 1);
     $basepage_url = get_permalink($basepage->ID);
-    $basepage_raw_url = $this->remove_language_from_link($basepage_url, $sitepress, $wpml_negotiation);
+		add_filter('page_link', [$wpml_url_filters, 'page_link_filter'], 1, 2);
+		$wpml_url_filters->add_global_hooks();
     foreach ($wpml_active as $slug => $data) {
-      $language_url = $sitepress->convert_url($basepage_raw_url, $slug);
+      $language_url = $sitepress->convert_url($basepage_url, $slug);
       $parsed_url = wp_parse_url($language_url, PHP_URL_PATH);
       $regex_path = substr($parsed_url, 1);
-
-      // Determine if there is a translation path.
+      $collected_rewrites[$basepage->ID][] = $regex_path;
       $post_id = apply_filters('wpml_object_id', $basepage->ID, 'page', FALSE, $slug);
-      if ($post_id == $basepage->ID) {
+      if (!empty($post_id)) {
         $collected_rewrites[$post_id][] = $regex_path;
       }
-      else {
-        $url = get_permalink($post_id);
-        $url = $sitepress->convert_url($url, $slug);
-        $parsed_url = wp_parse_url($url, PHP_URL_PATH);
-        $regex_path = substr($parsed_url, 1);
-        $collected_rewrites[$post_id][] = $regex_path;
+    }
+
+    // Support prefixes for Base Pages in multiple languages.
+    foreach ($wpml_active as $slug => $data) {
+
+      // Determine if there is a translation.
+      $post_id = apply_filters('wpml_object_id', $basepage->ID, 'page', FALSE, $slug);
+      if (empty($post_id)) {
+        continue;
       }
+
+      // Get the regex path for the unfiltered permalink.
+      $wpml_url_filters->remove_global_hooks();
+      remove_filter('page_link', [$wpml_url_filters, 'page_link_filter'], 1);
+      $url = get_permalink($post_id);
+      add_filter('page_link', [$wpml_url_filters, 'page_link_filter'], 1, 2);
+      $wpml_url_filters->add_global_hooks();
+      $parsed_url = wp_parse_url($url, PHP_URL_PATH);
+      $regex_path = substr($parsed_url, 1);
+
+      // Get the regex path for the converted permalink.
+      $converted_url = $sitepress->convert_url($url, $slug);
+      $parsed_url = wp_parse_url($converted_url, PHP_URL_PATH);
+      $regex_path_converted = substr($parsed_url, 1);
+
+      $collected_rewrites[$basepage->ID][] = $regex_path;
+      $collected_rewrites[$basepage->ID][] = $regex_path_converted;
+      $collected_rewrites[$post_id][] = $regex_path;
+      $collected_rewrites[$post_id][] = $regex_path_converted;
 
     }
 
@@ -253,7 +274,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
   }
 
   /**
-   * Filters the CiviCRM Base URL for the current language reported by WPML
+   * Filters the CiviCRM Base URL for the current language reported by WPML.
    *
    * Only filters URLs that point to the front-end/back-end, since WordPress admin URLs are
    * rewritten by WPML.
@@ -274,6 +295,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
     // Grab WPML language slug.
     $slug = '';
     $languages = apply_filters('wpml_active_languages', NULL);
+
     foreach ($languages as $id => $language) {
       if ($language['active']) {
         $slug = $id;
@@ -285,12 +307,12 @@ class CiviCRM_For_WordPress_Compat_WPML {
       return $url;
     }
 
-    // Obtain language negotiation setting.
+    // Obtain lagnuage negotiation setting
     $wpml_negotiation = apply_filters('wpml_setting', NULL, 'language_negotiation_type');
 
     // Build the modified URL.
     global $sitepress;
-    $raw_url = $this->remove_language_from_link($url, $sitepress, $wpml_negotiation);
+    $raw_url = $this->remove_language_from_url($url, $sitepress, $wpml_negotiation);
     $language_url = $sitepress->convert_url($raw_url, $slug);
 
     return $language_url;
