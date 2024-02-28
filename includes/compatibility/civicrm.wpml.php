@@ -276,7 +276,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
   /**
    * Filters the CiviCRM Base URL for the current language reported by WPML.
    *
-   * Only filters URLs that point to the front-end/back-end, since WordPress admin URLs are
+   * Only filters URLs that point to the front-end, since WordPress admin URLs are not
    * rewritten by WPML.
    *
    * @since 5.72
@@ -287,33 +287,47 @@ class CiviCRM_For_WordPress_Compat_WPML {
    */
   public function base_url_filter($url, $admin_request) {
 
+    global $sitepress, $wpml_url_filters;
+
     // Skip when not defined.
-    if (empty($url)) {
+    if (empty($url) || $admin_request) {
       return $url;
     }
 
-    // Grab WPML language slug.
-    $slug = '';
-    $languages = apply_filters('wpml_active_languages', NULL);
+    // Determine the language code.
+    $code = apply_filters('wpml_current_language', NULL);
+    if (empty($code)) {
+      return $url;
+    }
+    if ($code === 'all') {
+      $code = apply_filters('wpml_default_language', NULL);
+    }
 
-    foreach ($languages as $id => $language) {
-      if ($language['active']) {
-        $slug = $id;
+    // Get the converted URL.
+    $language_url = $sitepress->convert_url($url, $code);
+
+    // Let's use that if there are no rewrites.
+    if (empty($this->rewrites)) {
+      return $language_url;
+    }
+
+    // Let's find the Base Page in the appropriate language.
+    $parsed_url = wp_parse_url($language_url, PHP_URL_PATH);
+    $regex_path = trailingslashit(substr($parsed_url, 1));
+    foreach (array_reverse($this->rewrites, TRUE) as $page_id => $rewrite) {
+      if (in_array($regex_path, $rewrite)) {
+        $post_id = $page_id;
         break;
       }
     }
 
-    if (empty($slug)) {
-      return $url;
+    // Bail if we don't find the post.
+    if (empty($post_id)) {
+      return $language_url;
     }
 
-    // Obtain lagnuage negotiation setting
-    $wpml_negotiation = apply_filters('wpml_setting', NULL, 'language_negotiation_type');
-
-    // Build the modified URL.
-    global $sitepress;
-    $raw_url = $this->remove_language_from_url($url, $sitepress, $wpml_negotiation);
-    $language_url = $sitepress->convert_url($raw_url, $slug);
+    // Get the Base Page permalink in the right language.
+    $language_url = get_permalink($post_id);
 
     return $language_url;
 
