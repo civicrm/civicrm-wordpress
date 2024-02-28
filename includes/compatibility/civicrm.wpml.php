@@ -102,7 +102,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
    */
   public function rewrite_rules($flush_rewrite_rules, $basepage) {
 
-    global $sitepress, $wpml_url_filters, $wpml_url_converter;
+    global $sitepress, $wpml_url_filters;
 
     /*
      * Collect all rewrite rules into an array.
@@ -194,7 +194,6 @@ class CiviCRM_For_WordPress_Compat_WPML {
    */
   public function basepage_urls_rebuild($languages) {
 
-    // Get the current post.
     global $post, $sitepress;
 
     // We need the current Post object.
@@ -367,33 +366,6 @@ class CiviCRM_For_WordPress_Compat_WPML {
     }
 
     return $locale;
-
-  }
-
-  /**
-   * Remove Language from URL based on WPML configuration
-   *
-   * @since 5.72
-   *
-   * @param $url passed URL to strip language from
-   * @param object $sitepress WPML class
-   * @param int $wpml_negotiation language negotiation setting in WPML
-   *
-   * @return $url base page url without language
-   */
-  private function remove_language_from_link($url, $sitepress, $wpml_negotiation) {
-
-    $lang = apply_filters('wpml_current_language', NULL);
-    if ($lang) {
-      if ($wpml_negotiation == 1) {
-        $url = str_replace('/' . $lang . '/', '/', $url);
-      }
-      elseif ($wpml_negotiation == 3) {
-        $url = str_replace('lang=' . $lang, '', $url);
-      }
-    }
-
-    return $url;
 
   }
 
