@@ -83,7 +83,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
 
     // Register WPML compatibility callbacks.
     add_action('civicrm_after_rewrite_rules', [$this, 'rewrite_rules'], 10, 2);
-    add_filter('icl_ls_languages', [$this, 'rewrite_civicrm_urls']);
+    add_filter('icl_ls_languages', [$this, 'basepage_urls_rebuild']);
 
     // Register specific CiviCRM callbacks.
     add_filter('civicrm/basepage/match', [$this, 'basepage_match'], 10, 2);
@@ -117,11 +117,11 @@ class CiviCRM_For_WordPress_Compat_WPML {
     $wpml_active = apply_filters('wpml_active_languages', NULL);
 
     // Support prefixes for a single Base Page.
-		$wpml_url_filters->remove_global_hooks();
-		remove_filter('page_link', [$wpml_url_filters, 'page_link_filter'], 1);
+    $wpml_url_filters->remove_global_hooks();
+    remove_filter('page_link', [$wpml_url_filters, 'page_link_filter'], 1);
     $basepage_url = get_permalink($basepage->ID);
-		add_filter('page_link', [$wpml_url_filters, 'page_link_filter'], 1, 2);
-		$wpml_url_filters->add_global_hooks();
+    add_filter('page_link', [$wpml_url_filters, 'page_link_filter'], 1, 2);
+    $wpml_url_filters->add_global_hooks();
     foreach ($wpml_active as $slug => $data) {
       $language_url = $sitepress->convert_url($basepage_url, $slug);
       $parsed_url = wp_parse_url($language_url, PHP_URL_PATH);
@@ -185,59 +185,74 @@ class CiviCRM_For_WordPress_Compat_WPML {
   }
 
   /**
-   * icl_ls_languages WPML Filter
-   * Rewrite all CiviCRM URLs to contain the proper language structure based on the WPML settings
+   * Fixes the CiviCRM Base Page URLs in the WPML language switcher.
    *
    * @since 5.72
    *
-   * @param array $languages passed by WPML to modify current path
+   * @param array $languages The array of language data for the current query.
+   * @return array $languages The modified array of language data for the current query.
    */
-  public function rewrite_civicrm_urls($languages) {
+  public function basepage_urls_rebuild($languages) {
 
-    // Get the post slug.
-    global $post;
-    $post_slug = isset($post->post_name) ? $post->post_name : '';
-    if (empty($post_slug) && isset($post->post_name)) {
-      $post_slug = $post->post_name;
+    // Get the current post.
+    global $post, $sitepress;
+
+    // We need the current Post object.
+    if (empty($post) || !($post instanceof WP_Post)) {
+      return $languages;
     }
 
-    // Get CiviCRM basepage slug.
-    $civicrm_slug = apply_filters('civicrm_basepage_slug', 'civicrm');
+    // Skip unless on Base Page.
+    if (!civi_wp()->basepage->is_match($post->ID)) {
+      return $languages;
+    }
 
-    // Obtain WPML language negotiation setting.
-    $wpml_negotiation = apply_filters('wpml_setting', NULL, 'language_negotiation_type');
+    // Get the canonical Base Page URL in the current language.
+    $permalink = get_permalink($post->ID);
+    $canonical = htmlspecialchars_decode(civi_wp()->basepage->basepage_canonical_url($permalink));
 
-    // If this is a CiviCRM Page then let's modify the actual path.
-    if ($post_slug == $civicrm_slug) {
-      global $sitepress;
-      $current_url = explode("?", $_SERVER['REQUEST_URI']);
-      $civicrm_url = get_site_url(NULL, $current_url[0]);
-
-      // Remove language from path.
-      $wpml_negotiation = apply_filters('wpml_setting', NULL, 'language_negotiation_type');
-      $civicrm_url = $this->remove_language_from_link($civicrm_url, $sitepress, $wpml_negotiation);
-
-      // Build query string.
-      $qs = [];
-      parse_str($_SERVER["QUERY_STRING"], $qs);
-
-      // Strip any WPML languages if they exist.
-      unset($qs['lang']);
-      $query = http_build_query($qs);
-
-      // Rebuild CiviCRM links for each language.
-      foreach ($languages as &$language) {
-        $url = apply_filters('wpml_permalink', $civicrm_url, $language['language_code']);
-        if (!empty($query)) {
-          if ($wpml_negotiation == 3 && strpos($url, '?') !== FALSE) {
-            $language['url'] = $url . '&' . $query;
-          }
-          else {
-            $language['url'] = $url . '?' . $query;
-          }
-        }
+    // Let's deal with this first.
+    foreach ($languages as &$language) {
+      if ($language['active']) {
+        $language['url'] = $canonical;
       }
     }
+
+    // We do not want to filter Base Page URL.
+    remove_filter('civicrm/core/url/base', [$this, 'base_url_filter'], 10);
+
+    // Now handle remaining languages.
+    foreach ($languages as &$language) {
+      if ($language['active']) {
+        continue;
+      }
+
+      // WPML will return the "naked" URL to the translated Base Page.
+      $language_url = $sitepress->convert_url($canonical, $language['language_code']);
+
+      /**
+       * A custom callback that returns the translated Base Page URL.
+       *
+       * @since 5.72
+       *
+       * @param str $url The URL as built by CiviCRM.
+       * @param bool $admin_request True if building an admin URL, false otherwise.
+       * @return str $url The URL as modified by WPML.
+       */
+      $closure = function($url, $admin_request) use (&$language) {
+        return $language['url'];
+      };
+
+      // Use the unmodified canonical URL.
+      add_filter('civicrm/core/url/base', $closure, 10, 2);
+      $canonical = htmlspecialchars_decode(civi_wp()->basepage->basepage_canonical_url($language_url));
+      remove_filter('civicrm/core/url/base', $closure, 10);
+      $language['url'] = $canonical;
+
+    }
+
+    // Reinstate Base Page URL filter.
+    add_filter('civicrm/core/url/base', [$this, 'base_url_filter'], 10, 2);
 
     return $languages;
 
