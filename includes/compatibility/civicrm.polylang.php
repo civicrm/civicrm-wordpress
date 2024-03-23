@@ -184,8 +184,13 @@ class CiviCRM_For_WordPress_Compat_Polylang {
       return $redirect_url;
     }
 
-    // Bail if this is not a Base Page.
+    // Bail if there is no Post object.
     $post = get_post();
+    if (!($post instanceof WP_Post)) {
+      return $redirect_url;
+    }
+
+    // Bail if this is not a Base Page.
     if (!empty($this->rewrites)) {
       foreach ($this->rewrites as $post_id => $rewrite) {
         if ($post_id === $post->ID) {
