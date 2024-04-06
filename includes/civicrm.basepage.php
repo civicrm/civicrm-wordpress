@@ -406,6 +406,13 @@ class CiviCRM_For_WordPress_Basepage {
         // Determine if the current Post is the Base Page.
         $is_basepage = $this->is_match($post->ID);
 
+        // Check permission.
+        $denied = TRUE;
+        $argdata = $this->civi->get_request_args();
+        if ($this->civi->users->check_permission($argdata['args'])) {
+          $denied = FALSE;
+        }
+
         // Skip when this is not the Base Page or when "Base Page mode" is not forced or not in "legacy mode".
         if ($is_basepage || $basepage_mode || $shortcode_mode === 'legacy') {
 
@@ -494,9 +501,8 @@ class CiviCRM_For_WordPress_Basepage {
     // Regardless of URL, load page template.
     add_filter('template_include', [$this, 'basepage_template'], 999);
 
-    // Check permission.
-    $argdata = $this->civi->get_request_args();
-    if (!$this->civi->users->check_permission($argdata['args'])) {
+    // Show content based on permission.
+    if ($denied) {
 
       // Do not show content.
       add_filter('the_content', [$this->civi->users, 'get_permission_denied']);
