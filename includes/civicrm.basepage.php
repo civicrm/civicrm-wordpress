@@ -376,6 +376,13 @@ class CiviCRM_For_WordPress_Basepage {
     // Set a "found" flag.
     $basepage_found = FALSE;
 
+    // Check permission.
+    $denied = TRUE;
+    $argdata = $this->civi->get_request_args();
+    if ($this->civi->users->check_permission($argdata['args'])) {
+      $denied = FALSE;
+    }
+
     // Get the Shortcode Mode setting.
     $shortcode_mode = $this->civi->admin->get_shortcode_mode();
 
@@ -405,13 +412,6 @@ class CiviCRM_For_WordPress_Basepage {
 
         // Determine if the current Post is the Base Page.
         $is_basepage = $this->is_match($post->ID);
-
-        // Check permission.
-        $denied = TRUE;
-        $argdata = $this->civi->get_request_args();
-        if ($this->civi->users->check_permission($argdata['args'])) {
-          $denied = FALSE;
-        }
 
         // Skip when this is not the Base Page or when "Base Page mode" is not forced or not in "legacy mode".
         if ($is_basepage || $basepage_mode || $shortcode_mode === 'legacy') {
