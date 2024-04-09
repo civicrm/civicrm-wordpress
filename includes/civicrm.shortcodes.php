@@ -61,6 +61,14 @@ class CiviCRM_For_WordPress_Shortcodes {
   public $shortcode_in_post = [];
 
   /**
+   * @var array
+   * Simple flag to note that Shortcode parsing has occurred.
+   * @since 4.6
+   * @access public
+   */
+  public $shortcodes_parsed = FALSE;
+
+  /**
    * Instance constructor.
    *
    * @since 4.6
