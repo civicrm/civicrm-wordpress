@@ -1479,7 +1479,7 @@ class CiviCRM_For_WordPress {
      * @param bool $non_page Boolean TRUE for requests that CiviCRM should not render as a "page".
      * @param array $argdata Boolean The arguments and request string from query vars.
      */
-    $non_page = apply_filters('civicrm_is_page_request', $non_page, $argdata);
+    $non_page = apply_filters('civicrm_is_non_page_request', $non_page, $argdata);
 
     if ($non_page) {
       $is_page = FALSE;
