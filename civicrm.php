@@ -1451,7 +1451,7 @@ class CiviCRM_For_WordPress {
      * unnecessary?
      */
     if (CRM_Utils_Array::value('HTTP_X_REQUESTED_WITH', $_SERVER) === 'XMLHttpRequest'
-        || ($argdata['args'][0] === 'civicrm' && in_array($argdata['args'][1], ['ajax', 'file']))
+        || ($argdata['args'][0] === 'civicrm' && in_array($argdata['args'][1], ['ajax', 'file', 'asset']))
         // phpcs:disable WordPress.Security.NonceVerification.Recommended
         || !empty($_REQUEST['snippet'])
         // phpcs:enable WordPress.Security.NonceVerification.Recommended
