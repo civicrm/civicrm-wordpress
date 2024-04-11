@@ -1419,30 +1419,27 @@ class CiviCRM_For_WordPress {
    *
    * @since 4.4
    *
-   * @return boolean True if request is for a CiviCRM page, false otherwise.
+   * @return boolean $is_page True if request is for a CiviCRM page, false otherwise.
    */
   public function is_page_request() {
 
     // Assume not a CiviCRM page.
-    $return = FALSE;
+    $is_page = FALSE;
 
-    // Kick out if not CiviCRM.
+    // Bail if no CiviCRM.
     if (!$this->initialize()) {
       return $return;
     }
 
-    // Get args.
+    // Get request args.
     $argdata = $this->get_request_args();
 
-    // Grab query var.
+    // Try and populate "html" query var for testing snippet requests.
     $html = get_query_var('html');
     if (empty($html)) {
       // We do not use $html apart to test for empty.
-      // phpcs:disable WordPress.Security.NonceVerification.Recommended
-      // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+      // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
       $html = isset($_GET['html']) ? wp_unslash($_GET['html']) : '';
-      // phpcs:enable WordPress.Security.NonceVerification.Recommended
-      // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
     }
 
     /*
@@ -1450,21 +1447,48 @@ class CiviCRM_For_WordPress {
      * pages. Maybe the menu-XML should include some metadata to make this
      * unnecessary?
      */
-    if (CRM_Utils_Array::value('HTTP_X_REQUESTED_WITH', $_SERVER) === 'XMLHttpRequest'
-        || ($argdata['args'][0] === 'civicrm' && in_array($argdata['args'][1], ['ajax', 'file', 'asset']))
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended
-        || !empty($_REQUEST['snippet'])
-        // phpcs:enable WordPress.Security.NonceVerification.Recommended
-        || strpos($argdata['argString'], 'civicrm/event/ical') === 0 && empty($html)
-        || strpos($argdata['argString'], 'civicrm/contact/imagefile') === 0
-    ) {
-      $return = FALSE;
+
+    // Is this an AJAX request?
+    $is_ajax = (CRM_Utils_Array::value('HTTP_X_REQUESTED_WITH', $_SERVER) === 'XMLHttpRequest') ? TRUE : FALSE;
+
+    // Is this a non-page CiviCRM path?
+    $paths = ['ajax', 'file', 'asset'];
+    $is_civicrm_path = ($argdata['args'][0] === 'civicrm' && in_array($argdata['args'][1], $paths)) ? TRUE : FALSE;
+
+    // Is this a CiviCRM "snippet" request?
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    $is_snippet = !empty($_REQUEST['snippet']) ? TRUE : FALSE;
+
+    // Is this a CiviCRM iCal file request?
+    $is_ical = (strpos($argdata['argString'], 'civicrm/event/ical') === 0 && empty($html)) ? TRUE : FALSE;
+
+    // Is this a CiviCRM image file request?
+    $is_image = (strpos($argdata['argString'], 'civicrm/contact/imagefile') === 0) ? TRUE : FALSE;
+
+    // Any one of the above conditions being true means this is a "non-page" request.
+    $non_page = ($is_ajax || $is_civicrm_path || $is_snippet || $is_ical || $is_image) ? TRUE : FALSE;
+
+    /**
+     * Filter the result of the "non-page" checks.
+     *
+     * This filter can be used to force CiviCRM into considering a given request to be
+     * a "non-page" request (return TRUE) or a "page" request (return FALSE).
+     *
+     * @since 5.74
+     *
+     * @param bool $non_page Boolean TRUE for requests that CiviCRM should not render as a "page".
+     * @param array $argdata Boolean The arguments and request string from query vars.
+     */
+    $non_page = apply_filters('civicrm_is_page_request', $non_page, $argdata);
+
+    if ($non_page) {
+      $is_page = FALSE;
     }
     else {
-      $return = TRUE;
+      $is_page = TRUE;
     }
 
-    return $return;
+    return $is_page;
 
   }
 
