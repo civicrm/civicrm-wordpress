@@ -61,6 +61,14 @@ class CiviCRM_For_WordPress_Shortcodes {
   public $shortcode_in_post = [];
 
   /**
+   * @var array
+   * Simple flag to note that Shortcode parsing has occurred.
+   * @since 4.6
+   * @access public
+   */
+  public $shortcodes_parsed = FALSE;
+
+  /**
    * Instance constructor.
    *
    * @since 4.6
@@ -486,54 +494,13 @@ class CiviCRM_For_WordPress_Shortcodes {
     // Default to no class.
     $class = '';
 
-    // Access CiviCRM config object.
-    $config = CRM_Core_Config::singleton();
-
     // Do we have multiple Shortcodes?
     if ($multiple !== 0) {
 
-      $links = [];
-      foreach ($args as $var => $arg) {
-        if (!empty($arg) && $var !== 'q') {
-          $links[] = $var . '=' . $arg;
-        }
-      }
-      $query = implode('&', $links);
-
-      // Params are: $absolute, $frontend, $forceBackend.
-      $base_url = CRM_Utils_System::getBaseUrl(TRUE, FALSE, FALSE);
-
-      // Init query parts.
-      $queryParts = [];
-
-      // When not using Clean URLs.
-      if (!$config->cleanURL) {
-
-        // Construct query parts.
-        $queryParts[] = 'civiwp=CiviCRM';
-        if (isset($args['q'])) {
-          $queryParts[] = 'q=' . $args['q'];
-        }
-        if (isset($query)) {
-          $queryParts[] = $query;
-        }
-
-        // Construct link.
-        $link = trailingslashit($base_url) . '?' . implode('&', $queryParts);
-
-      }
-      else {
-
-        // Clean URLs.
-        if (isset($args['q'])) {
-          $base_url = trailingslashit($base_url) . str_replace('civicrm/', '', $args['q']) . '/';
-        }
-        if (isset($query)) {
-          $queryParts[] = $query;
-        }
-        $link = $base_url . '?' . implode('&', $queryParts);
-
-      }
+      // Build link to Base Page.
+      $path = $args['q'];
+      unset($args['q']);
+      $link = civicrm_basepage_url($path, $args, TRUE, NULL, FALSE);
 
       // Add a class for styling purposes.
       $class = ' civicrm-shortcode-multiple';
@@ -589,7 +556,7 @@ class CiviCRM_For_WordPress_Shortcodes {
     $footer = '';
 
     // Test config object for setting.
-    if (1 === (int) $config->empoweredBy) {
+    if (1 === (int) CRM_Core_Config::singleton()->empoweredBy) {
 
       // Footer enabled - define it.
       $civi = __('CiviCRM.org - Growing and Sustaining Relationships', 'civicrm');

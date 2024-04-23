@@ -376,6 +376,13 @@ class CiviCRM_For_WordPress_Basepage {
     // Set a "found" flag.
     $basepage_found = FALSE;
 
+    // Check permission.
+    $denied = TRUE;
+    $argdata = $this->civi->get_request_args();
+    if ($this->civi->users->check_permission($argdata['args'])) {
+      $denied = FALSE;
+    }
+
     // Get the Shortcode Mode setting.
     $shortcode_mode = $this->civi->admin->get_shortcode_mode();
 
@@ -494,9 +501,8 @@ class CiviCRM_For_WordPress_Basepage {
     // Regardless of URL, load page template.
     add_filter('template_include', [$this, 'basepage_template'], 999);
 
-    // Check permission.
-    $argdata = $this->civi->get_request_args();
-    if (!$this->civi->users->check_permission($argdata['args'])) {
+    // Show content based on permission.
+    if ($denied) {
 
       // Do not show content.
       add_filter('the_content', [$this->civi->users, 'get_permission_denied']);
