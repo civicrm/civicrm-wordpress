@@ -74,7 +74,7 @@ class CLI_Tools_CiviCRM_Command_DB extends CLI_Tools_CiviCRM_Command {
   public function clear($args, $assoc_args) {
 
     // Let's give folks a chance to bail.
-    WP_CLI::confirm(WP_CLI::colorize('%GAre you sure you want to all CiviCRM entities from the database?%n'), $assoc_args);
+    WP_CLI::confirm(WP_CLI::colorize('%GAre you sure you want to clear all CiviCRM entities from the database?%n'), $assoc_args);
 
     // Get all CiviCRM database entities.
     $functions = $this->cividb_functions_get();
