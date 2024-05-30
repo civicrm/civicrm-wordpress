@@ -39,7 +39,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
   /**
    * @var array
    * Collected rewrites.
-   * @since 5.72
+   * @since 5.75
    * @access private
    */
   private $rewrites = [];
@@ -95,7 +95,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
   /**
    * Setup the rewrite rules for WPML.
    *
-   * @since 5.72
+   * @since 5.75
    *
    * @param bool $flush_rewrite_rules True if rules flushed, false otherwise.
    * @param WP_Post $basepage The Base Page post object.
@@ -187,7 +187,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
   /**
    * Fixes the CiviCRM Base Page URLs in the WPML language switcher.
    *
-   * @since 5.72
+   * @since 5.75
    *
    * @param array $languages The array of language data for the current query.
    * @return array $languages The modified array of language data for the current query.
@@ -232,7 +232,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
       /**
        * A custom callback that returns the translated Base Page URL.
        *
-       * @since 5.72
+       * @since 5.75
        *
        * @param str $url The URL as built by CiviCRM.
        * @param bool $admin_request True if building an admin URL, false otherwise.
@@ -260,7 +260,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
   /**
    * Checks WPML for CiviCRM Base Page matches.
    *
-   * @since 5.72
+   * @since 5.75
    *
    * @param bool $is_basepage TRUE if the Post ID matches the Base Page ID, FALSE otherwise.
    * @param int $post_id The WordPress Post ID to check.
@@ -293,7 +293,7 @@ class CiviCRM_For_WordPress_Compat_WPML {
    * Only filters URLs that point to the front-end, since WordPress admin URLs are not
    * rewritten by WPML.
    *
-   * @since 5.72
+   * @since 5.75
    *
    * @param str $url The URL as built by CiviCRM.
    * @param bool $admin_request True if building an admin URL, false otherwise.
