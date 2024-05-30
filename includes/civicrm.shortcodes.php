@@ -155,6 +155,16 @@ class CiviCRM_For_WordPress_Shortcodes {
 
         global $post;
 
+        /**
+         * Filters the Post content.
+         *
+         * @since 5.75
+         *
+         * @param string $post_content The Post content.
+         * @param WP_Post $post The WordPress Post object.
+         */
+        $post->post_content = apply_filters('civicrm_prerender_post_content', $post->post_content, $post);
+
         // Check for existence of Shortcode in content.
         if (has_shortcode($post->post_content, 'civicrm')) {
 
