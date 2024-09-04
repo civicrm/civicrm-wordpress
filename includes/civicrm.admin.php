@@ -264,7 +264,7 @@ class CiviCRM_For_WordPress_Admin {
           'ctrl' => menu_page_url('civicrm-install', FALSE),
           'res' => CIVICRM_PLUGIN_URL . 'civicrm/' . strtr($setupPath, DIRECTORY_SEPARATOR, '/') . '/res/',
           'jquery.js' => CIVICRM_PLUGIN_URL . 'civicrm/bower_components/jquery/dist/jquery.min.js',
-          'font-awesome.css' => CIVICRM_PLUGIN_URL . 'civicrm/bower_components/font-awesome/css/font-awesome.min.css',
+          'font-awesome.css' => CIVICRM_PLUGIN_URL . 'civicrm/bower_components/font-awesome/css/all.min.css',
           'finished' => admin_url('admin.php?page=CiviCRM&q=civicrm&reset=1'),
         ]);
         \Civi\Setup\BasicRunner::run($ctrl);
