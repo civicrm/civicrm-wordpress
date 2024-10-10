@@ -147,6 +147,9 @@ class CiviCRM_For_WordPress_Admin {
     // Modify the admin menu.
     add_action('admin_menu', [$this, 'add_menu_items'], 9);
 
+    // Add CiviCRM's resources in the admin header.
+    add_action('admin_head', [$this->civi, 'wp_head'], 50);
+
     // If settings file does not exist.
     if (!CIVICRM_INSTALLED) {
 
@@ -651,9 +654,6 @@ class CiviCRM_For_WordPress_Admin {
 
       // Add core resources prior to page load.
       add_action('load-' . $this->menu_page, [$this, 'admin_page_load']);
-
-      // Add CiviCRM's resources in the admin header.
-      add_action('admin_head-' . $this->menu_page, [$this->civi, 'wp_head'], 50);
 
     }
     else {
