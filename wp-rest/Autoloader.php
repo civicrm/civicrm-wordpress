@@ -67,7 +67,7 @@ class Autoloader {
     self::instance();
 
     if (!is_readable(trailingslashit($source_path))) {
-      return \WP_Error('civicrm_wp_rest_error', sprintf(__('The source %s is not readable.', 'civicrm'), $source));
+      return new \WP_Error('civicrm_wp_rest_error', sprintf(__('The source %s is not readable.', 'civicrm'), $source));
     }
 
     self::$source_directories[] = $source_path;
