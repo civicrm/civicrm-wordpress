@@ -970,4 +970,39 @@ class CiviCRM_For_WordPress_Admin {
     return ['legacy', 'modern'];
   }
 
+  /**
+   * Gets the CiviCRM Shortcode Theme Compatibility Mode.
+   *
+   * Defaults to "loop" to preserve existing behaviour.
+   *
+   * @since 5.80
+   *
+   * @return string $theme_compatibility_mode The Shortcode Theme Compatibility Mode: either 'loop' or 'filter'.
+   */
+  public function get_theme_compatibility_mode() {
+    return get_option('civicrm_theme_compatibility_mode', 'loop');
+  }
+
+  /**
+   * Sets the CiviCRM Shortcode Theme Compatibility Mode.
+   *
+   * @since 5.80
+   *
+   * @param string $theme_compatibility_mode The Shortcode Theme Compatibility Mode: either 'loop' or 'filter'.
+   */
+  public function set_theme_compatibility_mode($theme_compatibility_mode) {
+    update_option('civicrm_theme_compatibility_mode', $theme_compatibility_mode);
+  }
+
+  /**
+   * Gets the array of CiviCRM Shortcode Theme Compatibility Modes.
+   *
+   * @since 5.80
+   *
+   * @return array $theme_compatibility_modes The array of Shortcode Theme Compatibility Modes.
+   */
+  public function get_theme_compatibility_modes() {
+    return ['loop', 'filter'];
+  }
+
 }
