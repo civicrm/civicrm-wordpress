@@ -91,6 +91,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     // Add AJAX handlers.
     add_action('wp_ajax_civicrm_basepage', [$this, 'ajax_save_basepage']);
     add_action('wp_ajax_civicrm_shortcode', [$this, 'ajax_save_shortcode']);
+    add_action('wp_ajax_civicrm_theme_compatibility', [$this, 'ajax_save_theme_compatibility']);
     add_action('wp_ajax_civicrm_email_sync', [$this, 'ajax_save_email_sync']);
     add_action('wp_ajax_civicrm_refresh_permissions', [$this, 'ajax_refresh_permissions']);
     add_action('wp_ajax_civicrm_clear_caches', [$this, 'ajax_clear_caches']);
@@ -282,7 +283,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
   // ---------------------------------------------------------------------------
 
   /**
-   * Register Integration Page meta boxes.
+   * Register Options Page meta boxes.
    *
    * @since 5.34
    *
@@ -325,6 +326,17 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       'civicrm_options_shortcode',
       __('Shortcode Display Mode', 'civicrm'),
       [$this, 'meta_box_options_shortcode_render'],
+      $screen_id,
+      'normal',
+      'core',
+      $data
+    );
+
+    // Create "Shortcode Theme Compatibility" metabox.
+    add_meta_box(
+      'civicrm_options_theme',
+      __('Shortcode Theme Compatibility', 'civicrm'),
+      [$this, 'meta_box_options_theme_render'],
       $screen_id,
       'normal',
       'core',
@@ -510,6 +522,53 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
 
     // Include template file.
     include CIVICRM_PLUGIN_DIR . 'assets/templates/metaboxes/metabox.options.shortcode.php';
+
+  }
+
+  /**
+   * Render "Theme Compatibility" meta box.
+   *
+   * @since 5.80
+   *
+   * @param mixed $unused Unused param.
+   * @param array $metabox Array containing id, title, callback, and args elements.
+   */
+  public function meta_box_options_theme_render($unused, $metabox) {
+
+    if (!$this->civi->initialize()) {
+      return;
+    }
+
+    // Get the Shortcode Theme Compatibility setting.
+    $theme_compatibility_mode = $this->civi->admin->get_theme_compatibility_mode();
+
+    // Set selected attributes.
+    $selected_loop = $theme_compatibility_mode === 'loop' ? 'selected="selected"' : '';
+    $selected_filter = $theme_compatibility_mode === 'filter' ? 'selected="selected"' : '';
+
+    // Set AJAX submit button options.
+    $options_ajax = [
+      'style' => 'float: right;',
+      'data-security' => esc_attr(wp_create_nonce('civicrm_theme')),
+      'disabled' => NULL,
+    ];
+
+    // Set POST submit button options.
+    $options_post = [
+      'style' => 'float: right;',
+    ];
+
+    /**
+     * Filters the Theme Compatibility POST submit button attributes.
+     *
+     * @since 5.44
+     *
+     * @param array $options_post The existing button attributes.
+     */
+    $options_post = apply_filters('civicrm/metabox/theme/submit/options', $options_post);
+
+    // Include template file.
+    include CIVICRM_PLUGIN_DIR . 'assets/templates/metaboxes/metabox.options.theme.php';
 
   }
 
@@ -713,6 +772,12 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       $this->form_save_shortcode();
       $this->form_redirect();
     }
+    elseif (!empty($_POST['civicrm_theme_post_submit'])) {
+      // Save Shortcode Mode.
+      $this->form_nonce_check();
+      $this->form_save_theme_compatibility();
+      $this->form_redirect();
+    }
     elseif (!empty($_POST['civicrm_email_post_submit'])) {
       // Save Email Sync.
       $this->form_nonce_check();
@@ -784,6 +849,27 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
 
     // Save the setting.
     update_option('shortcode_mode', $chosen);
+
+  }
+
+  /**
+   * Save the CiviCRM Shortcode Theme Compatibility Mode Setting.
+   *
+   * @since 5.80
+   */
+  private function form_save_theme_compatibility() {
+
+    // Bail if there is no valid chosen value.
+    // Nonce is checked in self::form_nonce_check().
+    // phpcs:disable WordPress.Security.NonceVerification.Missing
+    $chosen = isset($_POST['theme_compatibility_mode']) ? sanitize_text_field(wp_unslash($_POST['theme_compatibility_mode'])) : 0;
+    // phpcs:enable WordPress.Security.NonceVerification.Missing
+    if ($chosen === 0 || !in_array($chosen, $this->civi->admin->get_theme_compatibility_modes())) {
+      return;
+    }
+
+    // Save the setting.
+    update_option('theme_compatibility_mode', $chosen);
 
   }
 
@@ -960,6 +1046,50 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     // Data response.
     $data = [
       'section' => 'shortcode',
+      'result' => $chosen,
+      'message' => __('Setting saved.', 'civicrm'),
+      'saved' => TRUE,
+    ];
+
+    // Return the data.
+    wp_send_json($data);
+
+  }
+
+  /**
+   * Save the CiviCRM Shortcode Theme Compatibility Mode Setting.
+   *
+   * @since 5.80
+   */
+  public function ajax_save_theme_compatibility() {
+
+    // Default response.
+    $data = [
+      'section' => 'theme',
+      'message' => __('Could not save the selected setting.', 'civicrm'),
+      'saved' => FALSE,
+    ];
+
+    // Since this is an AJAX request, check security.
+    $result = check_ajax_referer('civicrm_theme', FALSE, FALSE);
+    if ($result === FALSE) {
+      $data['notice'] = __('Authentication failed. Could not save the selected setting.', 'civicrm');
+      wp_send_json($data);
+    }
+
+    // Bail if there is no valid chosen value.
+    $chosen = isset($_POST['value']) ? sanitize_text_field(wp_unslash($_POST['value'])) : 0;
+    if ($chosen === 0 || !in_array($chosen, $this->civi->admin->get_theme_compatibility_modes())) {
+      $data['notice'] = __('Unrecognised parameter. Could not save the selected setting.', 'civicrm');
+      wp_send_json($data);
+    }
+
+    // Set the Shortcode Theme Compatibility Mode setting.
+    $this->civi->admin->set_theme_compatibility_mode($chosen);
+
+    // Data response.
+    $data = [
+      'section' => 'theme',
       'result' => $chosen,
       'message' => __('Setting saved.', 'civicrm'),
       'saved' => TRUE,
