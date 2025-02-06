@@ -257,8 +257,8 @@ class CiviCRM_For_WordPress {
         include_once CIVICRM_PLUGIN_DIR . 'wp-cli/wp-cli-civicrm.php';
       }
 
-      define('CIVICRM_IFRAME', self::$instance->is_iframe());
-      if (CIVICRM_IFRAME) {
+      if (self::$instance->is_iframe()) {
+        define('CIVICRM_IFRAME', 1);
         // Must run before WP starts processing cookies.
         self::$instance->activate_iframe();
       }
@@ -1270,7 +1270,7 @@ class CiviCRM_For_WordPress {
     }
 
     // Do the business.
-    if (CIVICRM_IFRAME && \Civi::service('iframe.router')->getLayout() !== 'cms') {
+    if (defined('CIVICRM_IFRAME') && CIVICRM_IFRAME && \Civi::service('iframe.router')->getLayout() !== 'cms') {
       \Civi::service('iframe.router')->invoke([
         'route' => implode('/', $argdata['args']),
         'printPage' => function ($content) {
