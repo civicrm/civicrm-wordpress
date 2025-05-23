@@ -102,9 +102,6 @@ else {
   define('CIVICRM_INSTALLED', FALSE);
 }
 
-// Prevent CiviCRM from rendering its own header.
-define('CIVICRM_UF_HEAD', TRUE);
-
 /**
  * Setting this to 'TRUE' will replace all mailing URLs calls to 'extern/url.php'
  * and 'extern/open.php' with their REST counterpart 'civicrm/v3/url' and
