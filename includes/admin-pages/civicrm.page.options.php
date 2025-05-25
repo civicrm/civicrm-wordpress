@@ -986,7 +986,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     $auto_sign_in_user = $chosen === 'no' ? FALSE : TRUE;
 
     // Save the setting.
-    update_option('automatically_sign_in_user', $auto_sign_in_user);
+    update_option('automatically_sign_in_user', $auto_sign_in_user, FALSE);
 
   }
 
