@@ -170,15 +170,18 @@
       me.email_submit = $('#civicrm_email_submit');
       me.permissions_submit = $('#civicrm_permissions_submit');
       me.cache_submit = $('#civicrm_cache_submit');
+      me.auto_sign_in_user_submit = $('#civicrm_auto_sign_in_user_submit');
       me.basepage_select = $('#page_id');
       me.shortcode_select = $('#shortcode_mode');
       me.theme_select = $('#theme_compatibility_mode');
       me.email_select = $('#sync_email');
       me.permissions_select = $('#permissions_role');
+      me.auto_sign_in_user_select = $('#auto_sign_in_user');
       me.basepage_selected = me.basepage_select.val();
       me.shortcode_selected = me.shortcode_select.val();
       me.theme_selected = me.theme_select.val();
       me.email_selected = me.email_select.val();
+      me.auto_sign_in_user_selected = me.auto_sign_in_user_select.val();
 
       // Set status of Base Page submit button.
       me.basepage_submit.prop('disabled', true);
@@ -197,6 +200,10 @@
       // Set status of Email Sync submit button.
       me.email_submit.val(text);
       me.email_submit.prop('disabled', true);
+
+      // Set status of the Automatically Sign In User submit button.
+      me.auto_sign_in_user_submit.val(text);
+      me.auto_sign_in_user_submit.prop('disabled', true);
 
     };
 
@@ -306,6 +313,27 @@
       });
 
       /**
+       * Add an onchange event listener to the "Email Sync" section select.
+       *
+       * @param {Object} event The event object.
+       */
+      me.auto_sign_in_user_select.on('change', function(event) {
+
+        var text;
+
+        // Enable/disable submit button.
+        if (me.auto_sign_in_user_select.val() == me.auto_sign_in_user_selected) {
+          text = CiviCRM_Options_Settings.get_localisation('saved');
+          me.auto_sign_in_user_submit.val(text);
+          me.auto_sign_in_user_submit.prop('disabled', true);
+        } else {
+          text = CiviCRM_Options_Settings.get_localisation('update');
+          me.auto_sign_in_user_submit.val(text);
+          me.auto_sign_in_user_submit.prop('disabled', false);
+        }
+      });
+
+      /**
        * Add a click event listener to the "Basepage" section submit button.
        *
        * @param {Object} event The event object.
@@ -314,8 +342,8 @@
 
         // Define vars.
         var value = me.basepage_select.val(),
-            ajax_nonce = me.basepage_submit.data('security'),
-            saving = CiviCRM_Options_Settings.get_localisation('saving');
+          ajax_nonce = me.basepage_submit.data('security'),
+          saving = CiviCRM_Options_Settings.get_localisation('saving');
 
         // Prevent form submission.
         if (event.preventDefault) {
@@ -342,8 +370,8 @@
 
         // Define vars.
         var value = me.shortcode_select.val(),
-            ajax_nonce = me.shortcode_submit.data('security'),
-            saving = CiviCRM_Options_Settings.get_localisation('saving');
+          ajax_nonce = me.shortcode_submit.data('security'),
+          saving = CiviCRM_Options_Settings.get_localisation('saving');
 
         // Prevent form submission.
         if (event.preventDefault) {
@@ -370,8 +398,8 @@
 
         // Define vars.
         var value = me.theme_select.val(),
-            ajax_nonce = me.theme_submit.data('security'),
-            saving = CiviCRM_Options_Settings.get_localisation('saving');
+          ajax_nonce = me.theme_submit.data('security'),
+          saving = CiviCRM_Options_Settings.get_localisation('saving');
 
         // Prevent form submission.
         if (event.preventDefault) {
@@ -398,8 +426,8 @@
 
         // Define vars.
         var value = me.email_select.val(),
-            ajax_nonce = me.email_submit.data('security'),
-            saving = CiviCRM_Options_Settings.get_localisation('saving');
+          ajax_nonce = me.email_submit.data('security'),
+          saving = CiviCRM_Options_Settings.get_localisation('saving');
 
         // Prevent form submission.
         if (event.preventDefault) {
@@ -426,8 +454,8 @@
 
         // Define vars.
         var value = me.permissions_select.val(),
-            ajax_nonce = me.permissions_submit.data('security'),
-            refreshing = CiviCRM_Options_Settings.get_localisation('refreshing');
+          ajax_nonce = me.permissions_submit.data('security'),
+          refreshing = CiviCRM_Options_Settings.get_localisation('refreshing');
 
         // Prevent form submission.
         if (event.preventDefault) {
@@ -454,7 +482,7 @@
 
         // Define vars.
         var ajax_nonce = me.cache_submit.data('security'),
-            clearing = CiviCRM_Options_Settings.get_localisation('clearing');
+          clearing = CiviCRM_Options_Settings.get_localisation('clearing');
 
         // Prevent form submission.
         if (event.preventDefault) {
@@ -468,6 +496,34 @@
 
         // Submit request to server.
         me.send('civicrm_clear_caches', 1, ajax_nonce);
+
+      });
+
+      /**
+       * Add a click event listener to the "Automatically Sign In User" section submit button.
+       *
+       * @param {Object} event The event object.
+       */
+      me.auto_sign_in_user_submit.on('click', function(event) {
+
+        // Define vars.
+        var value = me.auto_sign_in_user_select.val(),
+          ajax_nonce = me.auto_sign_in_user_submit.data('security'),
+          saving = CiviCRM_Options_Settings.get_localisation('saving');
+
+        // Prevent form submission.
+        if (event.preventDefault) {
+          event.preventDefault();
+        }
+
+        // Modify button and select, then show spinner.
+        me.auto_sign_in_user_submit.val(saving);
+        me.auto_sign_in_user_submit.prop('disabled', true);
+        me.auto_sign_in_user_select.prop('disabled', true);
+        $(this).next('.spinner').css('visibility', 'visible');
+
+        // Submit request to server.
+        me.send('civicrm_auto_sign_in_user', value, ajax_nonce);
 
       });
 
@@ -538,14 +594,14 @@
 
       // Declare vars.
       var saved = CiviCRM_Options_Settings.get_localisation('saved'),
-          update = CiviCRM_Options_Settings.get_localisation('update'),
-          clearing = CiviCRM_Options_Settings.get_localisation('clearing'),
-          refresh = CiviCRM_Options_Settings.get_localisation('refresh'),
-          cache = CiviCRM_Options_Settings.get_localisation('cache');
+        update = CiviCRM_Options_Settings.get_localisation('update'),
+        clearing = CiviCRM_Options_Settings.get_localisation('clearing'),
+        refresh = CiviCRM_Options_Settings.get_localisation('refresh'),
+        cache = CiviCRM_Options_Settings.get_localisation('cache');
 
       if (data.saved) {
 
-		// Success!
+        // Success!
         if (data.section == 'basepage') {
 
           // Base Page section.
@@ -607,102 +663,120 @@
           me.cache_submit.prop('disabled', false);
           me.cache_submit.next('.spinner').css('visibility', 'hidden');
 
-        }
-
-      } else {
-
-		// Failure.
-        if (data.section == 'basepage') {
-
-          // Base Page section.
-          me.basepage_submit.val(update);
-          me.basepage_submit.next('.spinner').css('visibility', 'hidden');
-          me.basepage_select.val(data.result);
-          me.basepage_select.prop('disabled', false);
-          $('.basepage_notice').show();
-          $('.basepage_notice p').html(data.notice);
-          $('.basepage_feedback').html(data.message);
-          me.basepage_selected = data.result;
-
-        } else if (data.section == 'shortcode') {
-
+        } else if (data.section == 'auto_sign_in_user') {
           // Shortcode Mode section.
-          me.shortcode_submit.val(update);
-          me.shortcode_submit.next('.spinner').css('visibility', 'hidden');
-          me.shortcode_select.val(data.result);
-          me.shortcode_select.prop('disabled', false);
-          $('.shortcode_notice').show();
-          $('.shortcode_notice p').html(data.notice);
-          me.shortcode_selected = data.result;
+          me.auto_sign_in_user_submit.val(saved);
+          me.auto_sign_in_user_submit.next('.spinner').css('visibility', 'hidden');
+          me.auto_sign_in_user_select.val(data.result);
+          me.auto_sign_in_user_selected = data.result;
+          me.auto_sign_in_user_select.prop('disabled', false);
+      }
 
-        } else if (data.section == 'theme') {
+    } else {
 
-          // Shortcode Mode section.
-          me.theme_submit.val(update);
-          me.theme_submit.next('.spinner').css('visibility', 'hidden');
-          me.theme_select.val(data.result);
-          me.theme_select.prop('disabled', false);
-          $('.theme_notice').show();
-          $('.theme_notice p').html(data.notice);
-          me.theme_selected = data.result;
+      // Failure.
+      if (data.section == 'basepage') {
 
-        } else if (data.section == 'email_sync') {
+        // Base Page section.
+        me.basepage_submit.val(update);
+        me.basepage_submit.next('.spinner').css('visibility', 'hidden');
+        me.basepage_select.val(data.result);
+        me.basepage_select.prop('disabled', false);
+        $('.basepage_notice').show();
+        $('.basepage_notice p').html(data.notice);
+        $('.basepage_feedback').html(data.message);
+        me.basepage_selected = data.result;
 
-          // Email Sync section.
-          me.email_submit.val(update);
-          me.email_submit.next('.spinner').css('visibility', 'hidden');
-          me.email_select.val(data.result);
-          me.email_select.prop('disabled', false);
-          $('.email_notice').show();
-          $('.email_notice p').html(data.notice);
-          $('.email_feedback').html(data.message);
-          me.email_selected = data.result;
+      } else if (data.section == 'shortcode') {
 
-        } else if (data.section == 'refresh_permissions') {
+        // Shortcode Mode section.
+        me.shortcode_submit.val(update);
+        me.shortcode_submit.next('.spinner').css('visibility', 'hidden');
+        me.shortcode_select.val(data.result);
+        me.shortcode_select.prop('disabled', false);
+        $('.shortcode_notice').show();
+        $('.shortcode_notice p').html(data.notice);
+        me.shortcode_selected = data.result;
 
-          // Permissions and Capabilities section.
-          me.permissions_submit.val(refresh);
-          me.permissions_submit.next('.spinner').css('visibility', 'hidden');
-          me.permissions_submit.prop('disabled', false);
-          $('.permissions_success').hide();
-          $('.permissions_error').show();
-          $('.permissions_error p').html(data.notice);
+      } else if (data.section == 'theme') {
 
-        } else if (data.section == 'clear_caches') {
+        // Shortcode Mode section.
+        me.theme_submit.val(update);
+        me.theme_submit.next('.spinner').css('visibility', 'hidden');
+        me.theme_select.val(data.result);
+        me.theme_select.prop('disabled', false);
+        $('.theme_notice').show();
+        $('.theme_notice p').html(data.notice);
+        me.theme_selected = data.result;
 
-          // Clear Caches section.
-          me.cache_submit.val(cache);
-          me.cache_submit.next('.spinner').css('visibility', 'hidden');
-          me.cache_submit.prop('disabled', false);
-          $('.caches_success').hide();
-          $('.caches_error').show();
-          $('.caches_error p').html(data.notice);
+      } else if (data.section == 'email_sync') {
 
-        }
+        // Email Sync section.
+        me.email_submit.val(update);
+        me.email_submit.next('.spinner').css('visibility', 'hidden');
+        me.email_select.val(data.result);
+        me.email_select.prop('disabled', false);
+        $('.email_notice').show();
+        $('.email_notice p').html(data.notice);
+        $('.email_feedback').html(data.message);
+        me.email_selected = data.result;
+
+      } else if (data.section == 'refresh_permissions') {
+
+        // Permissions and Capabilities section.
+        me.permissions_submit.val(refresh);
+        me.permissions_submit.next('.spinner').css('visibility', 'hidden');
+        me.permissions_submit.prop('disabled', false);
+        $('.permissions_success').hide();
+        $('.permissions_error').show();
+        $('.permissions_error p').html(data.notice);
+
+      } else if (data.section == 'clear_caches') {
+
+        // Clear Caches section.
+        me.cache_submit.val(cache);
+        me.cache_submit.next('.spinner').css('visibility', 'hidden');
+        me.cache_submit.prop('disabled', false);
+        $('.caches_success').hide();
+        $('.caches_error').show();
+        $('.caches_error p').html(data.notice);
+
+      } else if (data.section == 'auto_sign_in_user') {
+
+        // Shortcode Mode section.
+        me.auto_sign_in_user_submit.val(update);
+        me.auto_sign_in_user_submit.next('.spinner').css('visibility', 'hidden');
+        me.auto_sign_in_user_select.val(data.result);
+        me.auto_sign_in_user_select.prop('disabled', false);
+        $('.auto_sign_in_user_notice').show();
+        $('.auto_sign_in_user_notice p').html(data.notice);
+        me.auto_sign_in_user_selected = data.result;
 
       }
 
-    };
+    }
 
-  }
+  };
 
-  // Init Settings and Buttons classes.
-  var CiviCRM_Options_Settings = new CRM_Settings();
-  var CiviCRM_Options_Buttons = new CRM_Buttons();
-  CiviCRM_Options_Settings.init();
-  CiviCRM_Options_Buttons.init();
+}
 
-  /**
-   * Trigger dom_ready methods where necessary.
-   *
-   * @since 5.34
-   *
-   * @param {Object} $ The jQuery object.
-   */
-  $(document).ready(function($) {
-    CiviCRM_Options_Settings.dom_ready();
-    CiviCRM_Options_Buttons.dom_ready();
-  }); // End document.ready()
+// Init Settings and Buttons classes.
+var CiviCRM_Options_Settings = new CRM_Settings();
+var CiviCRM_Options_Buttons = new CRM_Buttons();
+CiviCRM_Options_Settings.init();
+CiviCRM_Options_Buttons.init();
+
+/**
+ * Trigger dom_ready methods where necessary.
+ *
+ * @since 5.34
+ *
+ * @param {Object} $ The jQuery object.
+ */
+$(document).ready(function($) {
+  CiviCRM_Options_Settings.dom_ready();
+  CiviCRM_Options_Buttons.dom_ready();
+}); // End document.ready()
 
 } )( jQuery );
 

@@ -93,6 +93,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     add_action('wp_ajax_civicrm_shortcode', [$this, 'ajax_save_shortcode']);
     add_action('wp_ajax_civicrm_theme_compatibility', [$this, 'ajax_save_theme_compatibility']);
     add_action('wp_ajax_civicrm_email_sync', [$this, 'ajax_save_email_sync']);
+    add_action('wp_ajax_civicrm_auto_sign_in_user', [$this, 'ajax_save_auto_sign_in_user']);
     add_action('wp_ajax_civicrm_refresh_permissions', [$this, 'ajax_refresh_permissions']);
     add_action('wp_ajax_civicrm_clear_caches', [$this, 'ajax_clear_caches']);
 
@@ -381,6 +382,17 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       'civicrm_options_emailinks',
       __('Useful Links', 'civicrm'),
       [$this, 'meta_box_options_links_render'],
+      $screen_id,
+      'side',
+      'core',
+      $data
+    );
+
+    // Create "Automatically Sign In New User" metabox.
+    add_meta_box(
+      'civicrm_options_auto_sign_in_user',
+      __('Automatically Sign In New User', 'civicrm'),
+      [$this, 'meta_box_options_auto_sign_in_user_render'],
       $screen_id,
       'side',
       'core',
@@ -745,6 +757,55 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
 
   }
 
+  /**
+   * Render "Automatically Sign In User" meta box.
+   *
+   * @since 6.4
+   *
+   * @param mixed $unused Unused param.
+   * @param array $metabox Array containing id, title, callback, and args elements.
+   */
+  public function meta_box_options_auto_sign_in_user_render($unused, $metabox) {
+
+    if (!$this->civi->initialize()) {
+      return;
+    }
+
+    // Get the Shortcode Theme Compatibility setting.
+    $auto_sign_in_mode = $this->civi->admin->get_auto_sign_in_mode();
+
+    // Set selected attributes.
+
+    // Set selected attributes.
+    $selected_yes = $auto_sign_in_mode ? 'selected="selected"' : '';
+    $selected_no = $auto_sign_in_mode ? '' : 'selected="selected"';
+
+    // Set AJAX submit button options.
+    $options_ajax = [
+      'style' => 'float: right;',
+      'data-security' => esc_attr(wp_create_nonce('civicrm_auto_sign_in_user')),
+      'disabled' => NULL,
+    ];
+
+    // Set POST submit button options.
+    $options_post = [
+      'style' => 'float: right;',
+    ];
+
+    /**
+     * Filters the Automatically Sign In User POST submit button attributes.
+     *
+     * @since 6.4
+     *
+     * @param array $options_post The existing button attributes.
+     */
+    $options_post = apply_filters('civicrm/metabox/autosigninuser/submit/options', $options_post);
+
+    // Include template file.
+    include CIVICRM_PLUGIN_DIR . 'assets/templates/metaboxes/metabox.options.autosignin.php';
+
+  }
+
   // ---------------------------------------------------------------------------
   // Form Handlers
   // ---------------------------------------------------------------------------
@@ -794,6 +855,12 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       // Clear caches.
       $this->form_nonce_check();
       $this->civi->admin->clear_caches();
+      $this->form_redirect();
+    }
+    elseif (!empty($_POST['civicrm_auto_sign_in_user_post_submit'])) {
+      // Save Email Sync.
+      $this->form_nonce_check();
+      $this->form_save_auto_sign_in_user();
       $this->form_redirect();
     }
 
@@ -896,6 +963,30 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     civicrm_api3('Setting', 'create', [
       'syncCMSEmail' => $sync_email,
     ]);
+
+  }
+
+  /**
+   * Save the CiviCRM Automatically Sign In User Setting.
+   *
+   * @since 6.4
+   */
+  private function form_save_auto_sign_in_user() {
+
+    // Bail if there is no valid chosen value.
+    // Nonce is checked in self::form_nonce_check().
+    // phpcs:disable WordPress.Security.NonceVerification.Missing
+    $chosen = isset($_POST['auto_sign_in_user']) ? sanitize_text_field(wp_unslash($_POST['auto_sign_in_user'])) : 0;
+    // phpcs:enable WordPress.Security.NonceVerification.Missing
+    if ($chosen === 0) {
+      return;
+    }
+
+    // Setting is actually a boolean.
+    $auto_sign_in_user = $chosen === 'no' ? FALSE : TRUE;
+
+    // Save the setting.
+    update_option('automatically_sign_in_user', $auto_sign_in_user, FALSE);
 
   }
 
@@ -1252,6 +1343,53 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     $data = [
       'section' => 'clear_caches',
       'notice' => __('CiviCRM caches cleared.', 'civicrm'),
+      'saved' => TRUE,
+    ];
+
+    // Return the data.
+    wp_send_json($data);
+
+  }
+
+  /**
+   * Save the CiviCRM Automatically Sign In User Setting.
+   *
+   * @since 6.4
+   */
+  public function ajax_save_auto_sign_in_user() {
+
+    // Default response.
+    $data = [
+      'section' => 'auto_sign_in_user',
+      'message' => __('Could not save the selected setting.', 'civicrm'),
+      'saved' => FALSE,
+    ];
+
+    // Since this is an AJAX request, check security.
+    $result = check_ajax_referer('civicrm_auto_sign_in_user', FALSE, FALSE);
+    if ($result === FALSE) {
+      $data['notice'] = __('Authentication failed. Could not save the selected setting.', 'civicrm');
+      wp_send_json($data);
+    }
+
+    // Bail if there is no valid chosen value.
+    $chosen = isset($_POST['value']) ? sanitize_text_field(wp_unslash($_POST['value'])) : 0;
+    if ($chosen === 0) {
+      $data['notice'] = __('Unrecognised parameter. Could not save the selected setting.', 'civicrm');
+      wp_send_json($data);
+    }
+
+    // Setting is actually a boolean.
+    $auto_sign_in = $chosen === 'no' ? 0 : 1;
+
+    // Set the Automatically Sign In User Mode setting.
+    $this->civi->admin->set_auto_sign_in_user($auto_sign_in);
+
+    // Data response.
+    $data = [
+      'section' => 'auto_sign_in_user',
+      'result' => $chosen,
+      'message' => __('Setting saved.', 'civicrm'),
       'saved' => TRUE,
     ];
 
