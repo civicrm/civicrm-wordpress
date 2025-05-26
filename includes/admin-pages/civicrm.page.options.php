@@ -760,7 +760,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
   /**
    * Render "Automatically Sign In User" meta box.
    *
-   * @since 5.80
+   * @since 6.4
    *
    * @param mixed $unused Unused param.
    * @param array $metabox Array containing id, title, callback, and args elements.
@@ -795,7 +795,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     /**
      * Filters the Automatically Sign In User POST submit button attributes.
      *
-     * @since 6.2
+     * @since 6.4
      *
      * @param array $options_post The existing button attributes.
      */
@@ -969,7 +969,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
   /**
    * Save the CiviCRM Automatically Sign In User Setting.
    *
-   * @since 6.2
+   * @since 6.4
    */
   private function form_save_auto_sign_in_user() {
 
@@ -1354,7 +1354,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
   /**
    * Save the CiviCRM Automatically Sign In User Setting.
    *
-   * @since 6.2
+   * @since 6.4
    */
   public function ajax_save_auto_sign_in_user() {
 
