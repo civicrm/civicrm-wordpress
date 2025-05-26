@@ -1380,7 +1380,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     }
 
     // Setting is actually a boolean.
-    $auto_sign_in = $chosen === 'no' ? FALSE : TRUE;
+    $auto_sign_in = $chosen === 'no' ? 0 : 1;
 
     // Set the Automatically Sign In User Mode setting.
     $this->civi->admin->set_auto_sign_in_user($auto_sign_in);

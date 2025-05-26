@@ -1015,7 +1015,7 @@ class CiviCRM_For_WordPress_Admin {
    * @return bool $automatically_sign_in_user Whether to Automatically Sign In the WP User after it is created.
    */
   public function get_auto_sign_in_mode() {
-    return get_option('civicrm_automatically_sign_in_user', TRUE);
+    return boolval(get_option('civicrm_automatically_sign_in_user', TRUE));
   }
 
   /**
