@@ -772,7 +772,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     }
 
     // Get the Shortcode Theme Compatibility setting.
-    $auto_sign_in_mode = $this->civi->admin->get_auto_sign_in_mode();
+    $auto_sign_in_mode = $this->civi->admin->get_auto_sign_in_user();
 
     // Set selected attributes.
 
