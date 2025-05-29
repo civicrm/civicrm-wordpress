@@ -313,7 +313,7 @@
       });
 
       /**
-       * Add an onchange event listener to the "Email Sync" section select.
+       * Add an onchange event listener to the "Automatically Sign In User" section select.
        *
        * @param {Object} event The event object.
        */
@@ -626,7 +626,7 @@
 
         } else if (data.section == 'theme') {
 
-          // Shortcode Mode section.
+          // Shortcode Theme Compatibility section.
           me.theme_submit.val(saved);
           me.theme_submit.next('.spinner').css('visibility', 'hidden');
           me.theme_select.val(data.result);
@@ -664,119 +664,121 @@
           me.cache_submit.next('.spinner').css('visibility', 'hidden');
 
         } else if (data.section == 'auto_sign_in_user') {
-          // Shortcode Mode section.
+
+          // Automatically Sign In User section.
           me.auto_sign_in_user_submit.val(saved);
           me.auto_sign_in_user_submit.next('.spinner').css('visibility', 'hidden');
           me.auto_sign_in_user_select.val(data.result);
           me.auto_sign_in_user_selected = data.result;
           me.auto_sign_in_user_select.prop('disabled', false);
+
+        }
+
+      } else {
+
+        // Failure.
+        if (data.section == 'basepage') {
+
+          // Base Page section.
+          me.basepage_submit.val(update);
+          me.basepage_submit.next('.spinner').css('visibility', 'hidden');
+          me.basepage_select.val(data.result);
+          me.basepage_select.prop('disabled', false);
+          $('.basepage_notice').show();
+          $('.basepage_notice p').html(data.notice);
+          $('.basepage_feedback').html(data.message);
+          me.basepage_selected = data.result;
+
+        } else if (data.section == 'shortcode') {
+
+          // Shortcode Mode section.
+          me.shortcode_submit.val(update);
+          me.shortcode_submit.next('.spinner').css('visibility', 'hidden');
+          me.shortcode_select.val(data.result);
+          me.shortcode_select.prop('disabled', false);
+          $('.shortcode_notice').show();
+          $('.shortcode_notice p').html(data.notice);
+          me.shortcode_selected = data.result;
+
+        } else if (data.section == 'theme') {
+
+          // Shortcode Theme Compatibility section.
+          me.theme_submit.val(update);
+          me.theme_submit.next('.spinner').css('visibility', 'hidden');
+          me.theme_select.val(data.result);
+          me.theme_select.prop('disabled', false);
+          $('.theme_notice').show();
+          $('.theme_notice p').html(data.notice);
+          me.theme_selected = data.result;
+
+        } else if (data.section == 'email_sync') {
+
+          // Email Sync section.
+          me.email_submit.val(update);
+          me.email_submit.next('.spinner').css('visibility', 'hidden');
+          me.email_select.val(data.result);
+          me.email_select.prop('disabled', false);
+          $('.email_notice').show();
+          $('.email_notice p').html(data.notice);
+          $('.email_feedback').html(data.message);
+          me.email_selected = data.result;
+
+        } else if (data.section == 'refresh_permissions') {
+
+          // Permissions and Capabilities section.
+          me.permissions_submit.val(refresh);
+          me.permissions_submit.next('.spinner').css('visibility', 'hidden');
+          me.permissions_submit.prop('disabled', false);
+          $('.permissions_success').hide();
+          $('.permissions_error').show();
+          $('.permissions_error p').html(data.notice);
+
+        } else if (data.section == 'clear_caches') {
+
+          // Clear Caches section.
+          me.cache_submit.val(cache);
+          me.cache_submit.next('.spinner').css('visibility', 'hidden');
+          me.cache_submit.prop('disabled', false);
+          $('.caches_success').hide();
+          $('.caches_error').show();
+          $('.caches_error p').html(data.notice);
+
+        } else if (data.section == 'auto_sign_in_user') {
+
+          // Automatically Sign In User section.
+          me.auto_sign_in_user_submit.val(update);
+          me.auto_sign_in_user_submit.next('.spinner').css('visibility', 'hidden');
+          me.auto_sign_in_user_select.val(data.result);
+          me.auto_sign_in_user_select.prop('disabled', false);
+          $('.auto_sign_in_user_notice').show();
+          $('.auto_sign_in_user_notice p').html(data.notice);
+          me.auto_sign_in_user_selected = data.result;
+
+        }
+
       }
 
-    } else {
+    };
 
-      // Failure.
-      if (data.section == 'basepage') {
+  }
 
-        // Base Page section.
-        me.basepage_submit.val(update);
-        me.basepage_submit.next('.spinner').css('visibility', 'hidden');
-        me.basepage_select.val(data.result);
-        me.basepage_select.prop('disabled', false);
-        $('.basepage_notice').show();
-        $('.basepage_notice p').html(data.notice);
-        $('.basepage_feedback').html(data.message);
-        me.basepage_selected = data.result;
+  // Init Settings and Buttons classes.
+  var CiviCRM_Options_Settings = new CRM_Settings();
+  var CiviCRM_Options_Buttons = new CRM_Buttons();
+  CiviCRM_Options_Settings.init();
+  CiviCRM_Options_Buttons.init();
 
-      } else if (data.section == 'shortcode') {
-
-        // Shortcode Mode section.
-        me.shortcode_submit.val(update);
-        me.shortcode_submit.next('.spinner').css('visibility', 'hidden');
-        me.shortcode_select.val(data.result);
-        me.shortcode_select.prop('disabled', false);
-        $('.shortcode_notice').show();
-        $('.shortcode_notice p').html(data.notice);
-        me.shortcode_selected = data.result;
-
-      } else if (data.section == 'theme') {
-
-        // Shortcode Mode section.
-        me.theme_submit.val(update);
-        me.theme_submit.next('.spinner').css('visibility', 'hidden');
-        me.theme_select.val(data.result);
-        me.theme_select.prop('disabled', false);
-        $('.theme_notice').show();
-        $('.theme_notice p').html(data.notice);
-        me.theme_selected = data.result;
-
-      } else if (data.section == 'email_sync') {
-
-        // Email Sync section.
-        me.email_submit.val(update);
-        me.email_submit.next('.spinner').css('visibility', 'hidden');
-        me.email_select.val(data.result);
-        me.email_select.prop('disabled', false);
-        $('.email_notice').show();
-        $('.email_notice p').html(data.notice);
-        $('.email_feedback').html(data.message);
-        me.email_selected = data.result;
-
-      } else if (data.section == 'refresh_permissions') {
-
-        // Permissions and Capabilities section.
-        me.permissions_submit.val(refresh);
-        me.permissions_submit.next('.spinner').css('visibility', 'hidden');
-        me.permissions_submit.prop('disabled', false);
-        $('.permissions_success').hide();
-        $('.permissions_error').show();
-        $('.permissions_error p').html(data.notice);
-
-      } else if (data.section == 'clear_caches') {
-
-        // Clear Caches section.
-        me.cache_submit.val(cache);
-        me.cache_submit.next('.spinner').css('visibility', 'hidden');
-        me.cache_submit.prop('disabled', false);
-        $('.caches_success').hide();
-        $('.caches_error').show();
-        $('.caches_error p').html(data.notice);
-
-      } else if (data.section == 'auto_sign_in_user') {
-
-        // Shortcode Mode section.
-        me.auto_sign_in_user_submit.val(update);
-        me.auto_sign_in_user_submit.next('.spinner').css('visibility', 'hidden');
-        me.auto_sign_in_user_select.val(data.result);
-        me.auto_sign_in_user_select.prop('disabled', false);
-        $('.auto_sign_in_user_notice').show();
-        $('.auto_sign_in_user_notice p').html(data.notice);
-        me.auto_sign_in_user_selected = data.result;
-
-      }
-
-    }
-
-  };
-
-}
-
-// Init Settings and Buttons classes.
-var CiviCRM_Options_Settings = new CRM_Settings();
-var CiviCRM_Options_Buttons = new CRM_Buttons();
-CiviCRM_Options_Settings.init();
-CiviCRM_Options_Buttons.init();
-
-/**
- * Trigger dom_ready methods where necessary.
- *
- * @since 5.34
- *
- * @param {Object} $ The jQuery object.
- */
-$(document).ready(function($) {
-  CiviCRM_Options_Settings.dom_ready();
-  CiviCRM_Options_Buttons.dom_ready();
-}); // End document.ready()
+  /**
+   * Trigger dom_ready methods where necessary.
+   *
+   * @since 5.34
+   *
+   * @param {Object} $ The jQuery object.
+   */
+  $(document).ready(function($) {
+    CiviCRM_Options_Settings.dom_ready();
+    CiviCRM_Options_Buttons.dom_ready();
+  }); // End document.ready()
 
 } )( jQuery );
 

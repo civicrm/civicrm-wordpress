@@ -772,7 +772,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     }
 
     // Get the Shortcode Theme Compatibility setting.
-    $auto_sign_in_mode = $this->civi->admin->get_auto_sign_in_mode();
+    $auto_sign_in_mode = $this->civi->admin->get_auto_sign_in_user();
 
     // Set selected attributes.
 
@@ -915,7 +915,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     }
 
     // Save the setting.
-    update_option('shortcode_mode', $chosen);
+    $this->civi->admin->set_shortcode_mode($chosen);
 
   }
 
@@ -936,7 +936,7 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     }
 
     // Save the setting.
-    update_option('theme_compatibility_mode', $chosen);
+    $this->civi->admin->set_theme_compatibility_mode($chosen);
 
   }
 
@@ -983,10 +983,10 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
     }
 
     // Setting is actually a boolean.
-    $auto_sign_in_user = $chosen === 'no' ? FALSE : TRUE;
+    $auto_sign_in = $chosen === 'no' ? 0 : 1;
 
-    // Save the setting.
-    update_option('automatically_sign_in_user', $auto_sign_in_user, FALSE);
+    // Set the Automatically Sign In User Mode setting.
+    $this->civi->admin->set_auto_sign_in_user($auto_sign_in);
 
   }
 
