@@ -37,7 +37,7 @@ do_action('civicrm/metabox/theme/pre');
   <p></p>
 </div>
 
-<p><?php printf(esc_html__('Some themes do not use "The Loop" to render page and post content. If a theme does not use The Loop, then it will not display CiviCRM Shortcodes. Try using the "Content Filter" check instead. If this does not work, you can use the %1$scivicrm_theme_compatibility_mode%2$s filter to implement your own check.', 'civicrm'), '<code>', '</code>'); ?></p>
+<p><?php /* translators: 1: The opening code tag, 2: The closing code tag. */ printf(esc_html__('Some themes do not use "The Loop" to render page and post content. If a theme does not use The Loop, then it will not display CiviCRM Shortcodes. Try using the "Content Filter" check instead. If this does not work, you can use the %1$scivicrm_theme_compatibility_mode%2$s filter to implement your own check.', 'civicrm'), '<code>', '</code>'); ?></p>
 
 <label for="theme_compatibility_mode" class="screen-reader-text"><?php esc_html_e('Theme Compatibility', 'civicrm'); ?></label>
 <select name="theme_compatibility_mode" id="theme_compatibility_mode">
