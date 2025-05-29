@@ -26,9 +26,9 @@ if (!defined('ABSPATH')) {
 <?php
 
 /**
- * Before Shortcode section.
+ * Before Automatically Sign In User section.
  *
- * @since 5.80
+ * @since 6.4
  */
 do_action('civicrm/metabox/autosigninuser/pre');
 
@@ -54,8 +54,8 @@ do_action('civicrm/metabox/autosigninuser/pre');
 <?php
 
 /**
- * After Shortcode section.
+ * After Automatically Sign In User section.
  *
- * @since 5.80
+ * @since 6.4
  */
 do_action('civicrm/metabox/autosigninuser/post');

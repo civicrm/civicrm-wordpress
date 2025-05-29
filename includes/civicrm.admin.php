@@ -1010,7 +1010,7 @@ class CiviCRM_For_WordPress_Admin {
    *
    * Defaults to TRUE to preserve existing behaviour.
    *
-   * @since 6.2
+   * @since 6.4
    *
    * @return bool $automatically_sign_in_user Whether to Automatically Sign In the WP User after it is created.
    */
@@ -1021,7 +1021,7 @@ class CiviCRM_For_WordPress_Admin {
   /**
    * Sets the CiviCRM Automatically Sign In User Setting.
    *
-   * @since 6.2
+   * @since 6.4
    *
    * @param bool $automatically_sign_in_user Whether to Automatically Sign In the WP User after it is created.
    */
