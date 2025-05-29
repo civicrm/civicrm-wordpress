@@ -295,40 +295,74 @@ class CiviCRM_For_WordPress {
     _doing_it_wrong(__FUNCTION__, __('Please do not serialize CiviCRM_For_WordPress', 'civicrm'), '4.4');
   }
 
+  /**
+   * Checks for iframe requests.
+   *
+   * @since 6.0.0
+   */
   protected function is_iframe(): bool {
     if (is_admin()) {
-      // We intend to process IFRAMEs through WP-frontend not WP-backend.
-      // This is separate from the actual content of the page (which isn't really WP-frontend or WP-backend).
+      /*
+       * We intend to process iframes through WP-frontend not WP-backend.
+       * This is separate from the actual content of the page - which isn't really
+       * WP-frontend or WP-backend.
+       */
       return FALSE;
     }
 
-    // return (1 == get_query_var('_cvwpif')); // Too Early
+    /*
+     * There are several ways we could check.
+     *
+     * This method runs too early to test for registered query vars:
+     * `return (1 == get_query_var('_cvwpif'));`
+     *
+     * Harder to test. And Safari only gained support a year ago:
+     * `return 'iframe' === $_SERVER['HTTP_SEC_FETCH_DEST'];`
+     *
+     * So use the presence of a query var directly.
+     */
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
     return !empty($_REQUEST['_cvwpif']);
-    // return 'iframe' === $_SERVER['HTTP_SEC_FETCH_DEST']; // Harder to test. And Safari only gained support a year ago.
   }
 
+  /**
+   * Acts on iframe requests.
+   *
+   * @since 6.0.0
+   */
   protected function activate_iframe(): void {
     // By default, internal links should stay in the iframe.
     $GLOBALS['civicrm_url_defaults'][]['scheme'] = 'iframe';
 
-    // Strict browsers (eg Safari) will quietly disregard cookies when loading a page within an IFRAME.
-    // But it's quite awkward to test behavior with two variables (browser-type and page-context).
-    // For consistent testing/UX, we force similar behavior for any request with IFRAME-style URL.
+    /*
+     * Strict browsers (e.g. Safari) will quietly disregard cookies when loading a page within an iframe.
+     * But it's quite awkward to test behavior with two variables (browser-type and page-context).
+     * For consistent testing/UX, we force similar behavior for any request with IFRAME-style URL.
+     */
 
-    // Variant A: Disregard specific pieces
+    // Variant A: Disregard specific pieces.
     remove_filter('determine_current_user', 'wp_validate_auth_cookie');
     remove_filter('determine_current_user', 'wp_validate_logged_in_cookie', 20);
     remove_filter('determine_current_user', 'wp_validate_application_password', 20);
 
-    // Variant B: This sounds more thorough, but interferes with co-session. Probably a timing issue.
-    // $_COOKIE = [];
-    // self::$instance->wp_cookie = [];
+    /*
+     * Variant B: This sounds more thorough, but interferes with co-session.
+     * Probably a timing issue:
+     *
+     * $_COOKIE = [];
+     * self::$instance->wp_cookie = [];
+     */
 
-    // Variant C: Filter $_COOKIE by name. However, this might not work if local site has renamed the cookies.
-    // $ignoreKeys = preg_grep('/^(wp|wordpress)/', array_keys($_COOKIE));
-    // foreach ($ignoreKeys as $key) {
-    //   unset($_COOKIE[$key]);
-    // }
+    /*
+     * Variant C: Filter $_COOKIE by name. However, this might not work if local site
+     * has renamed the cookies:
+     *
+     * // phpcs:ignore WordPress.WP.CapitalPDangit.Misspelled
+     * $ignoreKeys = preg_grep('/^(wp|wordpress)/', array_keys($_COOKIE));
+     * foreach ($ignoreKeys as $key) {
+     *   unset($_COOKIE[$key]);
+     * }
+     */
   }
 
   /**
@@ -1488,8 +1522,7 @@ class CiviCRM_For_WordPress {
     $html = get_query_var('html');
     if (empty($html)) {
       // We do not use $html apart to test for empty.
-      // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-      $html = isset($_GET['html']) ? wp_unslash($_GET['html']) : '';
+      $html = isset($_GET['html']) ? wp_unslash($_GET['html']) : ''; // phpcs:ignore
     }
 
     /*
@@ -1506,8 +1539,7 @@ class CiviCRM_For_WordPress {
     $is_civicrm_path = ($argdata['args'][0] === 'civicrm' && in_array($argdata['args'][1], $paths)) ? TRUE : FALSE;
 
     // Is this a CiviCRM "snippet" request?
-    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-    $is_snippet = !empty($_REQUEST['snippet']) ? TRUE : FALSE;
+    $is_snippet = !empty($_REQUEST['snippet']) ? TRUE : FALSE; // phpcs:ignore
 
     // Is this a CiviCRM iCal file request?
     $is_ical = (strpos($argdata['argString'], 'civicrm/event/ical') === 0 && empty($html)) ? TRUE : FALSE;
