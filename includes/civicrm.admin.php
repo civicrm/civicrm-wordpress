@@ -416,12 +416,12 @@ class CiviCRM_For_WordPress_Admin {
       return FALSE;
     }
 
-    // Initialize the Class Loader.
-    require_once CIVICRM_PLUGIN_DIR . 'civicrm/CRM/Core/ClassLoader.php';
-    CRM_Core_ClassLoader::singleton()->register();
-
     // Access global defined in "civicrm.settings.php".
     global $civicrm_root;
+
+    // Initialize the Class Loader.
+    require_once $civicrm_root . 'CRM/Core/ClassLoader.php';
+    CRM_Core_ClassLoader::singleton()->register();
 
     // Bail if the config file isn't found.
     if (!file_exists($civicrm_root . 'CRM/Core/Config.php')) {
