@@ -273,6 +273,35 @@ class CiviCRM_For_WordPress_Admin {
 
     }
 
+    $vendor_setup_paths = [];
+    $civicrm_plugin_dir_array = explode(DIRECTORY_SEPARATOR, CIVICRM_PLUGIN_DIR);
+    foreach ($civicrm_plugin_dir_array as $directory_component) {
+      $vendor_setup_paths[] = $directory_component;
+      $civicrm_core_path = implode(DIRECTORY_SEPARATOR, array_merge($vendor_setup_paths, ['vendor', 'civicrm', 'civicrm-core']));
+      $civicrm_setup_autoload_path = $civicrm_core_path . DIRECTORY_SEPARATOR . 'setup' . DIRECTORY_SEPARATOR . 'civicrm-setup-autoload.php';
+      $civicrm_classloader_path = $civicrm_core_path . DIRECTORY_SEPARATOR . 'CRM' . DIRECTORY_SEPARATOR . 'Core' . DIRECTORY_SEPARATOR . 'ClassLoader.php';
+      if (file_exists($civicrm_setup_autoload_path)) {
+        require_once $civicrm_setup_autoload_path;
+        require_once $civicrm_classloader_path;
+        CRM_Core_ClassLoader::singleton()->register();
+        \Civi\Setup::assertProtocolCompatibility(1.0);
+        \Civi\Setup::init([
+          'cms' => 'WordPress',
+          'srcPath' => $civicrm_core_path,
+        ]);
+        $ctrl = \Civi\Setup::instance()->createController()->getCtrl();
+        $ctrl->setUrls([
+          'ctrl' => menu_page_url('civicrm-install', FALSE),
+          'res' => CIVICRM_PLUGIN_URL . 'civicrm/core/setup/res/',
+          'jquery.js' => CIVICRM_PLUGIN_URL . 'civicrm/core/bower_components/jquery/dist/jquery.min.js',
+          'font-awesome.css' => CIVICRM_PLUGIN_URL . 'civicrm/core/bower_components/font-awesome/css/all.min.css',
+          'finished' => admin_url('admin.php?page=CiviCRM&q=civicrm&reset=1'),
+        ]);
+        \Civi\Setup\BasicRunner::run($ctrl);
+        return;
+      }
+    }
+
     wp_die(__('Installer unavailable. Failed to locate CiviCRM libraries.', 'civicrm'));
 
   }
