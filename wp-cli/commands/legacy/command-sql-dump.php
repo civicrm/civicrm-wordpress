@@ -40,11 +40,14 @@ class CLI_Tools_CiviCRM_Command_SQL_Dump extends CLI_Tools_CiviCRM_Command {
    */
   public function __invoke($args, $assoc_args) {
 
-    WP_CLI::log(WP_CLI::colorize('%CDeprecated command:%n %cuse `wp civicrm db dump` instead.%n'));
-
     // Grab associative arguments.
     $tables = \WP_CLI\Utils\get_flag_value($assoc_args, 'tables', FALSE);
     $result_file = \WP_CLI\Utils\get_flag_value($assoc_args, 'result-file', FALSE);
+
+    // Do not include deprecation notice for STDOUT.
+    if (!empty($result_file)) {
+      WP_CLI::log(WP_CLI::colorize('%CDeprecated command:%n %cuse `wp civicrm db dump` instead.%n'));
+    }
 
     // Build command.
     $command = 'civicrm db dump' .
