@@ -299,6 +299,8 @@ class CiviCRM_For_WordPress {
    * Checks for iframe requests.
    *
    * @since 6.0.0
+   *
+   * @return bool True if this is an iframe request, false otherwise.
    */
   protected function is_iframe(): bool {
     if (is_admin()) {
