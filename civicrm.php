@@ -485,9 +485,6 @@ class CiviCRM_For_WordPress {
       wp_die(__('Only one instance of CiviCRM_For_WordPress please', 'civicrm'));
     }
 
-    // Maybe start session.
-    $this->maybe_start_session();
-
     /*
      * AJAX calls do not set the 'cms.root' item, so make sure it is set here so
      * the CiviCRM doesn't fall back on flaky directory traversal code.
@@ -710,6 +707,9 @@ class CiviCRM_For_WordPress {
 
     // Store.
     self::$context = $context;
+
+    // Maybe start session.
+    $this->maybe_start_session();
 
   }
 
