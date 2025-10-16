@@ -274,10 +274,17 @@ class CiviCRM_For_WordPress_Admin {
     }
 
     $vendor_setup_paths = [];
-    $civicrm_plugin_dir_array = explode(DIRECTORY_SEPARATOR, CIVICRM_PLUGIN_DIR);
-    foreach ($civicrm_plugin_dir_array as $directory_component) {
-      $vendor_setup_paths[] = $directory_component;
-      $civicrm_core_path = implode(DIRECTORY_SEPARATOR, array_merge($vendor_setup_paths, ['vendor', 'civicrm', 'civicrm-core']));
+    $filtered_paths = array_values(array_filter(explode(DIRECTORY_SEPARATOR, CIVICRM_PLUGIN_DIR)));
+    $potential_vendor_paths = [];
+    $count = count($filtered_paths);
+    for ($i = 0; $i <= $count; $i++) {
+      if ($i < $count) {
+        $slice = array_slice($filtered_paths, 0, $count - $i);
+        $potential_vendor_paths[] = '/' . implode('/', $slice);
+      }
+    }
+    foreach ($potential_vendor_paths as $potential_path) {
+      $civicrm_core_path = implode(DIRECTORY_SEPARATOR, array_merge(explode(DIRECTORY_SEPARATOR, $potential_path), ['vendor', 'civicrm', 'civicrm-core']));
       $civicrm_setup_autoload_path = $civicrm_core_path . DIRECTORY_SEPARATOR . 'setup' . DIRECTORY_SEPARATOR . 'civicrm-setup-autoload.php';
       $civicrm_classloader_path = $civicrm_core_path . DIRECTORY_SEPARATOR . 'CRM' . DIRECTORY_SEPARATOR . 'Core' . DIRECTORY_SEPARATOR . 'ClassLoader.php';
       if (file_exists($civicrm_setup_autoload_path)) {
