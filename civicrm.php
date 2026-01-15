@@ -3,7 +3,7 @@
  * Plugin Name: CiviCRM
  * Description: CiviCRM - Growing and Sustaining Relationships
  * Version: 4.7
- * Requires at least: 4.9
+ * Requires at least: 6.3
  * Requires PHP:      8.1.2
  * Author: CiviCRM LLC
  * Author URI: https://civicrm.org/
