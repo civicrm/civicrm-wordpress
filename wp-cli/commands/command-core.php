@@ -260,13 +260,6 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
 
     WP_CLI::success('CiviCRM data files initialized.');
 
-    // Clean the "templates_c" directory to avoid fatal error when overwriting the database.
-    if (function_exists('civicrm_initialize')) {
-      $this->bootstrap_civicrm();
-      $config = CRM_Core_Config::singleton();
-      $config->cleanup(1, FALSE);
-    }
-
     // Install database.
     if (!$installed->isDatabaseInstalled()) {
       WP_CLI::log(sprintf(WP_CLI::colorize('%GCreating%n %Ycivicrm_*%n %Gdatabase tables in%n %Y%s%n'), $setup->getModel()->db['database']));
@@ -280,6 +273,12 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
           WP_CLI::halt(0);
 
         case 'overwrite':
+          if (function_exists('civicrm_initialize')) {
+            // Clean the "templates_c" directory to avoid fatal error when overwriting the database.
+            $this->bootstrap_civicrm();
+            $config = CRM_Core_Config::singleton();
+            $config->cleanup(1, FALSE);
+          }
           WP_CLI::log(sprintf(WP_CLI::colorize('%GRemoving%n %Ycivicrm_*%n database tables in%n %Y%s%n'), $setup->getModel()->db['database']));
           $setup->uninstallDatabase();
           WP_CLI::log(sprintf(WP_CLI::colorize('%GCreating%n %Ycivicrm_*%n database tables in%n %Y%s%n'), $setup->getModel()->db['database']));
