@@ -295,9 +295,6 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
 
     WP_CLI::success('CiviCRM database loaded.');
 
-    // Looking good, let's activate the CiviCRM plugin.
-    WP_CLI::run_command(['plugin', 'activate', 'civicrm'], []);
-
   }
 
   /**
