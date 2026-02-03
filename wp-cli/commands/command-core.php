@@ -273,7 +273,7 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
           WP_CLI::halt(0);
 
         case 'overwrite':
-          if (function_exists('civicrm_initialize')) {
+          if (function_exists('civicrm_initialize') && CIVICRM_INSTALLED) {
             // Clean the "templates_c" directory to avoid fatal error when overwriting the database.
             $this->bootstrap_civicrm();
             $config = CRM_Core_Config::singleton();
