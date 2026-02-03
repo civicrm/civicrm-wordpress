@@ -122,7 +122,16 @@ class Rest extends Base {
     $params = apply_filters('civi_wp_rest/controller/rest/api_params', $this->get_formatted_api_params($request), $request);
 
     try {
-      $items = civicrm_api3(...$params);
+
+      if (!empty($params[2]) && $params[2]['version'] === 3) {
+        unset($params[2]['version']);
+        $items = civicrm_api3(...$params);
+      }
+      else {
+        unset($params[2]['version']);
+        $items = civicrm_api4(...$params);
+      }
+
     }
     catch (\CRM_Core_Exception $e) {
       $items = $this->civi_rest_error($e);
@@ -211,19 +220,27 @@ class Rest extends Base {
     unset($args['entity'], $args['action'], $args['key'], $args['api_key']);
 
     if (!isset($args['json']) || is_numeric($args['json'])) {
-
       $params = $args;
-
+    }
+    else {
+      $params = is_string($args['json']) ? json_decode($args['json'], TRUE) : [];
     }
 
+    // Set API version.
+    if (empty($params['version'])) {
+      $params['version'] = 3;
+    }
     else {
-
-      $params = is_string($args['json']) ? json_decode($args['json'], TRUE) : [];
-
+      $params['version'] = (int) $params['version'];
     }
 
     // Ensure check permissions is enabled.
-    $params['check_permissions'] = TRUE;
+    if ($params['version'] === 3) {
+      $params['check_permissions'] = TRUE;
+    }
+    elseif ($params['version'] === 4) {
+      $params['checkPermissions'] = TRUE;
+    }
 
     return [$entity, $action, $params];
 
