@@ -854,7 +854,7 @@ class CLI_Tools_CiviCRM_Command_Ext extends CLI_Tools_CiviCRM_Command {
 
       // Warn about missing fields.
       foreach ($fields_array as $field_in_array) {
-        if (!in_array($field_in_array, $field_keys, true)) {
+        if (!in_array($field_in_array, $field_keys, TRUE)) {
           WP_CLI::warning(sprintf(WP_CLI::colorize('Could not find field: %Y%s.%n'), $field_in_array));
         }
       }
