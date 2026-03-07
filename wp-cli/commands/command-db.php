@@ -922,7 +922,7 @@ class CLI_Tools_CiviCRM_Command_DB extends CLI_Tools_CiviCRM_Command {
    *     civicrm_uf_group
    *
    *     # Use wildcards to get matching view names from the set of CiviCRM multi-lingual views.
-   *     % wp civicrm db tables 'civicrm_*_group_de_de' 'civicrm_*_group_en_us' --views-only
+   *     $ wp civicrm db tables 'civicrm_*_group_de_de' 'civicrm_*_group_en_us' --views-only
    *     civicrm_custom_group_de_de
    *     civicrm_custom_group_en_us
    *     civicrm_option_group_de_de
@@ -943,7 +943,7 @@ class CLI_Tools_CiviCRM_Command_DB extends CLI_Tools_CiviCRM_Command {
    *
    *     # When CiviCRM shares a database with WordPress, use an extra wildcard to include
    *     # WordPress tables in a query. Here `$wpdb->prefix` is set to the default 'wp_'.
-   *     % wp civicrm db tables '*_user*' --also-include='wp_*' --tables-only
+   *     $ wp civicrm db tables '*_user*' --also-include='wp_*' --tables-only
    *     civicrm_user_job
    *     log_civicrm_user_job
    *     wp_usermeta
