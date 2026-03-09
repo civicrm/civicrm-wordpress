@@ -871,6 +871,8 @@ class CiviCRM_For_WordPress {
     // Register hooks for clean URLs.
     $this->register_hooks_clean_urls();
 
+    add_filter('show_admin_bar', [$this, 'suppress_menu_single_page']);
+
     if (!class_exists('CiviCRM_WP_REST\Plugin')) {
 
       // Set up REST API.
@@ -1645,6 +1647,43 @@ class CiviCRM_For_WordPress {
     else {
       return Civi::paths()->getUrl('[wp.frontend]/.', $absolute ? 'absolute' : 'relative');
     }
+  }
+
+  /**
+   * (dev/core#6171) Conditionally suppress admin navbar.
+   *
+   * Normally, other parties decide whether to show admin navbar.
+   *
+   * But there's an edge-case when:
+   * - Displaying a custom afform...
+   * - With a single-page access-token...
+   * - To a person who normally has permission to do admin-y things...
+   * - But isn't actually logged in
+   *
+   * Here, the navbar will tell the user that they're logged in, but they're
+   * not really logged-in, and the nav-links don't work in their normal way.
+   *
+   * @param $showAdminNav
+   *
+   * @return mixed|void
+   */
+  public function suppress_menu_single_page($showAdminNav) {
+    if (!$this->is_page_request()) {
+      return $showAdminNav;
+    }
+
+    if (!defined('_CIVICRM_FAKE_SESSION')) {
+      return $showAdminNav;
+    }
+
+    $scopes = explode(' ',
+      CRM_Core_Session::singleton()->get('authx')['jwt']['scope'] ?? ''
+    );
+    if (!in_array('afform', $scopes)) {
+      return $showAdminNav;
+    }
+
+    return FALSE;
   }
 
 }
