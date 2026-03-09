@@ -386,8 +386,6 @@ class Plugin {
 
     wp_set_current_user($wp_user->ID, $wp_user->user_login);
 
-    wp_set_auth_cookie($wp_user->ID);
-
     do_action('wp_login', $wp_user->user_login, $wp_user);
 
     $this->set_civi_user_session($wp_user);
