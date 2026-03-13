@@ -1788,11 +1788,13 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
 
     WP_CLI::log(sprintf(WP_CLI::colorize('%GUpgrade to%n %Y%s%n %Gcompleted.%n'), $code_version));
 
+    // Maybe run "wp civicrm cache flush".
     if (version_compare($code_version, '5.26.alpha', '<')) {
       // Work-around for bugs like dev/core#1713.
       WP_CLI::log(WP_CLI::colorize('%GDetected CiviCRM 5.25 or earlier. Force flush.%n'));
       if (empty($dry_run)) {
-        \Civi\Cv\Util\Cv::passthru('flush');
+        $options = ['launch' => FALSE, 'return' => FALSE];
+        WP_CLI::runcommand('civicrm cache flush', $options);
       }
     }
 
