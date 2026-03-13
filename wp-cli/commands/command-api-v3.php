@@ -40,6 +40,9 @@ class CLI_Tools_CiviCRM_Command_API_V3 extends CLI_Tools_CiviCRM_Command {
    * [--timezone=<timezone>]
    * : The CiviCRM timezone string. Defaults to the WordPress `timezone_string` setting.
    *
+   * [--xdebug]
+   * : Call the CiviCRM API with debug enabled.
+   *
    * [--format=<format>]
    * : Render output in a particular format. The "table" format can only be used when retrieving a single item.
    * ---
@@ -68,6 +71,7 @@ class CLI_Tools_CiviCRM_Command_API_V3 extends CLI_Tools_CiviCRM_Command {
     $input_format = (string) \WP_CLI\Utils\get_flag_value($assoc_args, 'input', 'args');
     $site_timezone = (string) \WP_CLI\Utils\get_flag_value($assoc_args, 'timezone', $this->site_timezone_get());
     $format = (string) \WP_CLI\Utils\get_flag_value($assoc_args, 'format', 'pretty');
+    $debug = (bool) \WP_CLI\Utils\get_flag_value($assoc_args, 'xdebug', FALSE);
 
     // Get the Entity and Action from the first positional argument.
     list($entity, $action) = explode('.', $args[0]);
@@ -111,6 +115,11 @@ class CLI_Tools_CiviCRM_Command_API_V3 extends CLI_Tools_CiviCRM_Command {
     if ($site_timezone) {
       date_default_timezone_set($site_timezone);
       CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
+    }
+
+    // Maybe add debug param.
+    if (!empty($debug)) {
+      $params['debug'] = 1;
     }
 
     // Now call the CiviCRM API.

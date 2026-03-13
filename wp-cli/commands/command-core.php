@@ -1788,11 +1788,13 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
 
     WP_CLI::log(sprintf(WP_CLI::colorize('%GUpgrade to%n %Y%s%n %Gcompleted.%n'), $code_version));
 
+    // Maybe run "wp civicrm cache flush".
     if (version_compare($code_version, '5.26.alpha', '<')) {
       // Work-around for bugs like dev/core#1713.
       WP_CLI::log(WP_CLI::colorize('%GDetected CiviCRM 5.25 or earlier. Force flush.%n'));
       if (empty($dry_run)) {
-        \Civi\Cv\Util\Cv::passthru('flush');
+        $options = ['launch' => FALSE, 'return' => FALSE];
+        WP_CLI::runcommand('civicrm cache flush', $options);
       }
     }
 
@@ -1893,6 +1895,7 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
    *   - all
    *   - plugin
    *   - db
+   *   - smarty
    *
    * [--format=<format>]
    * : Render output in a particular format.
@@ -1913,6 +1916,7 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
    *     +----------+---------+
    *     | Plugin   | 5.57.1  |
    *     | Database | 5.46.3  |
+   *     | Smarty   | 2       |
    *     +----------+---------+
    *
    *     # Get just the CiviCRM database version number.
@@ -1923,9 +1927,13 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
    *     $ wp civicrm core version --source=plugin --format=number
    *     5.57.1
    *
+   *     # Get just the CiviCRM Smarty version number.
+   *     $ wp civicrm core version --source=smarty --format=number
+   *     2
+   *
    *     # Get all CiviCRM version information as JSON-formatted data.
    *     $ wp civicrm core version --format=json
-   *     {"plugin":"5.57.1","db":"5.46.3"}
+   *     {"plugin":"5.57.1","db":"5.46.3","smarty":"2"}
    *
    * @since 5.69
    *
@@ -1945,6 +1953,12 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
     $plugin_version = CRM_Utils_System::version();
     $db_version = CRM_Core_BAO_Domain::version();
 
+    // Get Smarty if we can.
+    $smarty_version = 'Unknown';
+    if (method_exists(CRM_Core_Smarty::singleton(), 'getVersion')) {
+      $smarty_version = CRM_Core_Smarty::singleton()->getVersion();
+    }
+
     switch ($format) {
 
       // Version number-only output.
@@ -1958,6 +1972,9 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
         if ('db' === $source) {
           echo $db_version . "\n";
         }
+        if ('smarty' === $source) {
+          echo $smarty_version . "\n";
+        }
         break;
 
       // Display output as json.
@@ -1968,6 +1985,9 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
         }
         if (in_array($source, ['all', 'db'])) {
           $info['db'] = $db_version;
+        }
+        if (in_array($source, ['all', 'smarty'])) {
+          $info['smarty'] = $smarty_version;
         }
         $json = json_encode($info);
         if (JSON_ERROR_NONE !== json_last_error()) {
@@ -1992,6 +2012,12 @@ class CLI_Tools_CiviCRM_Command_Core extends CLI_Tools_CiviCRM_Command {
           $rows[] = [
             'Source' => 'Database',
             'Version' => $db_version,
+          ];
+        }
+        if (in_array($source, ['all', 'smarty'])) {
+          $rows[] = [
+            'Source' => 'Smarty',
+            'Version' => $smarty_version,
           ];
         }
 

@@ -49,6 +49,8 @@ WP_CLI::add_hook('before_wp_load', function() {
   require_once __DIR__ . '/commands/command-debug.php';
   require_once __DIR__ . '/commands/command-job.php';
   require_once __DIR__ . '/commands/command-pipe.php';
+  require_once __DIR__ . '/commands/command-ext.php';
+  require_once __DIR__ . '/commands/command-status.php';
 
   // ----------------------------------------------------------------------------
   // Add commands.
@@ -89,6 +91,14 @@ WP_CLI::add_hook('before_wp_load', function() {
   // Add Pipe command.
   WP_CLI::add_command('civicrm pipe', 'CLI_Tools_CiviCRM_Command_Pipe', ['before_invoke' => 'CLI_Tools_CiviCRM_Command_Pipe::check_dependencies']);
   WP_CLI::add_command('cv pipe', 'CLI_Tools_CiviCRM_Command_Pipe', ['before_invoke' => 'CLI_Tools_CiviCRM_Command_Pipe::check_dependencies']);
+
+  // Add Extension command.
+  WP_CLI::add_command('civicrm ext', 'CLI_Tools_CiviCRM_Command_Ext', ['before_invoke' => 'CLI_Tools_CiviCRM_Command_Ext::check_dependencies']);
+  WP_CLI::add_command('cv ext', 'CLI_Tools_CiviCRM_Command_Ext', ['before_invoke' => 'CLI_Tools_CiviCRM_Command_Ext::check_dependencies']);
+
+  // Add Status command.
+  WP_CLI::add_command('civicrm status', 'CLI_Tools_CiviCRM_Command_Status', ['before_invoke' => 'CLI_Tools_CiviCRM_Command_Ext::check_dependencies']);
+  WP_CLI::add_command('cv status', 'CLI_Tools_CiviCRM_Command_Status', ['before_invoke' => 'CLI_Tools_CiviCRM_Command_Ext::check_dependencies']);
 
   // ----------------------------------------------------------------------------
   // Add deprecated legacy commands.
