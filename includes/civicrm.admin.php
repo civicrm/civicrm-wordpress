@@ -295,6 +295,7 @@ class CiviCRM_For_WordPress_Admin {
         \Civi\Setup::init([
           'cms' => 'WordPress',
           'srcPath' => $civicrm_core_path,
+          'doNotCreateSettingsFile' => TRUE,
         ]);
         $ctrl = \Civi\Setup::instance()->createController()->getCtrl();
         $ctrl->setUrls([
