@@ -677,6 +677,9 @@ class CiviCRM_For_WordPress_Admin {
       // Add core resources prior to page load.
       add_action('load-' . $this->menu_page, [$this, 'admin_page_load']);
 
+      // Disable emoji script.
+      add_action('load-' . $this->menu_page, [$this, 'disable_emoji_script']);
+
     }
     else {
 
@@ -797,6 +800,18 @@ class CiviCRM_For_WordPress_Admin {
 
     // Add resources for back end.
     $this->civi->add_core_resources(FALSE);
+
+  }
+
+  /**
+   * Disables the WordPress emoji script on CiviCRM's admin pages.
+   *
+   * @since 6.16
+   */
+  public function disable_emoji_script() {
+
+    remove_action('admin_print_scripts', 'print_emoji_detection_script');
+    remove_action('admin_print_styles', 'print_emoji_styles');
 
   }
 
