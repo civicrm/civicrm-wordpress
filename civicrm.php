@@ -103,6 +103,54 @@ else {
 }
 
 /**
+ * Determine whether CiviCRM's database schema has actually been bootstrapped.
+ *
+ * In Bedrock-style deployments, civicrm.settings.php may be shipped as a
+ * template (driven by env vars) before the database has ever been initialized.
+ * In that case CIVICRM_INSTALLED is TRUE but the schema is empty. Without this
+ * check, the activation hook would skip the installer redirect and admin
+ * bootstrap would later fail trying to read from a missing schema.
+ *
+ * Probes the civicrm_domain table on CIVICRM_DSN. Cached per-request.
+ */
+if (!function_exists('civicrm_schema_is_installed')) {
+  function civicrm_schema_is_installed() {
+    static $cached = NULL;
+    if ($cached !== NULL) {
+      return $cached;
+    }
+    if (!CIVICRM_INSTALLED) {
+      return $cached = FALSE;
+    }
+    if (!defined('CIVICRM_DSN')) {
+      @include_once CIVICRM_SETTINGS_PATH;
+    }
+    if (!defined('CIVICRM_DSN')) {
+      return $cached = FALSE;
+    }
+    $dsn = @parse_url(CIVICRM_DSN);
+    if (empty($dsn['host']) || empty($dsn['user']) || empty($dsn['path'])) {
+      return $cached = FALSE;
+    }
+    $db_name = ltrim($dsn['path'], '/');
+    $port = !empty($dsn['port']) ? (int) $dsn['port'] : 3306;
+    try {
+      $mysqli = @new mysqli($dsn['host'], $dsn['user'], $dsn['pass'] ?? '', $db_name, $port);
+      if ($mysqli->connect_errno) {
+        return $cached = FALSE;
+      }
+      $result = @$mysqli->query("SHOW TABLES LIKE 'civicrm_domain'");
+      $found = ($result && $result->num_rows > 0);
+      $mysqli->close();
+      return $cached = (bool) $found;
+    }
+    catch (\Throwable $e) {
+      return $cached = FALSE;
+    }
+  }
+}
+
+/**
  * Setting this to 'TRUE' will replace all mailing URLs calls to 'extern/url.php'
  * and 'extern/open.php' with their REST counterpart 'civicrm/v3/url' and
  * 'civicrm/v3/open'.
@@ -435,7 +483,7 @@ class CiviCRM_For_WordPress {
     // When installed via the WordPress UI, try and redirect to the Installer page.
     // phpcs:ignore WordPress.Security.NonceVerification.Recommended
     $activate_multi = isset($_GET['activate-multi']) ? sanitize_text_field(wp_unslash($_GET['activate-multi'])) : '';
-    if (!is_multisite() && empty($activate_multi) && !CIVICRM_INSTALLED) {
+    if (!is_multisite() && empty($activate_multi) && (!CIVICRM_INSTALLED || !civicrm_schema_is_installed())) {
       wp_safe_redirect(admin_url('admin.php?page=civicrm-install'));
       exit;
     }
