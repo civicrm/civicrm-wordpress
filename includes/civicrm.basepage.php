@@ -630,6 +630,7 @@ class CiviCRM_For_WordPress_Basepage {
    *  - `get_canonical_url` (WordPress 4.6.0+)
    *  - `aioseop_canonical_url` (All in One SEO)
    *  - `wpseo_canonical` (Yoast WordPress SEO)
+   *  - `wpseo_opengraph_url` (Yoast WordPress SEO)
    *
    * The native WordPress one passes the page object, while the other two do
    * not.  We don't actually need the page object, so the argument is omitted
