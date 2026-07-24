@@ -491,6 +491,9 @@ class CiviCRM_For_WordPress_Basepage {
     // Yoast SEO has separate way of establishing canonical URL.
     add_filter('wpseo_canonical', [$this, 'basepage_canonical_url'], 999);
 
+    // Yoast SEO has separate way of establishing the Open Graph URL.
+    add_filter('wpseo_opengraph_url', [$this, 'basepage_canonical_url'], 999);
+
     // And also for All in One SEO to handle canonical URL.
     add_filter('aioseop_canonical_url', [$this, 'basepage_canonical_url'], 999);
 
