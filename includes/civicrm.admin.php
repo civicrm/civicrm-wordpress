@@ -295,7 +295,63 @@ class CiviCRM_For_WordPress_Admin {
         \Civi\Setup::init([
           'cms' => 'WordPress',
           'srcPath' => $civicrm_core_path,
+          'doNotCreateSettingsFile' => TRUE,
         ]);
+        // Bedrock-style deployments ship civicrm.settings.php as a template,
+        // so its presence does not imply CiviCRM has been installed. Force
+        // setSettingInstalled(FALSE) so only the database check gates whether
+        // SetupController::runStart() short-circuits to the "finished" page.
+        \Civi\Setup::dispatcher()->addListener(
+          'civi.setup.checkInstalled',
+          function (\Civi\Setup\Event\CheckInstalledEvent $e) {
+            $e->setSettingInstalled(FALSE);
+          },
+          -1000
+        );
+        // The default checkRequirements listener errors when the settings file
+        // path isn't writable. When doNotCreateSettingsFile is set, the file is
+        // managed externally and writability is irrelevant — overwrite the
+        // 'settingsWritable' message (keyed by name) with an info entry.
+        \Civi\Setup::dispatcher()->addListener(
+          'civi.setup.checkRequirements',
+          function (\Civi\Setup\Event\CheckRequirementsEvent $e) {
+            $m = $e->getModel();
+            if (!empty($m->doNotCreateSettingsFile)) {
+              $e->addInfo('system', 'settingsWritable', sprintf('The settings file "%s" is managed externally; writability is not checked.', $m->settingsPath));
+            }
+          },
+          -1000
+        );
+        // The default WordPress init listener sets $model->db to the WP
+        // database creds. When CIVICRM_DSN is already defined (Bedrock-style
+        // templated settings file), prefer that — the CiviCRM database is
+        // typically separate from the WordPress one. The civi.setup.init event
+        // is dispatched inside \Civi\Setup::init() before listeners can be
+        // attached, so mutate the model directly.
+        if (!defined('CIVICRM_DSN') && file_exists(CIVICRM_SETTINGS_PATH)) {
+          @include_once CIVICRM_SETTINGS_PATH;
+        }
+        if (defined('CIVICRM_DSN')) {
+          $civi_dsn_parsed = \Civi\Setup\DbUtil::parseDsn(CIVICRM_DSN);
+          \Civi\Setup::instance()->getModel()->db = $civi_dsn_parsed;
+          \Civi\Setup::instance()->getModel()->extras['advanced']['db'] = \Civi\Setup\DbUtil::encodeDsn($civi_dsn_parsed);
+        }
+        // Keep the editable "advanced.db" field in sync with $model->db when
+        // the user hasn't typed their own value yet — the default advanced
+        // listener at PRIORITY_LATE forces the input back to a placeholder, so
+        // run after it (PRIORITY_END = -2000).
+        \Civi\Setup::dispatcher()->addListener(
+          'civi.setupui.run',
+          function (\Civi\Setup\UI\Event\UIBootEvent $e) {
+            $model = $e->getModel();
+            $placeholder = 'mysql://USER:PASS@HOST/DB';
+            $values = $e->getField('advanced', []);
+            if (empty($values['db']) || $values['db'] === $placeholder) {
+              $model->extras['advanced']['db'] = \Civi\Setup\DbUtil::encodeDsn($model->db);
+            }
+          },
+          \Civi\Setup::PRIORITY_END
+        );
         $ctrl = \Civi\Setup::instance()->createController()->getCtrl();
         $ctrl->setUrls([
           'ctrl' => menu_page_url('civicrm-install', FALSE),
@@ -409,6 +465,18 @@ class CiviCRM_For_WordPress_Admin {
      * reason, the initial redirect on install hasn't occured.
      */
     if (!CIVICRM_INSTALLED) {
+      $this->error_flag = 'settings-missing';
+      $initialized = FALSE;
+      return FALSE;
+    }
+
+    /*
+     * Settings file exists, but the database schema may not have been
+     * bootstrapped yet (e.g. Bedrock layouts that ship a templated settings
+     * file driven by env vars). In that case route to the installer rather
+     * than attempting to bootstrap CiviCRM against an empty schema.
+     */
+    if (function_exists('civicrm_schema_is_installed') && !civicrm_schema_is_installed()) {
       $this->error_flag = 'settings-missing';
       $initialized = FALSE;
       return FALSE;
