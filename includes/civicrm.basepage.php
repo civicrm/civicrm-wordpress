@@ -491,6 +491,9 @@ class CiviCRM_For_WordPress_Basepage {
     // Yoast SEO has separate way of establishing canonical URL.
     add_filter('wpseo_canonical', [$this, 'basepage_canonical_url'], 999);
 
+    // Yoast SEO has separate way of establishing the Open Graph URL.
+    add_filter('wpseo_opengraph_url', [$this, 'basepage_canonical_url'], 999);
+
     // And also for All in One SEO to handle canonical URL.
     add_filter('aioseop_canonical_url', [$this, 'basepage_canonical_url'], 999);
 
@@ -627,6 +630,7 @@ class CiviCRM_For_WordPress_Basepage {
    *  - `get_canonical_url` (WordPress 4.6.0+)
    *  - `aioseop_canonical_url` (All in One SEO)
    *  - `wpseo_canonical` (Yoast WordPress SEO)
+   *  - `wpseo_opengraph_url` (Yoast WordPress SEO)
    *
    * The native WordPress one passes the page object, while the other two do
    * not.  We don't actually need the page object, so the argument is omitted
