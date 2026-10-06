@@ -1190,8 +1190,14 @@ class CiviCRM_For_WordPress {
     $config = CRM_Core_Config::singleton();
     $config->userFrameworkFrontend = $front_end;
 
+    // Adding core resources requires populated superglobals.
+    $this->remove_wp_magic_quotes();
+
     // Add CiviCRM core resources.
     CRM_Core_Resources::singleton()->addCoreResources();
+
+    // Restore superglobals.
+    $this->restore_wp_magic_quotes();
 
   }
 
