@@ -37,7 +37,9 @@ do_action('civicrm/metabox/autosigninuser/pre');
   <p></p>
 </div>
 
-<p><?php esc_html_e('When a WordPress User is created, CiviCRM will automatically log in the user after the creation of the user. This setting lets you choose whether CiviCRM will automatically log the user in after creation. Do you want to allow CiviCRM to automatically log in the user after it is created?', 'civicrm'); ?></p>
+<p><?php esc_html_e('When a WordPress User is created, CiviCRM will automatically log in the user after the creation of the user. This setting lets you choose whether CiviCRM will automatically log the user in after creation.'); ?>
+<p><em><?php esc_html_e('Please note: this feature may cause problems when combined with other extensions or plugins that alter the user session. If you encounter problems on a public CiviCRM form that allows user creation, try disabling this option.'); ?></em></p>
+<p><?php esc_html_e('Do you want to allow CiviCRM to automatically log in the user after it is created?', 'civicrm'); ?></p>
 
 <label for="auto_sign_in_user" class="screen-reader-text"><?php esc_html_e('Automatically Sign In User', 'civicrm'); ?></label>
 <select name="auto_sign_in_user" id="auto_sign_in_user">
