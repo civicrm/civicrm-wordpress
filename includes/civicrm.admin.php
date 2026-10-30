@@ -517,6 +517,10 @@ class CiviCRM_For_WordPress_Admin {
         $this->civi->users->get_civicrm_contact_type('Individual')
       );
 
+      // CRM_Core_Config::singleton sets the @civicrm_user_id, needed for filling in log_user_id in log tables.
+      // But only the first time it's called - and the user ID isn't known until synchronize() (just above) is called.
+      // So we call authenticate() again to set the @civicrm_user_id.
+      $config->authenticate();
     }
 
     // Success! Set static flag.
