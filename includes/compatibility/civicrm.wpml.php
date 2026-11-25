@@ -155,12 +155,14 @@ class CiviCRM_For_WordPress_Compat_WPML {
       $converted_url = $sitepress->convert_url($url, $slug);
       $parsed_url = wp_parse_url($converted_url, PHP_URL_PATH);
       $regex_path_converted = substr($parsed_url, 1);
-
-      $collected_rewrites[$basepage->ID][] = $regex_path;
-      $collected_rewrites[$basepage->ID][] = $regex_path_converted;
-      $collected_rewrites[$post_id][] = $regex_path;
-      $collected_rewrites[$post_id][] = $regex_path_converted;
-
+      if ($basepage->ID == $post_id) {
+        $collected_rewrites[$basepage->ID][] = $regex_path;
+        $collected_rewrites[$basepage->ID][] = $regex_path_converted;
+      }
+      else {
+        // Add only the language specific regex path
+        $collected_rewrites[$post_id][] = $regex_path_converted;
+      }
     }
 
     // Make collection unique and add remaining rewrite rules.
